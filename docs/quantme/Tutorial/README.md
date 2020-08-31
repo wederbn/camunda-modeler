@@ -87,6 +87,18 @@ The application is build in ```.\dist``` and can be started depending on your op
     Please note the defined attributes of the ReadoutErrorMitigationTask as shown in the bottom left corner of the figure.
     The example workflow in XML format can be found [here](./example-workflow.bpmn).
     
-  * Update the QRM repository: TODO
-
-TODO
+  * Update the QRM repository: 
+    The QRM repository is loaded into the QuantME Modeling and Transformation Framework at startup.
+    Therefore, if there are updates in the repository during the runtime of the framework, the QRM repository has to be reloaded.
+    This can be requested in the menu: 
+    
+    <kbd><img src="./reload-qrms.gif" width="900"/></kbd>
+    
+    Note: The Github API takes some time to return the updated files.
+    Thus, if you experience some issues, wait some time and then update the QRM repository again.
+    
+  * Then, the QuantME workflow model can be transformed to a native workflow model:
+  
+    <kbd><img src="./transform-workflow.gif" width="900"/></kbd>
+    
+7. Finally, the resulting workflow model can be manually adapted and deployed to a BPMN engine, such as the [Camunda engine](https://camunda.com/products/camunda-bpm/bpmn-engine/) to execute it.
