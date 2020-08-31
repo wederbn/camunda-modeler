@@ -76,6 +76,17 @@ The application is build in ```.\dist``` and can be started depending on your op
     
 6. Create the QuantME workflow:
 
-  * TODO
+  * Now a QuantME workflow can be modeled that uses a ReadoutErrorMitigationTask.
+    Thus, it can later be transformed into a workflow using only native BPMN modeling constructs.
+    For the sake of simplicity, we use a workflow with only one ReadoutErrorMitigationTask in this example.
+    Of course, the execution of just that task is not useful, but additional tasks and corresponding QRMs can be added in the same way.
+    Thus, our example workflow is depicted in the following figure:
+    
+    <kbd><img src="./example-workflow.png" /></kbd>
+    
+    Please note the defined attributes of the ReadoutErrorMitigationTask as shown in the bottom left corner of the figure.
+    The example workflow in XML format can be found [here](./example-workflow.bpmn).
+    
+  * Update the QRM repository: TODO
 
 TODO
