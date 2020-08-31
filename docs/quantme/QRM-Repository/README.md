@@ -11,15 +11,16 @@ Furthermore, `githubRepositoryName` has to specify the name of the Github reposi
 
 ### Structure
 
-The QRM repository can contain an arbitrary number of QRMs, each of which has to be located in a separate folder in the Github repository:
+The QRM repository can contain an arbitrary number of QRMs, each of which has to be located in a separate folder in the Github repository.
+In the following, an example QRM repository containg three QRMs is shown:
 
-<img src="./repository-overview.png" width="500">
+![QRM repository](./repository-overview.png)
 
 Each of the folders has to contain at least the two files `detector.bpmn` and `replacement.bpmn`, which represent the QRM.
 If one of the two files is missing or contains invalid content, the QRM is ignored during transformation.
 Additionally, other files can be added to the folders, e.g., a readme file describing the QRM:
 
-![QRM in repository](./repository-folder-content.png)
+![QRM folder](./repository-folder-content.png)
 
 ### Updating the QRM repository
 
