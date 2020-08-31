@@ -23,8 +23,12 @@ Thus, the properties of the QuantME task must either be adapted or a new QRM has
 
 ### [QuantME-CamundaPlugin](/resources/plugins/QuantME-CamundaPlugin)
 
-TODO
+Plugin containing the BPMN moddle extension for the QuantME tasks, as well as the property provider and palette extensions.
+Furthermore, the transformation logic is implemented in this plugin.
+Therefore, this plugin contains the major part of the QuantME extensions and should be extended, if, e.g., new tasks are added.
 
 ### [QuantME-ClientPlugin](/resources/plugins/QuantME-ClientPlugin)
 
-TODO
+Client extension plugin handling the [QRM-Repository](../QRM-Repository). 
+Thus, it implements the communication with Github as well as the validation of the QRMs (availability of detector.bpmn and replacement.bpmn).
+The currently available QRMs can be requested using the event bus and are then retrieved and send back via the event bus.
