@@ -19,7 +19,7 @@ Each of the folders has to contain at least the two files `detector.bpmn` and `r
 If one of the two files is missing or contains invalid content, the QRM is ignored during transformation.
 Additionally, other files can be added to the folders, e.g., a readme file describing the QRM:
 
-<img src="./repository-folder-content.png" width="500">
+![QRM in repository](./repository-folder-content.png)
 
 ### Updating the QRM repository
 
