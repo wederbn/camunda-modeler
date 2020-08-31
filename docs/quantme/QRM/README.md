@@ -53,4 +53,9 @@ Note: If a QuantME task in a QuantME workflow does not define an optional proper
 
 ### Replacement Fragment
 
+As the detector, the replacement fragment part of a QRM is also a BPMN diagram, defining a workflow fragment implementing the functionality to replace QuantME tasks matching the detector.
+An example replacement fragment can be found [here](./replacement.bpmn), which is visualized bellow:
+
+![Example replacement fragment](./replacement.png)
+
 TODO
