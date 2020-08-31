@@ -4,7 +4,7 @@ In the following, it is described how to set up the QuantME Modeling and Transfo
 
 1. Clone the QuantME Modeling and Transformation Framework: 
 
-  `git clone https://github.com/UST-QuAntiL/QuantME-TransformationFramework.git`
+  ```git clone https://github.com/UST-QuAntiL/QuantME-TransformationFramework.git```
 
 2. Create a Github repository for your QRMs. 
 In the following we will assume the repository is available under the `UST-QuAntiL` Github organization and has the repository name `qrm-test`.
@@ -14,12 +14,12 @@ Please adapt these values to your setup in the following steps.
 - Navigate to the configuration file that is located [here](../../../resources/plugins/QuantME-ClientPlugin/client/Config.js)
 - Insert the user/organisation name and repository name:
 
-```JS
-export const config = {
-  githubUsername: 'UST-QuAntiL',
-  githubRepositoryName: 'qrm-test'
-};
-```
+  ```JS
+  export const config = {
+    githubUsername: 'UST-QuAntiL',
+    githubRepositoryName: 'qrm-test'
+  };
+  ```
 
 4. Start the QuantME Modeling and Transformation Framework:
 
@@ -50,7 +50,7 @@ The application is build in ```.\dist``` and can be started depending on your op
     <kbd><img src="./set-attributes.gif" width="900"/></kbd>
   
     In this example, we want to create a replacement fragment that can apply the _correction matrix_ unfolding technique to calculations performed on _ibmq_rome_ or _ibmq_london_. 
-    Therefore, we define ```correction matrix``` for the _unfolding technique_ attribute of the task and the list ```ibmq_rome, ibmq_london``` for the _QPU_ attribute.
+    Therefore, we define ```Correction Matrix``` for the _unfolding technique_ attribute of the task and the list ```ibmq_rome, ibmq_london``` for the _QPU_ attribute.
     Our implementation will handle arbitrary values for the _max age_ attribute, thus, we add a wildcard (```*```) for this attribute.
     Note: For workflows only numerical values are allowed for the _max age_ attribute. 
     Therefore, the wildcard is marked as faulty.
@@ -61,6 +61,21 @@ The application is build in ```.\dist``` and can be started depending on your op
 
 * Second, create the replacement fragment:
 
-  - TODO
+  - Create a new BPMN diagram
+  
+  - Add a subprocess and three contained tasks as depicted below:
+  
+    <kbd><img src="./replacement.png" /></kbd>
+    
+    Store the created replacement fragment under the name ```replacement.bpmn``` in the folder of the QRM repository and commit it.
+    The replacement fragment for this example in XML format can be found [here](../QRM/replacement.bpmn).
+    
+    In this example, we assume that the different tasks are implemented as [external tasks](https://docs.camunda.org/manual/7.8/user-guide/process-engine/external-tasks/).
+    This means when the task is executed, the Camunda engine publishes a work item in a list, which can be polled and performed by some consumer service.
+    However, the kind of implementation of tasks does not affect the transformation method and is up to the QRM modeler.
+    
+6. Create the QuantME workflow:
+
+  * TODO
 
 TODO
