@@ -12,16 +12,20 @@ Furthermore, `githubRepositoryName` has to specify the name of the Github reposi
 ### Structure
 
 The QRM repository can contain an arbitrary number of QRMs, each of which has to be located in a separate folder in the Github repository.
-In the following, an example QRM repository containg three QRMs is shown:
+In the following, an example QRM repository containing three QRMs is shown:
 
-![QRM repository](./repository-overview.png)
+<img src="./repository-overview.png" width="800">
 
 Each of the folders has to contain at least the two files `detector.bpmn` and `replacement.bpmn`, which represent the QRM.
 If one of the two files is missing or contains invalid content, the QRM is ignored during transformation.
 Additionally, other files can be added to the folders, e.g., a readme file describing the QRM:
 
-![QRM folder](./repository-folder-content.png)
+<img src="./repository-folder-content.png" width="900">
 
 ### Updating the QRM repository
 
-TODO
+When starting the QuantME Modeling and Transformation Framework, the QRM repository is loaded once.
+However, if the repository is changed during runtime of the framework, the QRMs have to be reloaded.
+For this, use the `Plugins` menu entry, go to `QuantME`, and click on the `Update from QRM repository` button:
+
+<img src="./reload-repository.png" width="900">
