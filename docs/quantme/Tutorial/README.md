@@ -29,9 +29,9 @@ The application is build in ```.\dist``` and can be started depending on your op
 
 5. Use the framework to create a QRM:
 - Open a new BPMN diagram:
-![Open new diagram](./open-diagram.png)
+<kbd><img src="./open-diagram.png" /></kbd>
 - Delete the start event and add a new task:
-![Create task](./create-task.png)
+<kbd><img src="./create-task.gif" /></kbd>
 - Replace the task by a task of type ```ReadoutErrorMitigationTask```
 ![Replace task](./replace-task.png)
 - TODO
