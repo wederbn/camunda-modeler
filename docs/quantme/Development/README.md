@@ -19,7 +19,7 @@ Therefore, the plugin marks QuantME tasks in a diagram with a warning if:
 2. There exists no suited [QRM](../QRM) to replace the QuantME task with the current property configuration.
 
 If the warning is visualized at a QuantME task, the transformation to a native BPMN diagram is not possible at the moment.
-Thus, there the properties of the QuantME task must either be adapted or new QRMs have to be added to the [QRM-Repository](../QRM-Repository) where the detector matches the current property configuration.
+Thus, the properties of the QuantME task must either be adapted or a new QRM has to be added to the [QRM-Repository](../QRM-Repository) for which the detector matches the current property configuration.
 
 ### [QuantME-CamundaPlugin](/resources/plugins/QuantME-CamundaPlugin)
 
