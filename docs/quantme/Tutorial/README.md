@@ -4,7 +4,7 @@ In the following, it is described how to set up the QuantME Modeling and Transfo
 
 1. Clone the QuantME Modeling and Transformation Framework: 
 
-`git clone https://github.com/UST-QuAntiL/QuantME-TransformationFramework.git`
+  `git clone https://github.com/UST-QuAntiL/QuantME-TransformationFramework.git`
 
 2. Create a Github repository for your QRMs. 
 In the following we will assume the repository is available under the `UST-QuAntiL` Github organization and has the repository name `qrm-test`.
@@ -31,18 +31,36 @@ The application is build in ```.\dist``` and can be started depending on your op
 
 5. Use the framework to create a QRM (detector and replacement fragment):
 
-- Open a new BPMN diagram:
+* First, create the detector for the QRM:
 
-<kbd><img src="./open-diagram.png" /></kbd>
+  - Open a new BPMN diagram:
 
-- Delete the start event and add a new task:
+    <kbd><img src="./open-diagram.png" /></kbd>
 
-<kbd><img src="./create-task.gif" width="900"/></kbd>
+  - Delete the start event and add a new task:
 
-- Replace the task by a task of type ```ReadoutErrorMitigationTask```
+    <kbd><img src="./create-task.gif" width="900"/></kbd>
 
-<kbd><img src="./replace-task.gif" width="900"/></kbd>
+  - Replace the task by a task of type ```ReadoutErrorMitigationTask```
 
-- TODO
+    <kbd><img src="./replace-task.gif" width="900"/></kbd>
+
+  - Set the attributes of the detector:
+  
+    <kbd><img src="./set-attributes.gif" width="900"/></kbd>
+  
+    In this example, we want to create a replacement fragment that can apply the _correction matrix_ unfolding technique to calculations performed on _ibmq_rome_ or _ibmq_london_. 
+    Therefore, we define ```correction matrix``` for the _unfolding technique_ attribute of the task and the list ```ibmq_rome, ibmq_london``` for the _QPU_ attribute.
+    Our implementation will handle arbitrary values for the _max age_ attribute, thus, we add a wildcard (```*```) for this attribute.
+    Note: For workflows only numerical values are allowed for the _max age_ attribute. 
+    Therefore, the wildcard is marked as faulty.
+    However, this does not apply to detectors.
+
+  - Store the detector under the name ```detector.bpmn``` in a new folder of the QRM repository and commit it.
+    The detector for this example in XML format can be found [here](../QRM/detector.bpmn).
+
+* Second, create the replacement fragment:
+
+  - TODO
 
 TODO
