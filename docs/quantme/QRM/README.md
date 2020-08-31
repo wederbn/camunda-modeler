@@ -1,7 +1,7 @@
 # QuantME Replacement Models (QRMs)
 
 _QuantME Replacement Models (QRMs)_ define workflow fragments that can be used to transform QuantME workflows to workflows using only native modeling constructs of the host workflow language.
-Therefore, they define a _detector_ that defines which kind of QuantME task can be replaced by a the QRM and a _replacement fragment_ containing the workflow fragment to replace the matching QuantME tasks.
+Therefore, they define a _detector_ that defines which kind of QuantME task can be replaced by the QRM and a _replacement fragment_ containing the workflow fragment to replace the matching QuantME tasks.
 In the following, both constructs are introduced and it is shown how they can be created and used with the QuantME modeling and transformation framework.
 
 ### Detector
@@ -31,7 +31,7 @@ In the same way, if both properties are set, it is unclear which circuit to use.
 Therefore, exactly one of these alternative properties has to be set for each task in a QuantME workflow.
 
 In the detector, it is possible to set values for multiple alternative properties if the replacement fragment can handle different alternatives.
-However, in contrast to all other properties it is also possible to leave alternative properties empty if at least one of them is set.
+However, in contrast to all other properties, it is also possible to leave alternative properties empty if at least one of them is set.
 
 There are currently two QuantME task types using alternative properties: 
 
@@ -43,9 +43,9 @@ There are currently two QuantME task types using alternative properties:
 A detector has to define all properties of the contained QuantME task, except for alternative properties, for which at least one property has to be set.
 Thereby, for each property there are three different ways to define a value: 
 
-1. Exactly one value, which means the detector only matches QuantME tasks that define exactly the same value for this property (see `unfoldingTechnique` in the xml snipped above).
-2. A list of possible values, which means the detector matches all QuantME tasks that have one of these values defined for this property (see `qpu` in the xml snipped above).
-3. A wildcard, which means the detector matches all QuantME tasks independent of their value for this property (see `maxAge` in the xml snipped above)
+1. Exactly one value, which means the detector only matches QuantME tasks that define exactly the same value for this property (see `unfoldingTechnique` in the XML snipped above).
+2. A list of possible values, which means the detector matches all QuantME tasks that have one of these values defined for this property (see `qpu` in the XML snipped above).
+3. A wildcard, which means the detector matches all QuantME tasks independent of their value for this property (see `maxAge` in the XML snipped above)
 
 Thus, the detector matches a QuantME task, if all properties can be matched successfully, and then the replacement fragment can be used to replace the matched tasks in a QuantME workflow during transformation.
 
