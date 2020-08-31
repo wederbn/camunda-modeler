@@ -37,11 +37,11 @@ The application is build in ```.\dist``` and can be started depending on your op
 
 - Delete the start event and add a new task:
 
-<kbd><img src="./create-task.gif" /></kbd>
+<kbd><img src="./create-task.gif" width="900"/></kbd>
 
 - Replace the task by a task of type ```ReadoutErrorMitigationTask```
 
-<kbd><img src="./replace-task.gif" /></kbd>
+<kbd><img src="./replace-task.gif" width="900"/></kbd>
 
 - TODO
 
