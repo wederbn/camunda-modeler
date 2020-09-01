@@ -17,5 +17,5 @@ export default {
     'propertiesProvider'
   ],
   elementTemplatesModalEditorActions: [ 'type', EditorActions ],
-  propertiesProvider: [ 'type', PropertiesProvider ]
+  propertiesProvider2: [ 'type', PropertiesProvider ]
 };
