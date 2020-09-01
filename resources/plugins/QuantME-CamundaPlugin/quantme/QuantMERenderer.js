@@ -114,8 +114,16 @@ export default class QuantMERenderer extends BpmnRenderer {
         drawPath(parentGfx, pathData, {
           transform:'scale(0.3)',
           strokeWidth: 2.5,
-          strokeDasharray: 10,
+          strokeDasharray: 5,
           stroke: getStrokeColor(element, defaultStrokeColor)
+        });
+
+        // create white line for database
+        pathData = quantMEPathMap.getPath('TASK_TYPE_DATA_PREPARATION_BACKGROUND');
+        drawPath(parentGfx, pathData, {
+          transform:'scale(0.3)',
+          strokeWidth: 2.5,
+          stroke: getFillColor(element, '#FFFFFF')
         });
 
         return task;
