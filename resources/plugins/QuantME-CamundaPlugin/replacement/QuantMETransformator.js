@@ -55,31 +55,28 @@ export default class QuantMETransformator {
         console.log('Unable to retrieve root process element from definitions!');
         return;
       }
-      const rootElementBo = elementRegistry.get(rootElement.id);
 
       // get all QuantME tasks from the process
-      const quantmeTasks = getQuantMETasks(rootElement);
-      console.log('Process contains ' + quantmeTasks.length + ' QuantME tasks to replace...');
+      const replacementTasks = getQuantMETasks(rootElement);
+      console.log('Process contains ' + replacementTasks.length + ' QuantME tasks to replace...');
 
       // replace each QuantME tasks to retrieve standard-compliant BPMN
-      let taskQrmMap = [];
-      for (let i = 0; i < quantmeTasks.length; i++) {
+      for (let replacementTask of replacementTasks) {
 
         // abort transformation if at least one task can not be replaced
-        let matchingQRM = await getMatchingQRM(quantmeTasks[i]);
-        if (!matchingQRM) {
-          console.log('Unable to replace task with id %s. Aborting transformation!', quantmeTasks[i].id);
+        replacementTask.qrm = await getMatchingQRM(replacementTask.task);
+        if (!replacementTask.qrm) {
+          console.log('Unable to replace task with id %s. Aborting transformation!', replacementTask.id);
           return;
         }
-        taskQrmMap.push({ task: quantmeTasks[i], qrm: matchingQRM });
       }
 
       // replace all QuantME tasks
-      for (let taskQrm of taskQrmMap) {
-        console.log('Replacing task with id %s by using QRM: ', taskQrm.task.id, taskQrm.qrm);
-        const replacementSuccess = await replaceByFragment(taskQrm.task, rootElementBo, taskQrm.qrm.replacement);
+      for (let replacementTask of replacementTasks) {
+        console.log('Replacing task with id %s by using QRM: ', replacementTask.task.id, replacementTask.qrm);
+        const replacementSuccess = await replaceByFragment(replacementTask.task, replacementTask.parent, replacementTask.qrm.replacement);
         if (!replacementSuccess) {
-          console.log('Replacement of QuantME task with Id ' + taskQrm.task.id + ' failed. Aborting process!');
+          console.log('Replacement of QuantME task with Id ' + replacementTask.task.id + ' failed. Aborting process!');
           return;
         }
       }
@@ -92,12 +89,20 @@ export default class QuantMETransformator {
      * Get QuantME tasks from process
      */
     function getQuantMETasks(process) {
+      // retrieve parent object for later replacement
+      const processBo = elementRegistry.get(process.id);
+
       const quantmeTasks = [];
       const flowElements = process.flowElements;
       for (let i = 0; i < flowElements.length; i++) {
-        var flowElement = flowElements[i];
+        let flowElement = flowElements[i];
         if (flowElement.$type && flowElement.$type.startsWith('quantme:')) {
-          quantmeTasks.push(flowElement);
+          quantmeTasks.push({ task: flowElement , parent: processBo });
+        }
+
+        // recursively retrieve QuantME tasks if subprocess is found
+        if (flowElement.$type && flowElement.$type === 'bpmn:SubProcess') {
+          Array.prototype.push.apply(quantmeTasks, getQuantMETasks(flowElement));
         }
       }
       return quantmeTasks;
