@@ -62,14 +62,30 @@ export default class QuantMETransformator {
       console.log('Process contains ' + quantmeTasks.length + ' QuantME tasks to replace...');
 
       // replace each QuantME tasks to retrieve standard-compliant BPMN
+      let taskQrmMap = [];
       for (let i = 0; i < quantmeTasks.length; i++) {
-        const replacementSuccess = await replaceQuantMETask(quantmeTasks[i], rootElementBo);
-        if (!replacementSuccess) {
-          console.log('Replacement of QuantME task with Id ' + quantmeTasks[i].id + ' failed. Aborting process!');
+
+        // abort transformation if at least one task can not be replaced
+        let matchingQRM = await getMatchingQRM(quantmeTasks[i]);
+        if (!matchingQRM) {
+          console.log('Unable to replace task with id %s. Aborting transformation!', quantmeTasks[i].id);
           return;
         }
-        layout(modeling, elementRegistry, rootElement);
+        taskQrmMap.push({ task: quantmeTasks[i], qrm: matchingQRM });
       }
+
+      // replace all QuantME tasks
+      for (let taskQrm of taskQrmMap) {
+        console.log('Replacing task with id %s by using QRM: ', taskQrm.task.id, taskQrm.qrm);
+        const replacementSuccess = await replaceByFragment(taskQrm.task, rootElementBo, taskQrm.qrm.replacement);
+        if (!replacementSuccess) {
+          console.log('Replacement of QuantME task with Id ' + taskQrm.task.id + ' failed. Aborting process!');
+          return;
+        }
+      }
+
+      // layout diagram after successful transformation
+      layout(modeling, elementRegistry, rootElement);
     }
 
     /**
@@ -88,25 +104,26 @@ export default class QuantMETransformator {
     }
 
     /**
-     * Replace the given QuantME tasks by a suited QRM
+     * Search for a matching QRM for the given task
      */
-    async function replaceQuantMETask(task, parent) {
-      console.log('Replacing QuantME task with id: %s', task.id);
+    async function getMatchingQRM(task) {
       for (let i = 0; i < QRMs.length; i++) {
-        let qrm = QRMs[i];
-        if (await matchesQRM(qrm, task)) {
-          console.log('Found matching detector. Starting replacement!');
-          return await replaceByFragment(task, parent, qrm.replacement);
+        if (await matchesQRM(QRMs[i], task)) {
+          return QRMs[i];
         }
       }
-      console.log('No matching QRM found for task with id: %s', task.id);
-      return false;
+      return undefined;
     }
 
     /**
      * Replace the given task by the content of the replacement fragment
      */
     async function replaceByFragment(task, parent, replacement) {
+
+      if (!replacement) {
+        console.log('Replacement fragment is undefined. Aborting replacement!');
+        return false;
+      }
 
       // get the root process of the replacement fragment
       let replacementProcess = await getRootProcessFromXml(replacement);
