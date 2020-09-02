@@ -27,6 +27,12 @@ module.exports = {
       rules: {
         'license-header/header': [2, path.join(__dirname, './iaas-header.js') ]
       }
+    },
+    { // no licence for plugin from existing Github repository
+      files: ['resources/plugins/Linter-plugin/**'],
+      rules: {
+        'license-header/header': 'off'
+      }
     }
   ]
 };
