@@ -11,6 +11,22 @@
 
 import { isFlowLikeElement } from './Utilities';
 
+// space between multiple boundary events of a task/subprocess
+let BOUNDARY_EVENT_MARGIN = '10';
+
+/**
+ * Lyout the given process
+ *
+ * @param modeling the modeling component with the imported diagram
+ * @param elementRegistry the element registry for the imported diagram
+ * @param process the root element to start the layouting process
+ */
+export function layout(modeling, elementRegistry, process) {
+  layoutProcess(modeling, elementRegistry, process);
+  layoutBoundaryEvents(modeling, elementRegistry);
+  layoutWaypoints(modeling, elementRegistry);
+}
+
 /**
  * Layout the given process to avoid overlapping elements, etc.
  *
@@ -18,7 +34,7 @@ import { isFlowLikeElement } from './Utilities';
  * @param elementRegistry the element registry for the imported diagram
  * @param process the root element to start the layouting process
  */
-export function layout(modeling, elementRegistry, process) {
+function layoutProcess(modeling, elementRegistry, process) {
   console.log('Layout with root element: ', process);
 
   // required nodes and edges for the layout method
@@ -31,7 +47,7 @@ export function layout(modeling, elementRegistry, process) {
     for (let i = 0; i < flowElements.length; i++) {
       if (isFlowLikeElement(flowElements[i].$type)) {
         console.log('Adding flow element as edge for layouting.', flowElements[i]);
-        edges.push({ id: flowElements[i].id, sourceId: flowElements[i].sourceRef.id, targetId: flowElements[i].targetRef.id });
+        edges.push(getEdgeFromFlowElement(elementRegistry, flowElements[i]));
       } else {
         console.log('Adding flow element as node for layouting: ', flowElements[i]);
 
@@ -41,7 +57,12 @@ export function layout(modeling, elementRegistry, process) {
           let oldBounds = flowElements[i].di.bounds;
           modeling.resizeShape(elementRegistry.get(flowElements[i].id), { x: oldBounds.x, y: oldBounds.y, height: 10, width:10 });
 
-          layout(modeling, elementRegistry, elementRegistry.get(flowElements[i].id).businessObject);
+          layoutProcess(modeling, elementRegistry, elementRegistry.get(flowElements[i].id).businessObject);
+        }
+
+        // boundary events are skipped here, as they are always attached to some task and only this task has to be layouted
+        if (flowElements[i].$type === 'bpmn:BoundaryEvent') {
+          continue;
         }
 
         nodes.push(elementRegistry.get(flowElements[i].id));
@@ -64,13 +85,135 @@ export function layout(modeling, elementRegistry, process) {
     }
   }
 
-  layoutWithDagre(modeling, elementRegistry, require('dagre'), nodes, edges, { rankdir: 'LR' });
+  // layout the diagram using the dagre graph library
+  layoutWithDagre(modeling, elementRegistry, require('dagre'), nodes, edges, { rankdir: 'LR' , align: 'UL' , ranker: 'longest-path' });
+}
+
+/**
+ * Layout the boundary events in the diagram to display them at the tasks to which they are attached
+ *
+ * @param modeling the modeling component with the imported diagram
+ * @param elementRegistry the element registry for the imported diagram
+ */
+function layoutBoundaryEvents(modeling, elementRegistry) {
+  let layoutedBoundaries = {};
+
+  // add the boundary events to the new location of the tasks to which they are attached
+  for (let boundaryEvent of elementRegistry.getAll()) {
+    if (boundaryEvent.type === 'bpmn:BoundaryEvent') {
+
+      // retrieve the required elements from the registry
+      let boundaryEventShape = elementRegistry.get(boundaryEvent.id);
+      let attachedToElementShape = elementRegistry.get(boundaryEventShape.businessObject.attachedToRef.id);
+      let boundaryEventBounds = boundaryEventShape.businessObject.di.bounds;
+      let attachedToBounds = attachedToElementShape.businessObject.di.bounds;
+
+      // get all boundary events that were already attached to this element to move the current one beneath the last one
+      let attachedToElementBoundaries = [];
+      if (layoutedBoundaries[attachedToElementShape.id]) {
+        attachedToElementBoundaries = layoutedBoundaries[attachedToElementShape.id];
+      }
+
+      // place the boundary events at the bottom right corner of the parent element
+      let bottomOfAttached = attachedToBounds.x - boundaryEventBounds.x + attachedToBounds.width;
+      let offset = (attachedToElementBoundaries.length + 1) * (parseInt(boundaryEventBounds.width) + parseInt(BOUNDARY_EVENT_MARGIN));
+      let to_move_x = bottomOfAttached - offset;
+      let to_move_y = attachedToBounds.y - boundaryEventBounds.y + attachedToBounds.height - boundaryEventBounds.height/2;
+      modeling.moveShape(boundaryEventShape, { x: to_move_x, y: to_move_y });
+
+      // update list for the next boundary event
+      attachedToElementBoundaries.push(boundaryEventShape.id);
+      layoutedBoundaries[attachedToElementShape.id] = attachedToElementBoundaries;
+
+      // layout the waypoints of the connections of the boundary events
+      for (let outgoingConnection of boundaryEvent.outgoing) {
+        console.log('Layouting outgoing connection of boundary event:', outgoingConnection);
+        let connectionShape = elementRegistry.get(outgoingConnection.id);
+
+        // replace the first waypoint with the new bounds of the boundary event
+        let waypoints = connectionShape.waypoints;
+        let sourceX = boundaryEventBounds.x + boundaryEventBounds.width/2;
+        let sourceY = boundaryEventBounds.y + boundaryEventBounds.height;
+        waypoints.shift();
+        waypoints.unshift({ x: sourceX, y: sourceY });
+
+        // update diagram
+        modeling.updateWaypoints(connectionShape, waypoints);
+      }
+    }
+  }
+}
+
+/**
+ * Layout the waypoints of all SequenceFlow elements in the BPMN diagram, e.g., by trying to make the edges cornered
+ *
+ * @param modeling the modeling component with the imported diagram
+ * @param elementRegistry the element registry for the imported diagram
+ */
+function layoutWaypoints(modeling, elementRegistry) {
+  console.log('Layouting waypoints...');
+  for (let element of elementRegistry.getAll()) {
+    if (element.type === 'bpmn:SequenceFlow') {
+      let sourceShape = elementRegistry.get(element.businessObject.sourceRef.id);
+      let targetShape = elementRegistry.get(element.businessObject.targetRef.id);
+      layoutWaypoint(modeling, element, sourceShape, targetShape);
+    }
+  }
+}
+
+/**
+ * Layout the waypoints of the given connection
+ *
+ * @param modeling the modeling component with the imported diagram
+ * @param connection the connection to layout the waypoints for
+ * @param source the source element of the connection
+ * @param target the target element of the connection
+ */
+function layoutWaypoint(modeling, connection, source, target) {
+  let waypoints = connection.waypoints;
+  if (waypoints.length === 2) {
+    // no layouting required for a direct connection
+    return;
+  }
+
+  // make connection cornered
+  if (waypoints.length === 3) {
+    if (target.y < source.y) {
+      // edge goes upwards
+      waypoints[1].x = waypoints[2].x;
+      waypoints[1].y = waypoints[0].y;
+    } else {
+      // edge goes downwards
+      waypoints[1].x = waypoints[0].x;
+      waypoints[1].y = waypoints[2].y;
+    }
+    modeling.updateWaypoints(connection, waypoints);
+  }
+
+  // TODO: layout edges with more waypoints
+}
+
+/**
+ * Generate a edge for the layout graph from the given flow element
+ *
+ * @param elementRegistry the element registry to access all elements in the diagram
+ * @param flowElement the flow element representing a edge in the layouting graph
+ * @return the edge for the dagre graph
+ */
+function getEdgeFromFlowElement(elementRegistry, flowElement) {
+  let sourceElement = elementRegistry.get(flowElement.sourceRef.id).businessObject;
+  if (sourceElement.$type === 'bpmn:BoundaryEvent') {
+    console.log('Source element is BoundaryEvent. Adding attached task as source for the edge...');
+    sourceElement = sourceElement.attachedToRef;
+  }
+
+  return { id: flowElement.id, sourceId: sourceElement.id, targetId: flowElement.targetRef.id };
 }
 
 function layoutWithDagre(modeling, elementRegistry, dagre, tasks, flows, options) {
 
   // create layouting graph
-  var g = new dagre.graphlib.Graph();
+  let g = new dagre.graphlib.Graph();
   g.setGraph(options);
 
   // add tasks as nodes to the graph
