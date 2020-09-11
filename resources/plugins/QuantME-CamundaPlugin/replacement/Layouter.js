@@ -10,6 +10,7 @@
  */
 
 import { isFlowLikeElement } from './Utilities';
+import { is } from 'bpmn-js/lib/util/ModelUtil';
 
 // space between multiple boundary events of a task/subprocess
 let BOUNDARY_EVENT_MARGIN = '10';
@@ -160,14 +161,56 @@ function layoutBoundaryEvents(modeling, elementRegistry) {
  * @param elementRegistry the element registry for the imported diagram
  */
 function layoutWaypoints(modeling, elementRegistry) {
-  console.log('Layouting waypoints...');
   for (let element of elementRegistry.getAll()) {
     if (element.type === 'bpmn:SequenceFlow') {
       let sourceShape = elementRegistry.get(element.businessObject.sourceRef.id);
       let targetShape = elementRegistry.get(element.businessObject.targetRef.id);
-      layoutWaypoint(modeling, element, sourceShape, targetShape);
+
+      // fix invalid start/end waypoints for gateways
+      adaptGatewayWaypoints(modeling, element, sourceShape, targetShape);
+
+      // fix diagonal edges
+      layoutWaypointsOfSequenceFlow(modeling, element, sourceShape, targetShape);
     }
   }
+}
+
+/**
+ * Adapt the first/last waypoint of the given connection if it is attached to a gateway and is not centered on one side of the gateway
+ *
+ * @param modeling the modeling component with the imported diagram
+ * @param connection the connection to adapt the waypoints from
+ * @param sourceShape the source shape of the connection
+ * @param targetShape the target shape of the connection
+ */
+function adaptGatewayWaypoints(modeling, connection, sourceShape, targetShape) {
+
+  // move first waypoint of gateways to their center if not already there
+  if (is(sourceShape.businessObject, 'bpmn:Gateway')) {
+    let firstWaypoint = moveToMiddleOfShape(connection.waypoints.shift(), sourceShape);
+    connection.waypoints.unshift(firstWaypoint);
+  }
+
+  if (is(targetShape.businessObject, 'bpmn:Gateway')) {
+    let lastWaypoint = moveToMiddleOfShape(connection.waypoints.pop(), targetShape);
+    connection.waypoints.push(lastWaypoint);
+  }
+}
+
+/**
+ * Move the given waypoint to the middle of the side of the given shape where it is attached to. If the waypoint does not touch one of the sides, it is not changed.
+ *
+ * @param waypoint the waypoint to move to the middle of one side of the given shape
+ * @param shape the shape to align the waypoint at
+ */
+function moveToMiddleOfShape(waypoint, shape) {
+  if (waypoint.x === shape.x || waypoint.x === shape.x + shape.width) {
+    waypoint.y = shape.y + shape.width / 2;
+  }
+  if (waypoint.y === shape.y || waypoint.y === shape.y + shape.height) {
+    waypoint.x = shape.x + shape.height / 2;
+  }
+  return waypoint;
 }
 
 /**
@@ -178,7 +221,7 @@ function layoutWaypoints(modeling, elementRegistry) {
  * @param source the source element of the connection
  * @param target the target element of the connection
  */
-function layoutWaypoint(modeling, connection, source, target) {
+function layoutWaypointsOfSequenceFlow(modeling, connection, source, target) {
   let waypoints = connection.waypoints;
   if (waypoints.length === 2) {
 
@@ -222,6 +265,9 @@ function getEdgeFromFlowElement(elementRegistry, flowElement) {
   return { id: flowElement.id, sourceId: sourceElement.id, targetId: flowElement.targetRef.id };
 }
 
+/**
+ * Generate a basic layout of the current diagram using the dagre graph library
+ */
 function layoutWithDagre(modeling, elementRegistry, dagre, tasks, flows, options) {
 
   // create layouting graph
@@ -247,7 +293,6 @@ function layoutWithDagre(modeling, elementRegistry, dagre, tasks, flows, options
 
   // move all tasks to their new position
   g.nodes().forEach(v => {
-    console.log('Node ' + v + ': ' + JSON.stringify(g.node(v)));
     let node = g.node(v);
     let element = elementRegistry.get(v);
 
@@ -260,7 +305,6 @@ function layoutWithDagre(modeling, elementRegistry, dagre, tasks, flows, options
 
   // replace waypoints of edges if defined
   g.edges().forEach(e => {
-    console.log('Edge ' + e.v + ' -> ' + e.w + ': ' + JSON.stringify(g.edge(e)));
     let edge = g.edge(e);
     let points = edge.points;
     let element = elementRegistry.get(edge.label);
