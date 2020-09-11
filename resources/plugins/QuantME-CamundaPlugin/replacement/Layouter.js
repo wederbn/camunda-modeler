@@ -15,7 +15,7 @@ import { isFlowLikeElement } from './Utilities';
 let BOUNDARY_EVENT_MARGIN = '10';
 
 /**
- * Lyout the given process
+ * Layout the given process
  *
  * @param modeling the modeling component with the imported diagram
  * @param elementRegistry the element registry for the imported diagram
@@ -55,7 +55,12 @@ function layoutProcess(modeling, elementRegistry, process) {
         if (flowElements[i].$type === 'bpmn:SubProcess') {
           console.log('Flow element is subprocess. Layouting contained elements...');
           let oldBounds = flowElements[i].di.bounds;
-          modeling.resizeShape(elementRegistry.get(flowElements[i].id), { x: oldBounds.x, y: oldBounds.y, height: 10, width:10 });
+          modeling.resizeShape(elementRegistry.get(flowElements[i].id), {
+            x: oldBounds.x,
+            y: oldBounds.y,
+            height: 10,
+            width: 10
+          });
 
           layoutProcess(modeling, elementRegistry, elementRegistry.get(flowElements[i].id).businessObject);
         }
@@ -86,7 +91,11 @@ function layoutProcess(modeling, elementRegistry, process) {
   }
 
   // layout the diagram using the dagre graph library
-  layoutWithDagre(modeling, elementRegistry, require('dagre'), nodes, edges, { rankdir: 'LR' , align: 'UL' , ranker: 'longest-path' });
+  layoutWithDagre(modeling, elementRegistry, require('dagre'), nodes, edges, {
+    rankdir: 'LR',
+    align: 'UL',
+    ranker: 'longest-path'
+  });
 }
 
 /**
@@ -118,7 +127,7 @@ function layoutBoundaryEvents(modeling, elementRegistry) {
       let bottomOfAttached = attachedToBounds.x - boundaryEventBounds.x + attachedToBounds.width;
       let offset = (attachedToElementBoundaries.length + 1) * (parseInt(boundaryEventBounds.width) + parseInt(BOUNDARY_EVENT_MARGIN));
       let to_move_x = bottomOfAttached - offset;
-      let to_move_y = attachedToBounds.y - boundaryEventBounds.y + attachedToBounds.height - boundaryEventBounds.height/2;
+      let to_move_y = attachedToBounds.y - boundaryEventBounds.y + attachedToBounds.height - boundaryEventBounds.height / 2;
       modeling.moveShape(boundaryEventShape, { x: to_move_x, y: to_move_y });
 
       // update list for the next boundary event
@@ -132,7 +141,7 @@ function layoutBoundaryEvents(modeling, elementRegistry) {
 
         // replace the first waypoint with the new bounds of the boundary event
         let waypoints = connectionShape.waypoints;
-        let sourceX = boundaryEventBounds.x + boundaryEventBounds.width/2;
+        let sourceX = boundaryEventBounds.x + boundaryEventBounds.width / 2;
         let sourceY = boundaryEventBounds.y + boundaryEventBounds.height;
         waypoints.shift();
         waypoints.unshift({ x: sourceX, y: sourceY });
@@ -172,6 +181,7 @@ function layoutWaypoints(modeling, elementRegistry) {
 function layoutWaypoint(modeling, connection, source, target) {
   let waypoints = connection.waypoints;
   if (waypoints.length === 2) {
+
     // no layouting required for a direct connection
     return;
   }
@@ -179,10 +189,12 @@ function layoutWaypoint(modeling, connection, source, target) {
   // make connection cornered
   if (waypoints.length === 3) {
     if (target.y < source.y) {
+
       // edge goes upwards
       waypoints[1].x = waypoints[2].x;
       waypoints[1].y = waypoints[0].y;
     } else {
+
       // edge goes downwards
       waypoints[1].x = waypoints[0].x;
       waypoints[1].y = waypoints[2].y;
@@ -240,8 +252,8 @@ function layoutWithDagre(modeling, elementRegistry, dagre, tasks, flows, options
     let element = elementRegistry.get(v);
 
     // determine new position of task and move it there
-    let to_move_x = node.x - element.x - element.width/2;
-    let to_move_y = node.y - element.y - element.height/2;
+    let to_move_x = node.x - element.x - element.width / 2;
+    let to_move_y = node.y - element.y - element.height / 2;
     let delta_string = { x: to_move_x, y: to_move_y };
     modeling.moveElements([element], delta_string);
   });
@@ -260,7 +272,7 @@ function layoutWithDagre(modeling, elementRegistry, dagre, tasks, flows, options
 
     for (let pointsIndex = 0; pointsIndex < points.length; pointsIndex++) {
       let point;
-      point = { x:points[pointsIndex].x, y: points[pointsIndex].y };
+      point = { x: points[pointsIndex].x, y: points[pointsIndex].y };
       waypoints.push(point);
     }
 
