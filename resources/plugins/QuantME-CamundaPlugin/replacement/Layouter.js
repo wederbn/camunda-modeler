@@ -15,6 +15,9 @@ import { is } from 'bpmn-js/lib/util/ModelUtil';
 // space between multiple boundary events of a task/subprocess
 let BOUNDARY_EVENT_MARGIN = '10';
 
+// space between an edge and a corresponding label
+let LABEL_MARGIN = '10';
+
 /**
  * Layout the given process
  *
@@ -47,10 +50,8 @@ function layoutProcess(modeling, elementRegistry, process) {
   if (flowElements) {
     for (let i = 0; i < flowElements.length; i++) {
       if (isFlowLikeElement(flowElements[i].$type)) {
-        console.log('Adding flow element as edge for layouting.', flowElements[i]);
         edges.push(getEdgeFromFlowElement(elementRegistry, flowElements[i]));
       } else {
-        console.log('Adding flow element as node for layouting: ', flowElements[i]);
 
         // layout elements in subprocess
         if (flowElements[i].$type === 'bpmn:SubProcess') {
@@ -137,7 +138,6 @@ function layoutBoundaryEvents(modeling, elementRegistry) {
 
       // layout the waypoints of the connections of the boundary events
       for (let outgoingConnection of boundaryEvent.outgoing) {
-        console.log('Layouting outgoing connection of boundary event:', outgoingConnection);
         let connectionShape = elementRegistry.get(outgoingConnection.id);
 
         // replace the first waypoint with the new bounds of the boundary event
@@ -171,8 +171,88 @@ function layoutWaypoints(modeling, elementRegistry) {
 
       // fix diagonal edges
       layoutWaypointsOfSequenceFlow(modeling, element, sourceShape, targetShape);
+
+      // remove duplicate waypoints added by the graph layouting algorithm
+      removeDuplicateWaypoints(modeling, element);
+
+      // move labels for edges to the new edge position
+      adaptLabels(modeling, element);
     }
   }
+}
+
+/**
+ * Remove duplicate waypoints (same x and y coordinate)
+ *
+ * @param modeling the modeling component with the imported diagram
+ * @param connection the connection to remove the duplicate waypoints from
+ */
+function removeDuplicateWaypoints(modeling, connection) {
+
+  // remove waypoint if it has the same x and y coordinate as the following
+  let newWaypoints = [];
+  let oldWaypoints = connection.waypoints;
+  for (let i = 0; i < oldWaypoints.length - 1; i++) {
+    let firstWaypoint = oldWaypoints[i];
+    let secondWaypoint = oldWaypoints[i + 1];
+
+    // only add waypoint if it is different from the following
+    if (firstWaypoint.x !== secondWaypoint.x || firstWaypoint.y !== secondWaypoint.y) {
+      newWaypoints.push(firstWaypoint);
+    }
+  }
+  newWaypoints.push(oldWaypoints[oldWaypoints.length - 1]);
+
+  // update model with new set of waypoints
+  modeling.updateWaypoints(connection, newWaypoints);
+
+  // recursively check if there are more waypoints to remove
+  if (oldWaypoints.length !== newWaypoints.length) {
+    removeDuplicateWaypoints(modeling, connection);
+  }
+}
+
+/**
+ * Move labels to the edges after layouting them
+ *
+ * @param modeling the modeling component with the imported diagram
+ * @param connection the connection to adapt the labels for
+ */
+function adaptLabels(modeling, connection) {
+  if (connection.labels && connection.labels.length === 1) {
+
+    // place the first label of the given connection
+    let firstLabel = connection.labels[0];
+    let middle = getMiddleOfLocation(connection, firstLabel);
+    modeling.moveElements([firstLabel], { x: middle.x - firstLabel.x, y: middle.y - firstLabel.y });
+  }
+
+  // TODO: handle cases with multiple labels defined for the connection
+}
+
+/**
+ * Get the middle point of the given connection to place the given label
+ *
+ * @param connection the connection to get the middle for
+ * @param label the label to relocate
+ */
+function getMiddleOfLocation(connection, label) {
+
+  // get the two waypoints from the middle of the connection
+  let waypoints = connection.waypoints;
+  let middleWaypointIndex = Math.round(waypoints.length / 2);
+  let middlePoint1 = waypoints[middleWaypointIndex - 1];
+  let middlePoint2 = waypoints[middleWaypointIndex];
+
+  if (middlePoint1.x === middlePoint2.x) {
+    return { x: middlePoint1.x - LABEL_MARGIN - parseInt(label.width), y: (middlePoint1.y + middlePoint2.y) / 2 };
+  }
+
+  if (middlePoint1.y === middlePoint2.y) {
+    return { x: (middlePoint1.x + middlePoint2.x) / 2, y: middlePoint1.y - LABEL_MARGIN - parseInt(label.height) };
+  }
+
+  return { x: (middlePoint1.x + middlePoint2.x) / 2, y: (middlePoint1.y + middlePoint2.y) / 2 - LABEL_MARGIN - parseInt(label.height) };
 }
 
 /**
@@ -222,6 +302,7 @@ function moveToMiddleOfShape(waypoint, shape) {
  * @param target the target element of the connection
  */
 function layoutWaypointsOfSequenceFlow(modeling, connection, source, target) {
+
   let waypoints = connection.waypoints;
   if (waypoints.length === 2) {
 
