@@ -12,13 +12,13 @@
 import { layout } from './Layouter';
 import { matchesQRM } from './QuantMEMatcher';
 import { requiredAttributesAvailable } from './QuantMEAttributeChecker';
-import { getRootProcess, getRootProcessFromXml, getSingleFlowElement, isFlowLikeElement } from './Utilities';
+import { getRootProcess, getRootProcessFromXml, getSingleFlowElement, isFlowLikeElement, getCamundaInputOutput } from './Utilities';
 
 let QRMs = [];
 
 export default class QuantMETransformator {
 
-  constructor(injector, bpmnjs, modeling, elementRegistry, eventBus, bpmnReplace) {
+  constructor(injector, bpmnjs, modeling, elementRegistry, eventBus, bpmnReplace, bpmnFactory) {
 
     // register the startReplacementProcess() function as editor action to enable the invocation from the menu
     const editorActions = injector.get('editorActions', false);
@@ -65,6 +65,9 @@ export default class QuantMETransformator {
 
       // replace each QuantME tasks to retrieve standard-compliant BPMN
       for (let replacementTask of replacementTasks) {
+        // TODO
+        console.log('TESTTESTTEST');
+        console.log(replacementTask);
 
         // abort transformation if at least one task can not be replaced
         replacementTask.qrm = await getMatchingQRM(replacementTask.task);
@@ -145,7 +148,12 @@ export default class QuantMETransformator {
       console.log('Replacement element: ', replacementElement);
       let result = insertShape(parent, replacementElement, {}, true, task);
 
-      // TODO: handle attributes referenced in the replacement
+      // TODO: add attributes of QuantME tasks as input for the new element
+      let newElement = result['element'];
+      let inputOutputExtension = getCamundaInputOutput(newElement, newElement.businessObject, bpmnFactory);
+      console.log(newElement);
+      console.log('Input/Output element:', inputOutputExtension);
+
       return result['success'];
     }
 
@@ -335,7 +343,7 @@ export default class QuantMETransformator {
   }
 }
 
-QuantMETransformator.$inject = ['injector', 'bpmnjs', 'modeling', 'elementRegistry', 'eventBus', 'bpmnReplace'];
+QuantMETransformator.$inject = ['injector', 'bpmnjs', 'modeling', 'elementRegistry', 'eventBus', 'bpmnReplace', 'bpmnFactory'];
 
 /**
  * Check whether the given QuantME task can be replaced by an available QRM, which means check if a matching detector can be found

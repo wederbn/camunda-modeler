@@ -13,6 +13,7 @@ import BpmnModeler from 'bpmn-js/lib/Modeler';
 import elementTemplates from 'bpmn-js-properties-panel/lib/provider/camunda/element-templates';
 import quantMEModule from '../quantme';
 import quantMEExtension from '../resources/quantum4bpmn.json';
+import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
 
 /**
  * Get the root process element of the diagram
@@ -57,11 +58,12 @@ export async function getRootProcessFromXml(xml) {
   // import the xml containing the definitions
   function importXmlWrapper(xml) {
     return new Promise((resolve) => {
-      bpmnModeler.importXML(xml,(successResponse) => {
+      bpmnModeler.importXML(xml, (successResponse) => {
         resolve(successResponse);
       });
     });
   }
+
   await importXmlWrapper(xml);
 
   // extract and return root process
@@ -81,6 +83,27 @@ export function getSingleFlowElement(process) {
     return undefined;
   }
   return flowElements[0];
+}
+
+/**
+ * Get the 'camunda:InputOutput' extension element from the given business object
+ *
+ * @param bo the business object to retrieve the input/output extension for
+ * @param bpmnFactory the BPMN factory to create new BPMN elements
+ */
+export function getCamundaInputOutput(element, bo, bpmnFactory) {
+
+  // retrieve InputOutput element if already defined
+  let inputOutput = extensionElementsHelper.getExtensionElements(bo, 'camunda:InputOutput');
+
+  // create new InputOutput element if non existing
+  if (!inputOutput || inputOutput.length === 0) {
+    bo.extensionElements = extensionElementsHelper.addEntry(bo, bo, bpmnFactory.create('camunda:InputOutput'), bpmnFactory)['extensionElements'];
+    inputOutput = extensionElementsHelper.getExtensionElements(bo, 'camunda:InputOutput');
+  }
+
+  // if there are multiple input/output definitions, take the first one as the modeler only uses this one
+  return inputOutput[0];
 }
 
 /**
