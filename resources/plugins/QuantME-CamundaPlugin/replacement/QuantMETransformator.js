@@ -59,6 +59,9 @@ export default class QuantMETransformator {
       // get all QuantME tasks from the process
       const replacementTasks = getQuantMETasks(rootElement);
       console.log('Process contains ' + replacementTasks.length + ' QuantME tasks to replace...');
+      if (!replacementTasks || !replacementTasks.length) {
+        return;
+      }
 
       // replace each QuantME tasks to retrieve standard-compliant BPMN
       for (let replacementTask of replacementTasks) {
