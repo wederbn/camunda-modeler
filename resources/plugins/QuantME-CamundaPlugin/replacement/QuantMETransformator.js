@@ -65,9 +65,6 @@ export default class QuantMETransformator {
 
       // replace each QuantME tasks to retrieve standard-compliant BPMN
       for (let replacementTask of replacementTasks) {
-        // TODO
-        console.log('TESTTESTTEST');
-        console.log(replacementTask);
 
         // abort transformation if at least one task can not be replaced
         replacementTask.qrm = await getMatchingQRM(replacementTask.task);
@@ -150,7 +147,7 @@ export default class QuantMETransformator {
 
       // TODO: add attributes of QuantME tasks as input for the new element
       let newElement = result['element'];
-      let inputOutputExtension = getCamundaInputOutput(newElement, newElement.businessObject, bpmnFactory);
+      let inputOutputExtension = getCamundaInputOutput(newElement.businessObject, bpmnFactory);
       console.log(newElement);
       console.log('Input/Output element:', inputOutputExtension);
 

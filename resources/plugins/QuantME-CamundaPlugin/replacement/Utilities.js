@@ -91,7 +91,7 @@ export function getSingleFlowElement(process) {
  * @param bo the business object to retrieve the input/output extension for
  * @param bpmnFactory the BPMN factory to create new BPMN elements
  */
-export function getCamundaInputOutput(element, bo, bpmnFactory) {
+export function getCamundaInputOutput(bo, bpmnFactory) {
 
   // retrieve InputOutput element if already defined
   let inputOutput = extensionElementsHelper.getExtensionElements(bo, 'camunda:InputOutput');
