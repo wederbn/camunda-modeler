@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getRootProcessFromXml, isQuantMETask, getSingleFlowElement } from './Utilities';
+import { getRootProcessFromXml, isQuantMETask, getSingleFlowElement } from '../Utilities';
 
 export async function matchesQRM(qrm, task) {
   console.log('Matching QRM %s and task with id %s!', qrm.qrmUrl, task.id);
