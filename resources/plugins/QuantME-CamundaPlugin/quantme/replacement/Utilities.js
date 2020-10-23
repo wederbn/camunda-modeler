@@ -11,8 +11,8 @@
 
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 import elementTemplates from 'bpmn-js-properties-panel/lib/provider/camunda/element-templates';
-import quantMEModule from '../quantme';
-import quantMEExtension from '../resources/quantum4bpmn.json';
+import quantMEModule from '../modeling';
+import quantMEExtension from '../../resources/quantum4bpmn.json';
 import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
 
 /**
