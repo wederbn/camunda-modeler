@@ -13,7 +13,7 @@ let QuantMEAttributeChecker = require('quantme/replacement/QuantMEAttributeCheck
 let QuantMETransformator = require('quantme/replacement/QuantMETransformator');
 
 /**
- * Rule that reports QuantME tasks for which no suited replacment model exists
+ * Rule that reports QuantME tasks for which no suited replacement model exists
  */
 module.exports = function() {
 
