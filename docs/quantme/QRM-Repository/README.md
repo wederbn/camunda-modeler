@@ -30,4 +30,4 @@ For this, use the `Plugins` menu entry, go to `QuantME`, and click on the `Updat
 
 <img src="./reload-repository.png" width="900">
 
-If the defined Github username and repository name are invalid and result in an error when loading the QRM, a notification is displayed in the modeler and the configuration should be fixed.
+If the defined Github username and repository name are invalid and result in an error when loading the QRMs, a notification is displayed in the modeler and the configuration should be fixed.
