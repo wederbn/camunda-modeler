@@ -29,6 +29,11 @@ export default class QuantMEClient extends Component {
         modeler
       } = event;
 
+      // add possibility to trigger notifications from the modeler which are displayed at the client
+      modeler.on('Notification.display', (event) => {
+        props.displayNotification(event.data);
+      });
+
       // load current QRMs from defined Git repository and publish them via the event bus
       modeler.on('QRMs.update', (event) => {
         QRMHandler.getCurrentQRMs(config.githubUsername, config.githubRepositoryName, props)

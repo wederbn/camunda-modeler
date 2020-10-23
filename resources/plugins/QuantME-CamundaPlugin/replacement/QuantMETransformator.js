@@ -70,6 +70,11 @@ export default class QuantMETransformator {
         replacementTask.qrm = await getMatchingQRM(replacementTask.task);
         if (!replacementTask.qrm) {
           console.log('Unable to replace task with id %s. Aborting transformation!', replacementTask.task.id);
+
+          // inform user via notification in the modeler
+          let content = { type: 'warning', title: 'Unable to transform workflow',
+            content: 'Unable to replace task with id \'' + replacementTask.task.id + '\' by suited QRM', duration: 10000 };
+          eventBus.fire('Notification.display', { data: content });
           return;
         }
       }
