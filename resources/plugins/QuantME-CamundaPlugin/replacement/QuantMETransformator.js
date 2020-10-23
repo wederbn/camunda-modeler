@@ -63,7 +63,7 @@ export default class QuantMETransformator {
         return;
       }
 
-      // replace each QuantME tasks to retrieve standard-compliant BPMN
+      // check for available replacement models for all QuantME tasks
       for (let replacementTask of replacementTasks) {
 
         // abort transformation if at least one task can not be replaced
@@ -74,7 +74,7 @@ export default class QuantMETransformator {
         }
       }
 
-      // replace all QuantME tasks
+      // replace each QuantME tasks to retrieve standard-compliant BPMN
       for (let replacementTask of replacementTasks) {
         console.log('Replacing task with id %s by using QRM: ', replacementTask.task.id, replacementTask.qrm);
         const replacementSuccess = await replaceByFragment(replacementTask.task, replacementTask.parent, replacementTask.qrm.replacement);
@@ -137,7 +137,7 @@ export default class QuantMETransformator {
       // get the root process of the replacement fragment
       let replacementProcess = await getRootProcessFromXml(replacement);
       let replacementElement = getSingleFlowElement(replacementProcess);
-      if (replacementElement === null) {
+      if (replacementElement === null || replacementElement === undefined) {
         console.log('Unable to retrieve QuantME task from replacement fragment: ', replacement);
         return false;
       }
