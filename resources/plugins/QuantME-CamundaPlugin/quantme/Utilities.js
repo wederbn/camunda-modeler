@@ -100,6 +100,10 @@ export function getCamundaInputOutput(bo, bpmnFactory) {
   if (!inputOutput || inputOutput.length === 0) {
     bo.extensionElements = extensionElementsHelper.addEntry(bo, bo, bpmnFactory.create('camunda:InputOutput'), bpmnFactory)['extensionElements'];
     inputOutput = extensionElementsHelper.getExtensionElements(bo, 'camunda:InputOutput');
+
+    // initialize parameters as empty arrays to avoid access errors
+    inputOutput[0].inputParameters = [];
+    inputOutput[0].outputParameters = [];
   }
 
   // if there are multiple input/output definitions, take the first one as the modeler only uses this one
@@ -117,4 +121,46 @@ export function isFlowLikeElement(type) {
   return type === 'bpmn:SequenceFlow' || type === 'bpmn:Association';
 
   // TODO: handle further flow like element types
+}
+
+
+/**
+ * Get the properties that have to be copied from an element of a replacement fragment to the new element in the diagram
+ *
+ * @param element the element to retrieve the properties from
+ * @return the properties to copy
+ */
+export function getPropertiesToCopy(element) {
+  let properties = {};
+  for (let key in element) {
+
+    // ignore properties from parent element
+    if (!element.hasOwnProperty(key)) {
+      continue;
+    }
+
+    // ignore properties such as type
+    if (key.startsWith('$')) {
+      continue;
+    }
+
+    // ignore id as it is automatically generated with the shape
+    if (key === 'id') {
+      continue;
+    }
+
+    // ignore flow elements, as the children are added afterwards
+    if (key === 'flowElements') {
+      continue;
+    }
+
+    // ignore artifacts, as they are added afterwards with their shapes
+    if (key === 'artifacts') {
+      continue;
+    }
+
+    properties[key] = element[key];
+  }
+
+  return properties;
 }

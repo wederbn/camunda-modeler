@@ -12,7 +12,15 @@
 import { layout } from './Layouter';
 import { matchesQRM } from './QuantMEMatcher';
 import { requiredAttributesAvailable } from './QuantMEAttributeChecker';
-import { getRootProcess, getRootProcessFromXml, getSingleFlowElement, isFlowLikeElement, getCamundaInputOutput } from '../Utilities';
+import {
+  getRootProcess,
+  getRootProcessFromXml,
+  getSingleFlowElement,
+  isFlowLikeElement,
+  getCamundaInputOutput,
+  getPropertiesToCopy
+} from '../Utilities';
+import { addQuantMEInputParameters } from './InputOutputHandler';
 
 let QRMs = [];
 
@@ -72,8 +80,10 @@ export default class QuantMETransformator {
           console.log('Unable to replace task with id %s. Aborting transformation!', replacementTask.task.id);
 
           // inform user via notification in the modeler
-          let content = { type: 'warning', title: 'Unable to transform workflow',
-            content: 'Unable to replace task with id \'' + replacementTask.task.id + '\' by suited QRM', duration: 10000 };
+          let content = {
+            type: 'warning', title: 'Unable to transform workflow',
+            content: 'Unable to replace task with id \'' + replacementTask.task.id + '\' by suited QRM', duration: 10000
+          };
           eventBus.fire('Notification.display', { data: content });
           return;
         }
@@ -150,11 +160,9 @@ export default class QuantMETransformator {
       console.log('Replacement element: ', replacementElement);
       let result = insertShape(parent, replacementElement, {}, true, task);
 
-      // TODO: add attributes of QuantME tasks as input for the new element
-      let newElement = result['element'];
-      let inputOutputExtension = getCamundaInputOutput(newElement.businessObject, bpmnFactory);
-      console.log(newElement);
-      console.log('Input/Output element:', inputOutputExtension);
+      // add all attributes of the replaced QuantME task to the input parameters of the replacement fragment
+      let inputOutputExtension = getCamundaInputOutput(result['element'].businessObject, bpmnFactory);
+      addQuantMEInputParameters(task, inputOutputExtension, bpmnFactory);
 
       return result['success'];
     }
@@ -290,47 +298,6 @@ export default class QuantMETransformator {
       }
 
       return { success: success, idMap: idMap, element: parent };
-    }
-
-    /**
-     * Get the properties that have to be copied from an element of a replacement fragment to the new element in the diagram
-     *
-     * @param element the element to retrieve the properties from
-     * @return the properties to copy
-     */
-    function getPropertiesToCopy(element) {
-      let properties = {};
-      for (let key in element) {
-
-        // ignore properties from parent element
-        if (!element.hasOwnProperty(key)) {
-          continue;
-        }
-
-        // ignore properties such as type
-        if (key.startsWith('$')) {
-          continue;
-        }
-
-        // ignore id as it is automatically generated with the shape
-        if (key === 'id') {
-          continue;
-        }
-
-        // ignore flow elements, as the children are added afterwards
-        if (key === 'flowElements') {
-          continue;
-        }
-
-        // ignore artifacts, as they are added afterwards with their shapes
-        if (key === 'artifacts') {
-          continue;
-        }
-
-        properties[key] = element[key];
-      }
-
-      return properties;
     }
 
     /**
