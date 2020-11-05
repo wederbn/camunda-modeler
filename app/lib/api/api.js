@@ -10,11 +10,13 @@
  */
 
 const express = require('express');
+const routes = require('./routes');
+
 const api = express();
 
-api.get('/', function(req, res) {
-  res.send('Hello World');
-});
+// add defined routes of controllers
+api.use('/', routes.root);
+api.use('/workflows', routes.workflow);
 
 // retrieve port for the API from the environment variables or use default port 8081
 let port = process.env.PORT;
@@ -26,9 +28,9 @@ if (port !== undefined) {
   if (isNaN(port) || port <= 0 || port > 65535) {
     console.warn('Passed invalid port for REST API as environment variable: \'' + port + '\'');
     port = 8081;
-    console.log('Starting REST API on default port 8081!');
+    console.info('Starting REST API on default port 8081!');
   } else {
-    console.log('Starting REST API on defined port: %i', port);
+    console.info('Starting REST API on defined port: %i', port);
   }
 }
 
