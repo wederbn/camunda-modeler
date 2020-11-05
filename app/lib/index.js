@@ -31,6 +31,7 @@ const Platform = require('./platform');
 const Plugins = require('./plugins');
 const WindowManager = require('./window-manager');
 const Workspace = require('./workspace');
+const Api = require('./api');
 
 const {
   readFile,
