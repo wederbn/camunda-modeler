@@ -10,18 +10,27 @@
  */
 
 const express = require('express');
-const test = express();
+const api = express();
 
-test.get('/', function(req, res) {
+api.get('/', function(req, res) {
   res.send('Hello World');
 });
 
-const server = test.listen(8081, function() {
-  const host = server.address().address;
-  const port = server.address().port;
+// retrieve port for the API from the environment variables or use default port 8081
+let port = process.env.PORT;
+if (port !== undefined) {
+  port = port.replace(/ /g,'');
+  port = parseInt(port);
 
-  console.log('Example app listening at http://%s:%s', host, port);
-});
+  // defined port has to be between 0 and 65536
+  if (isNaN(port) || port <= 0 || port > 65535) {
+    console.warn('Passed invalid port for REST API as environment variable: \'' + port + '\'');
+    port = 8081;
+    console.log('Starting REST API on default port 8081!');
+  } else {
+    console.log('Starting REST API on defined port: %i', port);
+  }
+}
 
-// Console will print the message
-console.log('Server running at http://127.0.0.1:8081/');
+// start REST API
+api.listen(port);
