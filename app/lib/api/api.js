@@ -12,6 +12,7 @@
 const express = require('express');
 const routes = require('./routes');
 
+const log = require('../log')('app:api');
 const api = express();
 
 // add defined routes of controllers
@@ -26,12 +27,15 @@ if (port !== undefined) {
 
   // defined port has to be between 0 and 65536
   if (isNaN(port) || port <= 0 || port > 65535) {
-    console.warn('Passed invalid port for REST API as environment variable: \'' + port + '\'');
+    log.warn('Passed invalid port for REST API as environment variable: \'' + port + '\'');
     port = 8081;
-    console.info('Starting REST API on default port 8081!');
+    log.info('Starting REST API on default port 8081!');
   } else {
-    console.info('Starting REST API on defined port: %i', port);
+    log.info('Starting REST API on defined port: %i', port);
   }
+} else {
+  log.info('No port defined in environment variables. Starting REST API on default port 8081!');
+  port = 8081;
 }
 
 // start REST API

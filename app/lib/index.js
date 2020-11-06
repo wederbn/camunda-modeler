@@ -31,7 +31,6 @@ const Platform = require('./platform');
 const Plugins = require('./plugins');
 const WindowManager = require('./window-manager');
 const Workspace = require('./workspace');
-require('./api');
 
 const {
   readFile,
@@ -49,6 +48,9 @@ const bootstrapLog = Log('app:main:bootstrap');
 const clientLog = Log('client');
 
 bootstrapLogging();
+
+// start API after bootstrapping the Logging to enable logging the used port
+require('./api');
 
 const name = app.name = 'Camunda Modeler';
 const version = app.version = require('../package').version;
