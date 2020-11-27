@@ -33,6 +33,11 @@ const WindowManager = require('./window-manager');
 const Workspace = require('./workspace');
 
 const {
+  getQRMs,
+  updateQRMs
+} = require('./quantme');
+
+const {
   readFile,
   readFileStats,
   writeFile
@@ -55,7 +60,7 @@ require('./api');
 const name = app.name = 'Camunda Modeler';
 const version = app.version = require('../package').version;
 
-bootstrapLog.info(`starting ${ name } v${ version }`);
+bootstrapLog.info(`starting ${name} v${version}`);
 
 const {
   platform
@@ -192,6 +197,17 @@ renderer.on('file:write', function(filePath, file, options = {}, done) {
   }
 });
 
+// quantme //////////
+
+renderer.on('quantme:get-qrms', function(done) {
+  done(getQRMs());
+});
+
+renderer.on('quantme:update-qrms', function(done) {
+  updateQRMs();
+  done();
+});
+
 // config //////////
 
 renderer.on('config:get', function(key, ...args) {
@@ -226,7 +242,7 @@ renderer.on('toggle-plugins', function() {
 
   const pluginsDisabled = flags.get('disable-plugins');
 
-  app.emit('restart', [ pluginsDisabled ? '--no-disable-plugins' : '--disable-plugins' ]);
+  app.emit('restart', [pluginsDisabled ? '--no-disable-plugins' : '--disable-plugins']);
 });
 
 // open file handling //////////
@@ -395,7 +411,7 @@ app.createEditorWindow = function() {
 
 app.on('restart', function(args) {
 
-  const effectiveArgs = Cli.appendArgs(process.argv.slice(1), [ ...args, '--relaunch' ]);
+  const effectiveArgs = Cli.appendArgs(process.argv.slice(1), [...args, '--relaunch']);
 
   log.info('restarting with args', effectiveArgs);
 
@@ -481,8 +497,8 @@ function bootstrapLogging() {
  */
 function bootstrap() {
   const appPath = path.dirname(app.getPath('exe')),
-        cwd = process.cwd(),
-        userDesktopPath = app.getPath('userDesktop');
+    cwd = process.cwd(),
+    userDesktopPath = app.getPath('userDesktop');
 
   const {
     files,

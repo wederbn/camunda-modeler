@@ -9,7 +9,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export const config = {
-  githubUsername: 'wederbn',
-  githubRepositoryName: 'qrm-test'
-};
+module.exports = require('./qrm-manager');

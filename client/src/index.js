@@ -24,6 +24,7 @@ import {
   config,
   dialog,
   fileSystem,
+  quantME,
   plugins,
   flags,
   log,
@@ -57,6 +58,7 @@ const globals = {
   config,
   dialog,
   fileSystem,
+  quantME,
   isMac,
   log,
   plugins,
@@ -81,10 +83,10 @@ async function render() {
 
   ReactDOM.render(
     <AppParent
-      keyboardBindings={ keyboardBindings }
-      globals={ globals }
-      tabsProvider={ tabsProvider }
-      onStarted={ onStarted }
+      keyboardBindings={keyboardBindings}
+      globals={globals}
+      tabsProvider={tabsProvider}
+      onStarted={onStarted}
     />, rootElement
   );
 }
