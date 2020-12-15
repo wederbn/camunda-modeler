@@ -18,8 +18,13 @@ module.exports.getQRMs = function() {
   return QRMs;
 };
 
-module.exports.updateQRMs = function() {
+module.exports.updateQRMs = function(githubUsername, githubRepositoryName) {
   log.info('Updating QRMs in backend.');
-  qrmHandler.getCurrentQRMs(process.env.QRM_USERNAME, process.env.QRM_REPOSITORY)
-    .then(result => QRMs = result);
+  try {
+    qrmHandler.getCurrentQRMs(githubUsername, githubRepositoryName)
+      .then(result => QRMs = result);
+  } catch (error) {
+    log.error('Error while updating QRMs: ', error);
+    return error;
+  }
 };

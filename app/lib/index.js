@@ -200,12 +200,14 @@ renderer.on('file:write', function(filePath, file, options = {}, done) {
 // quantme //////////
 
 renderer.on('quantme:get-qrms', function(done) {
-  done(getQRMs());
+  done(null, getQRMs());
 });
 
-renderer.on('quantme:update-qrms', function(done) {
-  updateQRMs();
-  done();
+renderer.on('quantme:update-qrms', function(githubUsername, githubRepositoryName, done) {
+  updateQRMs(githubUsername, githubRepositoryName);
+
+  // TODO
+  done(null);
 });
 
 // config //////////

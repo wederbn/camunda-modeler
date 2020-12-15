@@ -29,9 +29,11 @@ export default class QuantME {
   /**
    * Update the current QRM set by requesting an update at the Github repository
    *
+   * @param githubUsername Github user name to retrieve the QRMs from
+   * @param githubRepositoryName Github repository of the user to retrieve the QRMs from
    * @return {Promise}
    */
-  updateQRMs() {
-    return this.backend.send('quantme:update-qrms');
+  updateQRMs(githubUsername, githubRepositoryName) {
+    return this.backend.send('quantme:update-qrms', githubUsername, githubRepositoryName);
   }
 }

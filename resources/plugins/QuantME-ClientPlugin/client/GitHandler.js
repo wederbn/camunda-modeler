@@ -10,7 +10,6 @@
  */
 
 import Fetch from 'node-fetch';
-import { fileSystem } from '../../../../client/src/remote';
 
 export default class GitHandler {
 

@@ -16,28 +16,23 @@ const gitHandler = require('./GitHandler');
  *
  * @param userName the Github username to which the QRM repository belongs
  * @param repoName the Github repository name to load the QRMs from
- * @param props client object to trigger actions, such as creating notifications
  * @returns {Promise<[QRM]>} an array with the current QRMs
  */
-module.exports.getCurrentQRMs = async function(userName, repoName, props) {
-
-  let folders = [];
-  let QRMs = [];
+module.exports.getCurrentQRMs = async function(userName, repoName) {
 
   // get all folders of the defined QRM repository which could contain a QRM
+  let folders = [];
   try {
     folders = await gitHandler.getFoldersInRepository(userName, repoName);
   } catch (error) {
-    console.log(error);
-    let content = 'Unable to load QRMs from Github repository with username \''
-      + userName + '\' and repository name \'' + repoName
-      + '\'. Please adapt the configuration for a suited repository!';
-    props.displayNotification({ type: 'error', title: 'Unable to update QRMs', content: content, duration: 25000 });
-    return QRMs;
+    throw 'Unable to load QRMs from Github repository with username \''
+    + userName + '\' and repository name \'' + repoName
+    + '\'. Please adapt the configuration for a suited repository!';
   }
 
   // filter invalid folders and retrieve QRMs
   console.log('Found %i folders with QRM candidates!', folders.length);
+  let QRMs = [];
   for (let i = 0; i < folders.length; i++) {
     let qrm = await getQRM(userName, repoName, folders[i]);
     if (qrm != null) {
