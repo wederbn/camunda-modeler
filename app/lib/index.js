@@ -57,7 +57,7 @@ bootstrapLogging();
 // start API after bootstrapping the Logging to enable logging the used port
 require('./api');
 
-const name = app.name = 'Camunda Modeler';
+const name = app.name = 'QuantME Modeler';
 const version = app.version = require('../package').version;
 
 bootstrapLog.info(`starting ${name} v${version}`);
@@ -345,7 +345,7 @@ app.createEditorWindow = function() {
   const windowOptions = {
     resizable: true,
     show: false,
-    title: 'Camunda Modeler' + getTitleSuffix(app.metadata.version),
+    title: 'QuantME Modeling and Transformation Framework' + getTitleSuffix(app.metadata.version),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration
