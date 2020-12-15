@@ -499,8 +499,8 @@ function bootstrapLogging() {
  */
 function bootstrap() {
   const appPath = path.dirname(app.getPath('exe')),
-    cwd = process.cwd(),
-    userDesktopPath = app.getPath('userDesktop');
+        cwd = process.cwd(),
+        userDesktopPath = app.getPath('userDesktop');
 
   const {
     files,
