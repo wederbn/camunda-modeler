@@ -203,11 +203,13 @@ renderer.on('quantme:get-qrms', function(done) {
   done(null, getQRMs());
 });
 
-renderer.on('quantme:update-qrms', function(githubUsername, githubRepositoryName, done) {
-  updateQRMs(githubUsername, githubRepositoryName);
-
-  // TODO
-  done(null);
+renderer.on('quantme:update-qrms', async function(githubUsername, githubRepositoryName, done) {
+  try {
+    let qrms = await updateQRMs(githubUsername, githubRepositoryName);
+    done(null, qrms);
+  } catch (error) {
+    done(error);
+  }
 });
 
 // config //////////

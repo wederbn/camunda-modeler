@@ -27,7 +27,7 @@ module.exports.getCurrentQRMs = async function(userName, repoName) {
   } catch (error) {
     throw 'Unable to load QRMs from Github repository with username \''
     + userName + '\' and repository name \'' + repoName
-    + '\'. Please adapt the configuration for a suited repository!';
+    + '\'. ' + error + '. Please adapt the configuration for a suited repository!';
   }
 
   // filter invalid folders and retrieve QRMs

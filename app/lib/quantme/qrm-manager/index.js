@@ -18,13 +18,13 @@ module.exports.getQRMs = function() {
   return QRMs;
 };
 
-module.exports.updateQRMs = function(githubUsername, githubRepositoryName) {
+module.exports.updateQRMs = async function(githubUsername, githubRepositoryName) {
   log.info('Updating QRMs in backend.');
   try {
-    qrmHandler.getCurrentQRMs(githubUsername, githubRepositoryName)
-      .then(result => QRMs = result);
+    QRMs = await qrmHandler.getCurrentQRMs(githubUsername, githubRepositoryName);
+    return QRMs;
   } catch (error) {
-    log.error('Error while updating QRMs: ', error);
-    return error;
+    log.error('Error while updating QRMs in backend: ', error);
+    throw error;
   }
 };
