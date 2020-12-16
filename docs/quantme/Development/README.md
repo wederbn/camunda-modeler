@@ -29,12 +29,6 @@ Plugin containing the BPMN moddle extension for the QuantME tasks, as well as th
 Furthermore, the transformation logic is implemented in this plugin.
 Therefore, this plugin contains the major part of the QuantME extensions and should be extended, if, e.g., new tasks are added.
 
-### [QuantME-ClientPlugin](/resources/plugins/QuantME-ClientPlugin)
-
-Client extension plugin handling the [QRM-Repository](../QRM-Repository). 
-Thus, it implements the communication with Github as well as the validation of the QRMs (availability of detector.bpmn and replacement.bpmn).
-The currently available QRMs can be requested using the event bus and are then retrieved and send back via the event bus.
-
 ## Extensions in the Backend
 
 In addition to the plugins, some extensions are directly implemented in the modeler backend, which will be discussed in the following.
