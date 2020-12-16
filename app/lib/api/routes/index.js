@@ -11,8 +11,10 @@
 
 const root = require('./root');
 const workflow = require('./workflow');
+const quantme = require('./quantme');
 
 module.exports = {
   root,
-  workflow
+  workflow,
+  quantme
 };
