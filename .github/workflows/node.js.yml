@@ -6,17 +6,11 @@ name: Test on Linux
 on:
   push:
     branches: '**'
-  pull_request:
-    branches: '**'
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [10.x, 12.x, ]
 
     steps:
     - uses: actions/checkout@v2
