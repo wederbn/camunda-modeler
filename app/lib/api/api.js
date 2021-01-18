@@ -19,6 +19,7 @@ const api = express();
 api.use('/', routes.root);
 api.use('/workflows', routes.workflow);
 api.use('/quantme', routes.quantme);
+api.use('/quantme/qrms', routes.qrm);
 
 // retrieve port for the API from the environment variables or use default port 8081
 let port = process.env.PORT;

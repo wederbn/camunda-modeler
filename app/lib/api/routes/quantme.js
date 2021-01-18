@@ -12,12 +12,10 @@
 const { Router } = require('express');
 const router = Router();
 
-// TODO: implement required routes
 router.get('/', (req, res) => {
   res.json({ '_links': {
     'self': { method: 'GET', href: req.header('host') + '/quantme' },
-    'qrms': { method: 'GET', title: 'Get all available QRMs', href: req.header('host') + '/quantme/qrms' },
-    'update-qrms': { method: 'POST', title: 'Reload the available QRMs form the specified repository', href: req.header('host') + '/quantme/qrms' }
+    'qrms': { method: 'GET', title: 'Get all available QRMs', href: req.header('host') + '/quantme/qrms' }
   } });
 });
 

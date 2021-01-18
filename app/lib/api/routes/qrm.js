@@ -12,6 +12,16 @@
 const { Router } = require('express');
 const router = Router();
 
+// TODO: add body
+router.get('/', (req, res) => {
+  res.json({ '_links': {
+    'self': { method: 'GET', href: req.header('host') + '/quantme/qrms' },
+    'update': { method: 'POST', title: 'Reload the available QRMs form the specified repository', href: req.header('host') + '/quantme/qrms/update' },
+    'username': { method: 'GET', title: 'Get the username for the QRM repository', href: req.header('host') + '/quantme/qrms/username' },
+    'repository': { method: 'GET', title: 'Get the name of the QRM repository', href: req.header('host') + '/quantme/qrms/repository' }
+  } });
+});
+
 // TODO
 
 module.exports = router;
