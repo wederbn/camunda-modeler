@@ -57,7 +57,7 @@ export default class QuantMETransformator extends PureComponent {
       this.editorActions.register({
         updateFromQRMRepo: function() {
           self.quantME.updateQRMs(config.githubUsername, config.githubRepositoryName).then(response => {
-            console.error('Update of QRMs completed: ', response);
+            console.log('Update of QRMs completed: ', response);
           }).catch(e => {
             self.props.displayNotification({
               type: 'warning',

@@ -11,13 +11,11 @@
 
 const express = require('express');
 const routes = require('./routes');
-const hateoasLinker = require('express-hateoas-links');
 
 const log = require('../log')('app:api');
 const api = express();
 
 // add defined routes of controllers
-api.use(hateoasLinker);
 api.use('/', routes.root);
 api.use('/workflows', routes.workflow);
 api.use('/quantme', routes.quantme);
