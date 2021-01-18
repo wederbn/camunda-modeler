@@ -203,9 +203,9 @@ renderer.on('quantme:get-qrms', function(done) {
   done(null, getQRMs());
 });
 
-renderer.on('quantme:update-qrms', async function(githubUsername, githubRepositoryName, done) {
+renderer.on('quantme:update-qrms', async function(done) {
   try {
-    let qrms = await updateQRMs(githubUsername, githubRepositoryName);
+    let qrms = await updateQRMs();
     done(null, qrms);
   } catch (error) {
     done(error);

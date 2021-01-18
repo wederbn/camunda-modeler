@@ -10,23 +10,22 @@
  */
 
 const gitHandler = require('./GitHandler');
+const repositoryConfig = require('./RepositoryConfig');
 
 /**
  * Get the currently defined QRMs form the repository
  *
- * @param userName the Github username to which the QRM repository belongs
- * @param repoName the Github repository name to load the QRMs from
  * @returns {Promise<[QRM]>} an array with the current QRMs
  */
-module.exports.getCurrentQRMs = async function(userName, repoName) {
+module.exports.getCurrentQRMs = async function() {
 
   // get all folders of the defined QRM repository which could contain a QRM
   let folders = [];
   try {
-    folders = await gitHandler.getFoldersInRepository(userName, repoName);
+    folders = await gitHandler.getFoldersInRepository(repositoryConfig.githubUsername, repositoryConfig.githubRepositoryName);
   } catch (error) {
     throw 'Unable to load QRMs from Github repository with username \''
-    + userName + '\' and repository name \'' + repoName
+    + repositoryConfig.githubUsername + '\' and repository name \'' + repositoryConfig.githubRepositoryName
     + '\'. ' + error + '. Please adapt the configuration for a suited repository!';
   }
 
@@ -34,7 +33,7 @@ module.exports.getCurrentQRMs = async function(userName, repoName) {
   console.log('Found %i folders with QRM candidates!', folders.length);
   let QRMs = [];
   for (let i = 0; i < folders.length; i++) {
-    let qrm = await getQRM(userName, repoName, folders[i]);
+    let qrm = await getQRM(repositoryConfig.githubUsername, repositoryConfig.githubRepositoryName, folders[i]);
     if (qrm != null) {
       QRMs.push(qrm);
     } else {

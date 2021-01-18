@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export const config = {
-  githubUsername: 'wederbn',
-  githubRepositoryName: 'qrm-test'
+module.exports = {
+  githubUsername: process.env.QRM_USERNAME,
+  githubRepositoryName: process.env.QRM_REPONAME
 };

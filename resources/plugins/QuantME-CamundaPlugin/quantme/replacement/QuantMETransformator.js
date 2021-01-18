@@ -11,7 +11,6 @@
 
 import { PureComponent } from 'camunda-modeler-plugin-helpers/react';
 import { layout } from './Layouter';
-import { config } from './Config';
 import { matchesQRM } from './QuantMEMatcher';
 import { requiredAttributesAvailable } from './QuantMEAttributeChecker';
 import {
@@ -56,7 +55,7 @@ export default class QuantMETransformator extends PureComponent {
       const self = this;
       this.editorActions.register({
         updateFromQRMRepo: function() {
-          self.quantME.updateQRMs(config.githubUsername, config.githubRepositoryName).then(response => {
+          self.quantME.updateQRMs().then(response => {
             console.log('Update of QRMs completed: ', response);
           }).catch(e => {
             self.props.displayNotification({
@@ -75,7 +74,7 @@ export default class QuantMETransformator extends PureComponent {
       });
 
       // trigger initial QRM update
-      this.quantME.updateQRMs(config.githubUsername, config.githubRepositoryName).then(response => {
+      this.quantME.updateQRMs().then(response => {
         console.log('Update of QRMs completed: ', response);
       }).catch(e => {
         self.props.displayNotification({

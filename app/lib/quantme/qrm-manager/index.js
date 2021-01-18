@@ -11,17 +11,52 @@
 
 const log = require('../../log')('app:qrm-manager');
 const qrmHandler = require('./QRMHandler');
+const repositoryConfig = require('./RepositoryConfig');
+
 let QRMs = [];
+
+/**
+ * Get the repository name used to access the QRMs
+ *
+ * @return {string} the specified repository name
+ */
+module.exports.getQRMRepositoryName = function() {
+  return repositoryConfig.githubRepositoryName;
+};
+
+/**
+ * Get the username used to access the QRM repository
+ *
+ * @return {string} the specified username
+ */
+module.exports.getQRMRepositoryUserName = function() {
+  return repositoryConfig.githubUsername;
+};
+
+/**
+ * Update the QRM repository configuration with the given username and repository name
+ *
+ * @param userName the Github username to which the QRM repository belongs
+ * @param repoName the Github repository name to load the QRMs from
+ */
+module.exports.updateQRMRepositoryConfig = function(userName, repoName) {
+  if (userName !== null) {
+    repositoryConfig.githubUsername = userName;
+  }
+  if (repoName !== null) {
+    repositoryConfig.githubRepositoryName = repoName;
+  }
+};
 
 module.exports.getQRMs = function() {
   log.info('Retrieving QRMs from backend. Number of QRMs: %i', QRMs.length);
   return QRMs;
 };
 
-module.exports.updateQRMs = async function(githubUsername, githubRepositoryName) {
+module.exports.updateQRMs = async function() {
   log.info('Updating QRMs in backend.');
   try {
-    QRMs = await qrmHandler.getCurrentQRMs(githubUsername, githubRepositoryName);
+    QRMs = await qrmHandler.getCurrentQRMs();
     return QRMs;
   } catch (error) {
     log.error('Error while updating QRMs in backend: ', error);
