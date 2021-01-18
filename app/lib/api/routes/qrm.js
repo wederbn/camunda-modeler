@@ -9,14 +9,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const root = require('./root');
-const workflow = require('./workflow');
-const quantme = require('./quantme');
-const qrm = require('./qrm');
+const { Router } = require('express');
+const router = Router();
 
-module.exports = {
-  root,
-  workflow,
-  quantme,
-  qrm
-};
+// TODO
+
+module.exports = router;
