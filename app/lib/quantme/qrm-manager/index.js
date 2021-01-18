@@ -25,6 +25,17 @@ module.exports.getQRMRepositoryName = function() {
 };
 
 /**
+ * Set the repository name used to access the QRMs
+ *
+ * @param repositoryName the repository name
+ */
+module.exports.setQRMRepositoryName = function(repositoryName) {
+  if (repositoryName !== null && repositoryName !== undefined) {
+    repositoryConfig.githubRepositoryName = repositoryName;
+  }
+};
+
+/**
  * Get the username used to access the QRM repository
  *
  * @return {string} the specified username
@@ -34,16 +45,27 @@ module.exports.getQRMRepositoryUserName = function() {
 };
 
 /**
+ * Set the username used to access the QRM repository
+ *
+ * @param userName the username
+ */
+module.exports.setQRMUserName = function(userName) {
+  if (userName !== null && userName !== undefined) {
+    repositoryConfig.githubUsername = userName;
+  }
+};
+
+/**
  * Update the QRM repository configuration with the given username and repository name
  *
  * @param userName the Github username to which the QRM repository belongs
  * @param repoName the Github repository name to load the QRMs from
  */
 module.exports.updateQRMRepositoryConfig = function(userName, repoName) {
-  if (userName !== null) {
+  if (userName !== null && userName !== undefined) {
     repositoryConfig.githubUsername = userName;
   }
-  if (repoName !== null) {
+  if (repoName !== null && repoName !== undefined) {
     repositoryConfig.githubRepositoryName = repoName;
   }
 };
