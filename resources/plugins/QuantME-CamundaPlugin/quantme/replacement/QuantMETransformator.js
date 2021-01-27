@@ -343,29 +343,3 @@ export default class QuantMETransformator extends PureComponent {
     return null;
   }
 }
-
-/**
- * Check whether the given QuantME task can be replaced by an available QRM, which means check if a matching detector can be found
- *
- * @param element the element representing the QuantME task
- * @returns {boolean} true if the task can be replaced, false otherwise
- */
-export async function isReplaceable(element) {
-
-  // check for required attributes
-  if (!requiredAttributesAvailable(element)) {
-    console.log('Missing required attributes. Replacement not possible!');
-    return false;
-  }
-
-  // search for a suited QRM that can replace the given task
-  let currentQRMs = [];
-  for (let i = 0; i < currentQRMs.length; i++) {
-    if (await matchesQRM(currentQRMs[i], element)) {
-      return true;
-    }
-  }
-
-  // no suited QRM found, and therefore, no replacement possible
-  return true; // FIXME: QRMs are currently not accessible from this method
-}
