@@ -12,7 +12,6 @@
 import { PureComponent } from 'camunda-modeler-plugin-helpers/react';
 import { layout } from './Layouter';
 import { matchesQRM } from './QuantMEMatcher';
-import { requiredAttributesAvailable } from './QuantMEAttributeChecker';
 import {
   getRootProcess,
   getRootProcessFromXml,
