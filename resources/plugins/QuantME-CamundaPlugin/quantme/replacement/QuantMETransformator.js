@@ -46,7 +46,6 @@ export default class QuantMETransformator extends PureComponent {
       this.bpmnFactory = modeler.get('bpmnFactory');
       this.elementRegistry = modeler.get('elementRegistry');
       this.editorActions = modeler.get('editorActions');
-      this.eventBus = modeler.get('eventBus');
       this.bpmnReplace = modeler.get('bpmnReplace');
       this.modeling = modeler.get('modeling');
 

@@ -12,9 +12,12 @@
 const { Router } = require('express');
 const router = Router();
 
-// TODO: implement required routes
 router.get('/', (req, res) => {
-  return res.send('Workflow resource...');
+  res.json({ '_links': {
+    'self': { method: 'GET', href: req.header('host') + '/quantme' },
+    'qrms': { method: 'GET', title: 'Get all available QRMs', href: req.header('host') + '/quantme/qrms' },
+    'workflows': { method: 'GET', title: 'Get all transformed workflows', href: req.header('host') + '/quantme/workflows' }
+  } });
 });
 
 module.exports = router;

@@ -10,7 +10,7 @@
  */
 
 const log = require('../../log')('app:qrm-manager');
-const qrmHandler = require('./QRMHandler');
+const qrmHandler = require('./qrm-handler');
 const repositoryConfig = require('./RepositoryConfig');
 
 let QRMs = [];

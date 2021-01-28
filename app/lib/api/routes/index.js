@@ -9,10 +9,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const root = require('./root');
-const workflow = require('./workflow');
-const quantme = require('./quantme');
-const qrm = require('./qrm');
+const root = require('./root-controller');
+const workflow = require('./workflow-controller');
+const quantme = require('./quantme-controller');
+const qrm = require('./qrm-controller');
 
 module.exports = {
   root,
