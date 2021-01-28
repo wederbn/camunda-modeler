@@ -115,11 +115,12 @@ export default class QuantMETransformator extends PureComponent {
         console.log('Unable to replace task with id %s. Aborting transformation!', replacementTask.task.id);
 
         // inform user via notification in the modeler
-        let content = {
-          type: 'warning', title: 'Unable to transform workflow',
-          content: 'Unable to replace task with id \'' + replacementTask.task.id + '\' by suited QRM', duration: 10000
-        };
-        this.eventBus.fire('Notification.display', { data: content });
+        this.props.displayNotification({
+          type: 'warning',
+          title: 'Unable to transform workflow',
+          content: 'Unable to replace task with id \'' + replacementTask.task.id + '\' by suited QRM',
+          duration: 10000
+        });
         return;
       }
     }
