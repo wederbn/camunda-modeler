@@ -13,10 +13,12 @@ const root = require('./root-controller');
 const workflow = require('./workflow-controller');
 const quantme = require('./quantme-controller');
 const qrm = require('./qrm-controller');
+const quantumWorkflow = require('./quantum-workflow-controller');
 
 module.exports = {
   root,
   workflow,
   quantme,
-  qrm
+  qrm,
+  quantumWorkflow
 };
