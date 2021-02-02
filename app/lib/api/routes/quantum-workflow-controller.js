@@ -19,7 +19,7 @@ const log = require('../../log')('app:api:quantum-workflow-controller');
 let workflows = [];
 
 router.get('/', (req, res) => {
-  res.json({
+  let body = {
     workflows: workflows,
     '_links': {
       'self': { method: 'GET', href: req.header('host') + '/quantme/workflows' },
@@ -29,16 +29,40 @@ router.get('/', (req, res) => {
         href: req.header('host') + '/quantme/workflows'
       },
     }
-  });
+  };
+
+  // add links to all transformed workflows
+  for (let i = 0; i < workflows.length; i++) {
+    let workflow = workflows[i];
+
+    if (workflow.status === 'finished') {
+      body._links[workflow.id] = { method: 'GET', href: req.header('host') + '/quantme/workflows/' + workflow.id };
+    }
+  }
+
+  res.json(body);
 });
 
 // transform the given QuantME workflow model into a native workflow model
 router.post('/', jsonParser, function(req, res) {
+
   // TODO: get xml, create new object, invoke transformation
   res.status(201).send();
 });
 
-// TODO: add GET on single workflow
+router.get('/:id', (req, res) => {
+  let id = req.params.id;
+
+  // TODO: get workflow and return 404 otherwise
+  let workflow = 'TEST';
+
+  res.json({
+    workflow: workflow,
+    '_links': {
+      'self': { method: 'GET', href: req.header('host') + '/quantme/workflows/' + id }
+    }
+  });
+});
 
 module.exports.addResultOfLongRunningTask = function(id, args) {
   log.info('Updating workflow object with id: ' + id);
