@@ -6,7 +6,7 @@ ENV USE_SYSTEM_7ZA true
 
 RUN apk add --update --no-cache p7zip
 
-RUN npm install -g lerna npm-run-all
+RUN npm install -g lerna npm-run-all webpack
 
 RUN npm install && npm run build
 
