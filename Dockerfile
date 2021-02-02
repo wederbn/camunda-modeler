@@ -6,6 +6,8 @@ ENV USE_SYSTEM_7ZA true
 
 RUN apk add --update --no-cache p7zip
 
+RUN npm install -g lerna
+
 RUN npm install && npm run build
 
 FROM ubuntu:18.04
@@ -17,11 +19,11 @@ WORKDIR /quantme
 
 # install and start xvfb to run in headless mode or access modeler via x11 forwarding
 RUN apt-get update && \
-    apt-get install -y libgtk2.0-0 libgconf-2-4 \
+    apt-get install -qqy libgtk2.0-0 libgconf-2-4 \
     libasound2 libxtst6 libxss1 libnss3 xvfb   
 RUN Xvfb -ac -screen scrn 1280x2000x24 :9.0 & export DISPLAY=:9.0
 
 # install shared libraries required by the modeler
-RUN apt-get install libnss3-dev libgtk2.0-0 libgtk-3-0 libxss1
+RUN apt-get -qqy install libnss3-dev libgtk2.0-0 libgtk-3-0 libxss1
 
 CMD ./quantme-modeler
