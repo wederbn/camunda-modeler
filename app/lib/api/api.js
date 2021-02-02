@@ -44,8 +44,11 @@ if (port !== undefined) {
 }
 
 // start REST API
-api.listen(port, '0.0.0.0');
-log.info('REST API listening on port: %i', port);
+const host = '0.0.0.0';
+api.listen(port, host, function(err) {
+  if (err) return log.error(err);
+  log.info('Listening at http://%s:%s', host, port);
+});
 
 /**
  * Add the result of a long-running task to the result set of the corresponding controller
