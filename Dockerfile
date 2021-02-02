@@ -6,9 +6,9 @@ ENV USE_SYSTEM_7ZA true
 
 RUN apk add --update --no-cache p7zip
 
-RUN npm install -g lerna npm-run-all webpack
+RUN npm install -g --silent lerna npm-run-all webpack webpack-cli
 
-RUN npm install && npm run build
+RUN npm install --silent && npm run build
 
 FROM ubuntu:18.04
 LABEL maintainer = "Benjamin Weder <benjamin.weder@iaas.uni-stuttgart.de>"
