@@ -19,7 +19,6 @@ const api = express();
 
 // add defined routes of controllers
 api.use('/', routes.root);
-api.use('/workflows', routes.workflow);
 api.use('/quantme', routes.quantme);
 api.use('/quantme/qrms', routes.qrm);
 api.use('/quantme/workflows', routes.quantumWorkflow);

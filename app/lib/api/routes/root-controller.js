@@ -15,7 +15,6 @@ const router = Router();
 router.get('/', function(req, res) {
   res.json({ '_links': {
     'self': { method: 'GET', href: req.header('host') + '' },
-    'workflows': { method: 'GET', title: 'Get workflows', href: req.header('host') + '/workflows' },
     'quantme': { method: 'GET', title: 'Get QuantME resources', href: req.header('host') + '/quantme' }
   } });
 });
