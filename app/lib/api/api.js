@@ -45,6 +45,7 @@ if (port !== undefined) {
 
 // start REST API
 api.listen(port, '0.0.0.0');
+log.info('REST API listening on port: %i', port);
 
 /**
  * Add the result of a long-running task to the result set of the corresponding controller
