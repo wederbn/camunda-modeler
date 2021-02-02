@@ -6,11 +6,11 @@ ENV USE_SYSTEM_7ZA true
 
 RUN apk add --update --no-cache p7zip
 
-RUN npm install -g --silent lerna npm-run-all webpack webpack-cli cpx cross-env
+RUN npm install -g --silent lerna npm-run-all webpack webpack-cli cpx cross-env del-cli
 
 RUN npm install --silent && npm run build
 
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 LABEL maintainer = "Benjamin Weder <benjamin.weder@iaas.uni-stuttgart.de>"
 
 COPY --from=builder /tmp/dist/linux-unpacked /quantme
@@ -24,6 +24,6 @@ RUN apt-get update && \
 RUN Xvfb -ac -screen scrn 1280x2000x24 :9.0 & export DISPLAY=:9.0
 
 # install shared libraries required by the modeler
-RUN apt-get -qqy install libnss3-dev libgtk2.0-0 libgtk-3-0 libxss1
+RUN apt-get update && apt-get install -y gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget
 
 CMD ./quantme-modeler
