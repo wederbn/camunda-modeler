@@ -16,6 +16,7 @@ const jsonParser = bodyParser.json();
 
 const log = require('../../log')('app:api:quantum-workflow-controller');
 
+let id = 1;
 let workflows = [];
 
 router.get('/', (req, res) => {
@@ -45,16 +46,37 @@ router.get('/', (req, res) => {
 
 // transform the given QuantME workflow model into a native workflow model
 router.post('/', jsonParser, function(req, res) {
+  if (req.body === undefined || req.body.xml === undefined) {
+    res.status(400).send('Xml has to be set!');
+    return;
+  }
+  let workflowXml = req.body.xml;
 
-  // TODO: get xml, create new object, invoke transformation
-  res.status(201).send();
+  // add workflow to list and increase id for the next request
+  workflows.push({ id: id, status: 'transforming', xml: workflowXml });
+  res.status(201).json({ id: id });
+  id++;
+
+  // TODO: invoke transformation
 });
 
 router.get('/:id', (req, res) => {
   let id = req.params.id;
 
-  // TODO: get workflow and return 404 otherwise
-  let workflow = 'TEST';
+  // search the workflow with the given id
+  let workflow = undefined;
+  for (let i = 0; i < workflows.length; i++) {
+    let searchedWorkflow = workflows[i];
+    if (parseInt(searchedWorkflow.id) === parseInt(id)) {
+      workflow = searchedWorkflow;
+      break;
+    }
+  }
+
+  if (workflow === undefined) {
+    res.status(404).send();
+    return;
+  }
 
   res.json({
     workflow: workflow,
