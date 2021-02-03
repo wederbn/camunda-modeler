@@ -21,6 +21,9 @@ let QRMs = [];
  * @return {string} the specified repository name
  */
 module.exports.getQRMRepositoryName = function() {
+  if (repositoryConfig.githubRepositoryName === undefined) {
+    return '';
+  }
   return repositoryConfig.githubRepositoryName;
 };
 
@@ -41,6 +44,9 @@ module.exports.setQRMRepositoryName = function(repositoryName) {
  * @return {string} the specified username
  */
 module.exports.getQRMRepositoryUserName = function() {
+  if (repositoryConfig.githubUsername === undefined) {
+    return '';
+  }
   return repositoryConfig.githubUsername;
 };
 
