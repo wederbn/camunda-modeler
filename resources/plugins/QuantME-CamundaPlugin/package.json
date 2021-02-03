@@ -31,7 +31,7 @@
     "webpack-dev-server": "^3.1.14"
   },
   "dependencies": {
-    "babel-core": "^6.26.3",
+    "babel-core": "^7.0.0-bridge.0",
     "babel-loader": "^7.1.5",
     "babel-preset-env": "^1.7.0",
     "bpmn-js": "^3.2.2",

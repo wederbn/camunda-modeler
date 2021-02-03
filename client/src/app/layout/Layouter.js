@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isFlowLikeElement } from '../Utilities';
+import { isFlowLikeElement } from '../../../../resources/plugins/QuantME-CamundaPlugin/quantme/Utilities';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
 
 // space between multiple boundary events of a task/subprocess

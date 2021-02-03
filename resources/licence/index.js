@@ -19,13 +19,13 @@ module.exports = {
     { // camunda licence for source files
       files: ['app/**', 'client/**'],
       rules: {
-        'license-header/header': [2, path.join(__dirname, './camunda-header.js') ]
+        'license-header/header': [2, path.join(__dirname, './camunda-header.js')]
       }
     },
     { // iaas licence for our plugins
-      files: ['resources/plugins/**', 'app/lib/api/**', 'app/lib/quantme/**'],
+      files: ['resources/plugins/**', 'app/lib/api/**', 'app/lib/quantme/**', 'client/src/app/layout/**', 'client/src/app/quantme/**'],
       rules: {
-        'license-header/header': [2, path.join(__dirname, './iaas-header.js') ]
+        'license-header/header': [2, path.join(__dirname, './iaas-header.js')]
       }
     },
     { // no licence for plugin from existing Github repository

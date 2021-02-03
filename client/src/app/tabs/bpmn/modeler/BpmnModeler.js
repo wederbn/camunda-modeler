@@ -31,6 +31,8 @@ import signavioCompatModule from 'bpmn-js-signavio-compat';
 import camundaModdlePackage from 'camunda-bpmn-moddle/resources/camunda';
 import camundaModdleExtension from 'camunda-bpmn-moddle/lib';
 
+import quantmeModdlePackage from '../../../quantme/quantum4bpmn/quantum4bpmn';
+
 import propertiesPanelModule from 'bpmn-js-properties-panel';
 import propertiesProviderModule from 'bpmn-js-properties-panel/lib/provider/camunda';
 
@@ -58,6 +60,7 @@ export default class CamundaBpmnModeler extends BpmnModeler {
       ...otherOptions,
       moddleExtensions: {
         camunda: camundaModdlePackage,
+        quantme: quantmeModdlePackage,
         ...(moddleExtensions || {})
       }
     });
