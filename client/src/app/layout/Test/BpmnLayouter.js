@@ -10,6 +10,7 @@
  */
 
 import { isFlowLikeElement } from '../../../../../resources/plugins/QuantME-CamundaPlugin/quantme/Utilities';
+import CamundaBpmnModeler from '../../tabs/bpmn/modeler';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
 
 // space between multiple boundary events of a task/subprocess
@@ -31,8 +32,8 @@ export default function BpmnLayouter() {
 BpmnLayouter.prototype.layout = function(modeling, elementRegistry, processId) {
   console.log(modeling);
   console.log(processId);
-  //const modeler = new CamundaBpmnModeler({});
-  //console.log(modeler);
+  const modeler = new CamundaBpmnModeler({});
+  console.log(modeler);
   let process = elementRegistry.get(processId).businessObject;
   console.log(process);
   layoutProcess(modeling, elementRegistry, process);
