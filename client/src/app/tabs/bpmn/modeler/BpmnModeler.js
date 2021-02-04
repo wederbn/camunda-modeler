@@ -14,6 +14,8 @@ import minimapModule from 'diagram-js-minimap';
 
 import diagramOriginModule from 'diagram-js-origin';
 
+import bpmnLayouterModule from '../../../layout';
+
 import alignToOriginModule from '@bpmn-io/align-to-origin';
 import addExporterModule from '@bpmn-io/add-exporter';
 
@@ -71,6 +73,7 @@ const defaultModules = BpmnModeler.prototype._modules;
 
 const extensionModules = [
   addExporterModule,
+  bpmnLayouterModule,
   camundaModdleExtension,
   completeDirectEditingModule,
   executableFixModule,

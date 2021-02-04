@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isFlowLikeElement } from '../../../../resources/plugins/QuantME-CamundaPlugin/quantme/Utilities';
+import { isFlowLikeElement } from '../../../../../resources/plugins/QuantME-CamundaPlugin/quantme/Utilities';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
 
 // space between multiple boundary events of a task/subprocess
@@ -18,18 +18,27 @@ let BOUNDARY_EVENT_MARGIN = '10';
 // space between an edge and a corresponding label
 let LABEL_MARGIN = '10';
 
+export default function BpmnLayouter() {
+}
+
 /**
  * Layout the given process
  *
  * @param modeling the modeling component with the imported diagram
  * @param elementRegistry the element registry for the imported diagram
- * @param process the root element to start the layouting process
+ * @param processId the Id of the root element to start the layouting process
  */
-export function layout(modeling, elementRegistry, process) {
+BpmnLayouter.prototype.layout = function(modeling, elementRegistry, processId) {
+  console.log(modeling);
+  console.log(processId);
+  //const modeler = new CamundaBpmnModeler({});
+  //console.log(modeler);
+  let process = elementRegistry.get(processId).businessObject;
+  console.log(process);
   layoutProcess(modeling, elementRegistry, process);
   layoutBoundaryEvents(modeling, elementRegistry);
   layoutWaypoints(modeling, elementRegistry);
-}
+};
 
 /**
  * Layout the given process to avoid overlapping elements, etc.
@@ -182,6 +191,80 @@ function layoutWaypoints(modeling, elementRegistry) {
 }
 
 /**
+ * Adapt the first/last waypoint of the given connection if it is attached to a gateway and is not centered on one side of the gateway
+ *
+ * @param modeling the modeling component with the imported diagram
+ * @param connection the connection to adapt the waypoints from
+ * @param sourceShape the source shape of the connection
+ * @param targetShape the target shape of the connection
+ */
+function adaptGatewayWaypoints(modeling, connection, sourceShape, targetShape) {
+
+  // move first waypoint of gateways to their center if not already there
+  if (is(sourceShape.businessObject, 'bpmn:Gateway')) {
+    let firstWaypoint = moveToMiddleOfShape(connection.waypoints.shift(), sourceShape);
+    connection.waypoints.unshift(firstWaypoint);
+  }
+
+  if (is(targetShape.businessObject, 'bpmn:Gateway')) {
+    let lastWaypoint = moveToMiddleOfShape(connection.waypoints.pop(), targetShape);
+    connection.waypoints.push(lastWaypoint);
+  }
+}
+
+/**
+ * Layout the waypoints of the given connection
+ *
+ * @param modeling the modeling component with the imported diagram
+ * @param connection the connection to layout the waypoints for
+ * @param source the source element of the connection
+ * @param target the target element of the connection
+ */
+function layoutWaypointsOfSequenceFlow(modeling, connection, source, target) {
+
+  let waypoints = connection.waypoints;
+  if (waypoints.length === 2) {
+
+    // no layouting required for a direct connection
+    return;
+  }
+
+  // make connection cornered
+  if (waypoints.length === 3) {
+    if (target.y < source.y) {
+
+      // edge goes upwards
+      waypoints[1].x = waypoints[2].x;
+      waypoints[1].y = waypoints[0].y;
+    } else {
+
+      // edge goes downwards
+      waypoints[1].x = waypoints[0].x;
+      waypoints[1].y = waypoints[2].y;
+    }
+    modeling.updateWaypoints(connection, waypoints);
+  }
+
+  // TODO: layout edges with more waypoints
+}
+
+/**
+ * Move the given waypoint to the middle of the side of the given shape where it is attached to. If the waypoint does not touch one of the sides, it is not changed.
+ *
+ * @param waypoint the waypoint to move to the middle of one side of the given shape
+ * @param shape the shape to align the waypoint at
+ */
+function moveToMiddleOfShape(waypoint, shape) {
+  if (waypoint.x === shape.x || waypoint.x === shape.x + shape.width) {
+    waypoint.y = shape.y + shape.width / 2;
+  }
+  if (waypoint.y === shape.y || waypoint.y === shape.y + shape.height) {
+    waypoint.x = shape.x + shape.height / 2;
+  }
+  return waypoint;
+}
+
+/**
  * Remove duplicate waypoints (same x and y coordinate)
  *
  * @param modeling the modeling component with the imported diagram
@@ -252,81 +335,10 @@ function getMiddleOfLocation(connection, label) {
     return { x: (middlePoint1.x + middlePoint2.x) / 2, y: middlePoint1.y - LABEL_MARGIN - parseInt(label.height) };
   }
 
-  return { x: (middlePoint1.x + middlePoint2.x) / 2, y: (middlePoint1.y + middlePoint2.y) / 2 - LABEL_MARGIN - parseInt(label.height) };
-}
-
-/**
- * Adapt the first/last waypoint of the given connection if it is attached to a gateway and is not centered on one side of the gateway
- *
- * @param modeling the modeling component with the imported diagram
- * @param connection the connection to adapt the waypoints from
- * @param sourceShape the source shape of the connection
- * @param targetShape the target shape of the connection
- */
-function adaptGatewayWaypoints(modeling, connection, sourceShape, targetShape) {
-
-  // move first waypoint of gateways to their center if not already there
-  if (is(sourceShape.businessObject, 'bpmn:Gateway')) {
-    let firstWaypoint = moveToMiddleOfShape(connection.waypoints.shift(), sourceShape);
-    connection.waypoints.unshift(firstWaypoint);
-  }
-
-  if (is(targetShape.businessObject, 'bpmn:Gateway')) {
-    let lastWaypoint = moveToMiddleOfShape(connection.waypoints.pop(), targetShape);
-    connection.waypoints.push(lastWaypoint);
-  }
-}
-
-/**
- * Move the given waypoint to the middle of the side of the given shape where it is attached to. If the waypoint does not touch one of the sides, it is not changed.
- *
- * @param waypoint the waypoint to move to the middle of one side of the given shape
- * @param shape the shape to align the waypoint at
- */
-function moveToMiddleOfShape(waypoint, shape) {
-  if (waypoint.x === shape.x || waypoint.x === shape.x + shape.width) {
-    waypoint.y = shape.y + shape.width / 2;
-  }
-  if (waypoint.y === shape.y || waypoint.y === shape.y + shape.height) {
-    waypoint.x = shape.x + shape.height / 2;
-  }
-  return waypoint;
-}
-
-/**
- * Layout the waypoints of the given connection
- *
- * @param modeling the modeling component with the imported diagram
- * @param connection the connection to layout the waypoints for
- * @param source the source element of the connection
- * @param target the target element of the connection
- */
-function layoutWaypointsOfSequenceFlow(modeling, connection, source, target) {
-
-  let waypoints = connection.waypoints;
-  if (waypoints.length === 2) {
-
-    // no layouting required for a direct connection
-    return;
-  }
-
-  // make connection cornered
-  if (waypoints.length === 3) {
-    if (target.y < source.y) {
-
-      // edge goes upwards
-      waypoints[1].x = waypoints[2].x;
-      waypoints[1].y = waypoints[0].y;
-    } else {
-
-      // edge goes downwards
-      waypoints[1].x = waypoints[0].x;
-      waypoints[1].y = waypoints[2].y;
-    }
-    modeling.updateWaypoints(connection, waypoints);
-  }
-
-  // TODO: layout edges with more waypoints
+  return {
+    x: (middlePoint1.x + middlePoint2.x) / 2,
+    y: (middlePoint1.y + middlePoint2.y) / 2 - LABEL_MARGIN - parseInt(label.height)
+  };
 }
 
 /**

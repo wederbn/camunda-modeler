@@ -10,7 +10,6 @@
  */
 
 import { PureComponent } from 'camunda-modeler-plugin-helpers/react';
-import { layout } from '../../../../../client/src/app/layout/Layouter';
 import { matchesQRM } from './QuantMEMatcher';
 import {
   getRootProcess,
@@ -48,11 +47,7 @@ export default class QuantMETransformator extends PureComponent {
       this.editorActions = modeler.get('editorActions');
       this.bpmnReplace = modeler.get('bpmnReplace');
       this.modeling = modeler.get('modeling');
-      this.layouter = modeler.get('layouter');
-
-      // TODO: get layouter from client package
-      console.log(this.modeling);
-      console.log(this.layouter);
+      this.layouter = modeler.get('bpmnLayouter');
 
       // register actions to enable invocation over the menu
       const self = this;
@@ -140,7 +135,7 @@ export default class QuantMETransformator extends PureComponent {
     }
 
     // layout diagram after successful transformation
-    layout(this.modeling, this.elementRegistry, rootElement);
+    this.layouter.layout(this.modeling, this.elementRegistry, rootElement.id);
   }
 
   /**
