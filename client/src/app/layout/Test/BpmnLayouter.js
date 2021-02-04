@@ -9,8 +9,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import CamundaBpmnModeler from '../../tabs/bpmn/modeler';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
+import QuantMEUtilities from '../../quantme/utilities/QuantMEUtilities';
+import BpmnModeler from 'bpmn-js/lib/Modeler';
+import quantMEExtension from '../../quantme/quantum4bpmn/quantum4bpmn.json';
 
 // space between multiple boundary events of a task/subprocess
 let BOUNDARY_EVENT_MARGIN = '10';
@@ -18,11 +20,14 @@ let BOUNDARY_EVENT_MARGIN = '10';
 // space between an edge and a corresponding label
 let LABEL_MARGIN = '10';
 
-export default function BpmnLayouter(quantMEUtilities) {
-  this.quantMEUtilities = quantMEUtilities;
+export default function BpmnLayouter() {
+  this.utils = new QuantMEUtilities();
+  this.modeler = new BpmnModeler({
+    moddleExtensions: {
+      quantME: quantMEExtension
+    }
+  });
 }
-
-BpmnLayouter.$inject = ['quantMEUtilities'];
 
 /**
  * Layout the given process
@@ -34,13 +39,12 @@ BpmnLayouter.$inject = ['quantMEUtilities'];
 BpmnLayouter.prototype.layout = function(modeling, elementRegistry, processId) {
   console.log(modeling);
   console.log(processId);
-  const modeler = new CamundaBpmnModeler({});
-  console.log(modeler);
+
   let process = elementRegistry.get(processId).businessObject;
   console.log(process);
-  layoutProcess(modeling, elementRegistry, process);
-  layoutBoundaryEvents(modeling, elementRegistry);
-  layoutWaypoints(modeling, elementRegistry);
+  this.layoutProcess(modeling, elementRegistry, process);
+  this.layoutBoundaryEvents(modeling, elementRegistry);
+  this.layoutWaypoints(modeling, elementRegistry);
 };
 
 /**
@@ -50,7 +54,7 @@ BpmnLayouter.prototype.layout = function(modeling, elementRegistry, processId) {
  * @param elementRegistry the element registry for the imported diagram
  * @param process the root element to start the layouting process
  */
-function layoutProcess(modeling, elementRegistry, process) {
+BpmnLayouter.prototype.layoutProcess = function(modeling, elementRegistry, process) {
   console.log('Layout with root element: ', process);
 
   // required nodes and edges for the layout method
@@ -61,7 +65,7 @@ function layoutProcess(modeling, elementRegistry, process) {
   let flowElements = process.flowElements;
   if (flowElements) {
     for (let i = 0; i < flowElements.length; i++) {
-      if (this.quantMEUtilities.isFlowLikeElement(flowElements[i].$type)) {
+      if (this.utils.isFlowLikeElement(flowElements[i].$type)) {
         edges.push(getEdgeFromFlowElement(elementRegistry, flowElements[i]));
       } else {
 
@@ -76,7 +80,7 @@ function layoutProcess(modeling, elementRegistry, process) {
             width: 10
           });
 
-          layoutProcess(modeling, elementRegistry, elementRegistry.get(flowElements[i].id).businessObject);
+          this.layoutProcess(modeling, elementRegistry, elementRegistry.get(flowElements[i].id).businessObject);
         }
 
         // boundary events are skipped here, as they are always attached to some task and only this task has to be layouted
@@ -110,7 +114,7 @@ function layoutProcess(modeling, elementRegistry, process) {
     align: 'UL',
     ranker: 'longest-path'
   });
-}
+};
 
 /**
  * Layout the boundary events in the diagram to display them at the tasks to which they are attached
@@ -118,7 +122,7 @@ function layoutProcess(modeling, elementRegistry, process) {
  * @param modeling the modeling component with the imported diagram
  * @param elementRegistry the element registry for the imported diagram
  */
-function layoutBoundaryEvents(modeling, elementRegistry) {
+BpmnLayouter.prototype.layoutBoundaryEvents = function(modeling, elementRegistry) {
   let layoutedBoundaries = {};
 
   // add the boundary events to the new location of the tasks to which they are attached
@@ -164,7 +168,7 @@ function layoutBoundaryEvents(modeling, elementRegistry) {
       }
     }
   }
-}
+};
 
 /**
  * Layout the waypoints of all SequenceFlow elements in the BPMN diagram, e.g., by trying to make the edges cornered
@@ -172,7 +176,7 @@ function layoutBoundaryEvents(modeling, elementRegistry) {
  * @param modeling the modeling component with the imported diagram
  * @param elementRegistry the element registry for the imported diagram
  */
-function layoutWaypoints(modeling, elementRegistry) {
+BpmnLayouter.prototype.layoutWaypoints = function(modeling, elementRegistry) {
   for (let element of elementRegistry.getAll()) {
     if (element.type === 'bpmn:SequenceFlow') {
       let sourceShape = elementRegistry.get(element.businessObject.sourceRef.id);
@@ -191,7 +195,7 @@ function layoutWaypoints(modeling, elementRegistry) {
       adaptLabels(modeling, element);
     }
   }
-}
+};
 
 /**
  * Adapt the first/last waypoint of the given connection if it is attached to a gateway and is not centered on one side of the gateway

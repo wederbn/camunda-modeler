@@ -9,8 +9,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import CamundaBpmnModeler from '../../tabs/bpmn/modeler';
+import BpmnModeler from 'bpmn-js/lib/Modeler';
 import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
+import quantMEExtension from '../quantum4bpmn/quantum4bpmn.json';
 
 export default function QuantMEUtilities() {
 }
@@ -45,7 +46,11 @@ QuantMEUtilities.prototype.isQuantMETask = function(task) {
 QuantMEUtilities.prototype.getRootProcessFromXml = async function(xml) {
 
   // create new modeler with the custom QuantME extensions
-  const bpmnModeler = new CamundaBpmnModeler({});
+  const bpmnModeler = new BpmnModeler({
+    moddleExtensions: {
+      quantME: quantMEExtension
+    }
+  });
 
   // import the xml containing the definitions
   function importXmlWrapper(xml) {

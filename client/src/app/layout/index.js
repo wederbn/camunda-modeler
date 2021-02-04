@@ -11,8 +11,9 @@
 
 'use strict';
 
-var BpmnLayouter = require('./Test/BpmnLayouter').default;
+let BpmnLayouter = require('./Test/BpmnLayouter').default;
 
 module.exports = {
+  __init__: [ 'bpmnLayouter' ],
   bpmnLayouter: [ 'value', new BpmnLayouter() ]
 };

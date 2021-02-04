@@ -11,8 +11,9 @@
 
 'use strict';
 
-var QuantMEUtilities = require('./utilities/QuantMEUtilities').default;
+let QuantMEUtilities = require('./utilities/QuantMEUtilities').default;
 
 module.exports = {
+  __init__: [ 'quantmeUtilities' ],
   quantmeUtilities: [ 'value', new QuantMEUtilities() ]
 };

@@ -63,6 +63,11 @@ export default class QuantMETransformator extends PureComponent {
           self.startReplacementProcess().then(() => console.log('Transformation finished!'));
         }
       });
+      this.editorActions.register({
+        layoutProcess: function() {
+          self.layouter.layout(self.modeling, self.elementRegistry, self.utilities.getRootProcess(self.bpmnjs.getDefinitions()).id);
+        }
+      });
 
       // trigger initial QRM update
       this.quantME.updateQRMs().then(response => {
@@ -163,7 +168,7 @@ export default class QuantMETransformator extends PureComponent {
     console.log('Number of available QRMs: ', currentQRMs.length);
 
     for (let i = 0; i < currentQRMs.length; i++) {
-      if (await matchesQRM(currentQRMs[i], task)) {
+      if (await matchesQRM(currentQRMs[i], task, this.utilities)) {
         return currentQRMs[i];
       }
     }

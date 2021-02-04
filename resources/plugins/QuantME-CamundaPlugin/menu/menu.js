@@ -33,6 +33,17 @@ module.exports = function(electronApp, menuState) {
       action: function() {
         electronApp.emit('menu:action', 'startReplacementProcess');
       }
+    },
+    {
+      label: 'Layout process model',
+      enabled: function() {
+
+        // only enabled for BPMN diagrams
+        return menuState.bpmn;
+      },
+      action: function() {
+        electronApp.emit('menu:action', 'layoutProcess');
+      }
     }
   ];
 };
