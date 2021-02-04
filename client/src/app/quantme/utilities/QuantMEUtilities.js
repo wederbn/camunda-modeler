@@ -9,22 +9,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import BpmnModeler from 'bpmn-js/lib/Modeler';
-import elementTemplates from 'bpmn-js-properties-panel/lib/provider/camunda/element-templates';
-import quantMEModule from './modeling';
-import quantMEExtension from '../../../../client/src/app/quantme/quantum4bpmn/quantum4bpmn.json';
+import CamundaBpmnModeler from '../../tabs/bpmn/modeler';
 import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
+
+export default function QuantMEUtilities() {
+}
 
 /**
  * Get the root process element of the diagram
  */
-export function getRootProcess(definitions) {
+QuantMEUtilities.prototype.getRootProcess = function(definitions) {
   for (let i = 0; i < definitions.rootElements.length; i++) {
     if (definitions.rootElements[i].$type === 'bpmn:Process') {
       return definitions.rootElements[i];
     }
   }
-}
+};
 
 /**
  * Check if the given task is a QuantME task
@@ -32,9 +32,9 @@ export function getRootProcess(definitions) {
  * @param task the task to check
  * @returns true if the passed task is a QuantME task, false otherwise
  */
-export function isQuantMETask(task) {
+QuantMEUtilities.prototype.isQuantMETask = function(task) {
   return task.$type.startsWith('quantme:');
-}
+};
 
 /**
  * Get the root process from a xml string representing a BPMN diagram
@@ -42,18 +42,10 @@ export function isQuantMETask(task) {
  * @param xml the xml representing the BPMN diagram
  * @return the root process from the xml definitions
  */
-export async function getRootProcessFromXml(xml) {
+QuantMEUtilities.prototype.getRootProcessFromXml = async function(xml) {
 
   // create new modeler with the custom QuantME extensions
-  const bpmnModeler = new BpmnModeler({
-    additionalModules: [
-      elementTemplates,
-      quantMEModule
-    ],
-    moddleExtensions: {
-      quantME: quantMEExtension
-    }
-  });
+  const bpmnModeler = new CamundaBpmnModeler({});
 
   // import the xml containing the definitions
   function importXmlWrapper(xml) {
@@ -67,8 +59,8 @@ export async function getRootProcessFromXml(xml) {
   await importXmlWrapper(xml);
 
   // extract and return root process
-  return getRootProcess(bpmnModeler.getDefinitions());
-}
+  return this.getRootProcess(bpmnModeler.getDefinitions());
+};
 
 /**
  * Check if the given process contains only one flow element and return it
@@ -76,14 +68,14 @@ export async function getRootProcessFromXml(xml) {
  * @param process the process to retrieve the flow element from
  * @return the flow element if only one is defined, or undefined if none or multiple flow elements exist in the process
  */
-export function getSingleFlowElement(process) {
+QuantMEUtilities.prototype.getSingleFlowElement = function(process) {
   let flowElements = process.flowElements;
   if (flowElements.length !== 1) {
     console.log('Process contains %i flow elements but must contain exactly one!', flowElements.length);
     return undefined;
   }
   return flowElements[0];
-}
+};
 
 /**
  * Get the 'camunda:InputOutput' extension element from the given business object
@@ -91,7 +83,7 @@ export function getSingleFlowElement(process) {
  * @param bo the business object to retrieve the input/output extension for
  * @param bpmnFactory the BPMN factory to create new BPMN elements
  */
-export function getCamundaInputOutput(bo, bpmnFactory) {
+QuantMEUtilities.prototype.getCamundaInputOutput = function(bo, bpmnFactory) {
 
   // retrieve InputOutput element if already defined
   let inputOutput = extensionElementsHelper.getExtensionElements(bo, 'camunda:InputOutput');
@@ -108,7 +100,7 @@ export function getCamundaInputOutput(bo, bpmnFactory) {
 
   // if there are multiple input/output definitions, take the first one as the modeler only uses this one
   return inputOutput[0];
-}
+};
 
 /**
  * Check if the given element is a flow like element that is represented as a BPMNEdge in the diagram, such as a SequenceFlow,
@@ -117,11 +109,11 @@ export function getCamundaInputOutput(bo, bpmnFactory) {
  * @param type the type of the element to check
  * @return true if the given element is a flow like element, false otherwise
  */
-export function isFlowLikeElement(type) {
+QuantMEUtilities.prototype.isFlowLikeElement = function(type) {
   return type === 'bpmn:SequenceFlow' || type === 'bpmn:Association';
 
   // TODO: handle further flow like element types
-}
+};
 
 
 /**
@@ -130,7 +122,7 @@ export function isFlowLikeElement(type) {
  * @param element the element to retrieve the properties from
  * @return the properties to copy
  */
-export function getPropertiesToCopy(element) {
+QuantMEUtilities.prototype.getPropertiesToCopy = function(element) {
   let properties = {};
   for (let key in element) {
 
@@ -163,4 +155,4 @@ export function getPropertiesToCopy(element) {
   }
 
   return properties;
-}
+};

@@ -34,6 +34,7 @@ import camundaModdlePackage from 'camunda-bpmn-moddle/resources/camunda';
 import camundaModdleExtension from 'camunda-bpmn-moddle/lib';
 
 import quantmeModdlePackage from '../../../quantme/quantum4bpmn/quantum4bpmn';
+import quantmeModule from '../../../quantme';
 
 import propertiesPanelModule from 'bpmn-js-properties-panel';
 import propertiesProviderModule from 'bpmn-js-properties-panel/lib/provider/camunda';
@@ -84,6 +85,7 @@ const extensionModules = [
   propertiesPanelKeyboardBindingsModule,
   propertiesPanelModule,
   propertiesProviderModule,
+  quantmeModule,
   signavioCompatModule,
   disableCollapsedSubprocessModule
 ];

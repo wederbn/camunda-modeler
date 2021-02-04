@@ -9,16 +9,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getRootProcessFromXml, isQuantMETask, getSingleFlowElement } from '../Utilities';
 import * as consts from '../Constants';
 
-export async function matchesQRM(qrm, task) {
+// TODO: remove quantmeUtilities when moving to client
+export async function matchesQRM(qrm, task, quantmeUtilities) {
   console.log('Matching QRM %s and task with id %s!', qrm.qrmUrl, task.id);
 
   // check whether the detector is valid and contains exactly one QuantME task
-  let rootProcess = await getRootProcessFromXml(qrm.detector);
-  let detectorElement = getSingleFlowElement(rootProcess);
-  if (detectorElement === undefined || !isQuantMETask(detectorElement)) {
+  let rootProcess = await quantmeUtilities.getRootProcessFromXml(qrm.detector);
+  let detectorElement = quantmeUtilities.getSingleFlowElement(rootProcess);
+  if (detectorElement === undefined || !quantmeUtilities.isQuantMETask(detectorElement)) {
     console.log('Unable to retrieve QuantME task from detector: ', qrm.detector);
     return false;
   }

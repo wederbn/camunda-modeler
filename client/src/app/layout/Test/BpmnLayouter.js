@@ -9,7 +9,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isFlowLikeElement } from '../../../../../resources/plugins/QuantME-CamundaPlugin/quantme/Utilities';
 import CamundaBpmnModeler from '../../tabs/bpmn/modeler';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
 
@@ -19,8 +18,11 @@ let BOUNDARY_EVENT_MARGIN = '10';
 // space between an edge and a corresponding label
 let LABEL_MARGIN = '10';
 
-export default function BpmnLayouter() {
+export default function BpmnLayouter(quantMEUtilities) {
+  this.quantMEUtilities = quantMEUtilities;
 }
+
+BpmnLayouter.$inject = ['quantMEUtilities'];
 
 /**
  * Layout the given process
@@ -59,7 +61,7 @@ function layoutProcess(modeling, elementRegistry, process) {
   let flowElements = process.flowElements;
   if (flowElements) {
     for (let i = 0; i < flowElements.length; i++) {
-      if (isFlowLikeElement(flowElements[i].$type)) {
+      if (this.quantMEUtilities.isFlowLikeElement(flowElements[i].$type)) {
         edges.push(getEdgeFromFlowElement(elementRegistry, flowElements[i]));
       } else {
 

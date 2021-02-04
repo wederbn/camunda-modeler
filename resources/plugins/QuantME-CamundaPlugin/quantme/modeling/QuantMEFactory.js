@@ -10,20 +10,20 @@
  */
 
 import BpmnFactory from 'bpmn-js/lib/features/modeling/BpmnFactory';
-import { isQuantMETask } from '../Utilities';
 
 /**
  * This class implements functionality when creating shapes representing QuantME tasks
  */
 export default class QuantMEFactory extends BpmnFactory {
-  constructor(moddle) {
+  constructor(moddle, quantmeUtilities) {
     super(moddle);
+    this.quantmeUtilities = quantmeUtilities;
   }
 
   _ensureId(element) {
 
     // handle all non QuantME elements as usual
-    if (!isQuantMETask(element)) {
+    if (!this.quantmeUtilities.isQuantMETask(element)) {
       super._ensureId(element);
       return;
     }
@@ -36,4 +36,4 @@ export default class QuantMEFactory extends BpmnFactory {
   }
 }
 
-QuantMEFactory.$inject = ['moddle'];
+QuantMEFactory.$inject = ['moddle', 'quantmeUtilities'];

@@ -9,8 +9,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getPropertiesToCopy } from '../Utilities';
 import { QUANTME_ATTRIBUTES } from '../Constants';
+
+// TODO: remove quantmeUtilities when moving to client
 
 /**
  * Add attributes of a replaced QuantME task to the replacing workflow fragment to enable its configuration based of the attribute values.
@@ -19,10 +20,10 @@ import { QUANTME_ATTRIBUTES } from '../Constants';
  * @param inputOutputExtension the input/output element of the root element from the replacement fragment
  * @param bpmnFactory the BPMN factory to create new elements for the diagram
  */
-export function addQuantMEInputParameters(task, inputOutputExtension, bpmnFactory) {
+export function addQuantMEInputParameters(task, inputOutputExtension, bpmnFactory, quantmeUtilities) {
   console.log('Adding QuantME attributes to replacing workflow fragment: ', task);
 
-  let propertiesToCopy = getPropertiesToCopy(task);
+  let propertiesToCopy = quantmeUtilities.getPropertiesToCopy(task);
   for (let name in propertiesToCopy) {
 
     // skip non QuantME attributes

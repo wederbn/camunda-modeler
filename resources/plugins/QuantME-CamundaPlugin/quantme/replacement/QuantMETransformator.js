@@ -11,14 +11,6 @@
 
 import { PureComponent } from 'camunda-modeler-plugin-helpers/react';
 import { matchesQRM } from './QuantMEMatcher';
-import {
-  getRootProcess,
-  getRootProcessFromXml,
-  getSingleFlowElement,
-  isFlowLikeElement,
-  getCamundaInputOutput,
-  getPropertiesToCopy
-} from '../Utilities';
 import { addQuantMEInputParameters } from './InputOutputHandler';
 
 export default class QuantMETransformator extends PureComponent {
@@ -48,6 +40,7 @@ export default class QuantMETransformator extends PureComponent {
       this.bpmnReplace = modeler.get('bpmnReplace');
       this.modeling = modeler.get('modeling');
       this.layouter = modeler.get('bpmnLayouter');
+      this.utilities = modeler.get('quantmeUtilities');
 
       // register actions to enable invocation over the menu
       const self = this;
@@ -92,7 +85,7 @@ export default class QuantMETransformator extends PureComponent {
     console.log('Starting replacement process for the current process model...');
 
     // get root element of the current diagram
-    const rootElement = getRootProcess(this.bpmnjs.getDefinitions());
+    const rootElement = this.utilities.getRootProcess(this.bpmnjs.getDefinitions());
     if (typeof rootElement === 'undefined') {
       console.log('Unable to retrieve root process element from definitions!');
       return;
@@ -188,8 +181,8 @@ export default class QuantMETransformator extends PureComponent {
     }
 
     // get the root process of the replacement fragment
-    let replacementProcess = await getRootProcessFromXml(replacement);
-    let replacementElement = getSingleFlowElement(replacementProcess);
+    let replacementProcess = await this.utilities.getRootProcessFromXml(replacement);
+    let replacementElement = this.utilities.getSingleFlowElement(replacementProcess);
     if (replacementElement === null || replacementElement === undefined) {
       console.log('Unable to retrieve QuantME task from replacement fragment: ', replacement);
       return false;
@@ -199,8 +192,8 @@ export default class QuantMETransformator extends PureComponent {
     let result = this.insertShape(parent, replacementElement, {}, true, task);
 
     // add all attributes of the replaced QuantME task to the input parameters of the replacement fragment
-    let inputOutputExtension = getCamundaInputOutput(result['element'].businessObject, this.bpmnFactory);
-    addQuantMEInputParameters(task, inputOutputExtension, this.bpmnFactory);
+    let inputOutputExtension = this.utilities.getCamundaInputOutput(result['element'].businessObject, this.bpmnFactory);
+    addQuantMEInputParameters(task, inputOutputExtension, this.bpmnFactory, this.quantmeUtilities);
 
     return result['success'];
   }
@@ -224,7 +217,7 @@ export default class QuantMETransformator extends PureComponent {
     }
 
     let element;
-    if (!isFlowLikeElement(newElement.$type)) {
+    if (!this.utilities.isFlowLikeElement(newElement.$type)) {
       if (replace) {
 
         // replace old element to retain attached sequence flow, associations, data objects, ...
@@ -265,7 +258,7 @@ export default class QuantMETransformator extends PureComponent {
     }
 
     // update the properties of the new element
-    this.modeling.updateProperties(element, getPropertiesToCopy(newElement));
+    this.modeling.updateProperties(element, this.utilities.getPropertiesToCopy(newElement));
 
     // recursively handle children of the current element
     let resultTuple = this.insertChildElements(element, newElement, idMap);
