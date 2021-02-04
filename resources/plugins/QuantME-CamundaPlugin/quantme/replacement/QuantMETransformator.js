@@ -70,6 +70,14 @@ export default class QuantMETransformator extends PureComponent {
           self.startReplacementProcess().then(() => console.log('Transformation finished!'));
         }
       });
+      this.editorActions.register({
+        transformWorkflow: function(params) {
+
+          // TODO
+          console.log('Transforming workflow!');
+          console.log(params);
+        }
+      });
 
       // trigger initial QRM update
       this.quantME.updateQRMs().then(response => {

@@ -9,6 +9,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+const { app } = require('electron');
 const { Router } = require('express');
 const router = Router();
 const bodyParser = require('body-parser');
@@ -57,7 +58,7 @@ router.post('/', jsonParser, function(req, res) {
   res.status(201).json({ id: id });
   id++;
 
-  // TODO: invoke transformation
+  app.emit('menu:action', 'transformWorkflow', { id: id, xml: workflowXml, returnPath: '/quantme/workflows' });
 });
 
 router.get('/:id', (req, res) => {
