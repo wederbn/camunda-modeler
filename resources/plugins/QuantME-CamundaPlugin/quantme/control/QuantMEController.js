@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 Institute for the Architecture of Application System -
+ * Copyright (c) 2021 Institute of Architecture of Application Systems -
  * University of Stuttgart
  *
  * This program and the accompanying materials are made available under the
@@ -82,11 +82,14 @@ export default class QuantMEController extends PureComponent {
 
       // transform the workflow passed through the API to a native workflow
       this.editorActions.register({
-        transformWorkflow: function(params) {
+        transformWorkflow: async function(params) {
+          console.log('Transforming workflow posted through API!');
+          let currentQRMs = await self.quantME.getQRMs();
+          let result = await startReplacementProcess(params.xml, currentQRMs);
 
           // TODO
-          console.log('Transforming workflow!');
-          console.log(params);
+          console.log('Result of transformation:');
+          console.log(result);
         }
       });
 

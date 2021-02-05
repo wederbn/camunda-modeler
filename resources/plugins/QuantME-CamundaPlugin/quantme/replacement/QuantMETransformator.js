@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 Institute for the Architecture of Application System -
+ * Copyright (c) 2021 Institute of Architecture of Application Systems -
  * University of Stuttgart
  *
  * This program and the accompanying materials are made available under the
@@ -29,7 +29,6 @@ import { createModelerFromXml } from './ModelerGenerator';
  * @param currentQRMs the set of currently in the framework available QRMs
  */
 export async function startReplacementProcess(xml, currentQRMs) {
-  console.log('Starting replacement process for the current process model...');
   let modeler = await createModelerFromXml(xml);
   let bpmnReplace = modeler.get('bpmnReplace');
   let modeling = modeler.get('modeling');
