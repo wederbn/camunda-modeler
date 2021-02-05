@@ -20,58 +20,76 @@ import {
   getPropertiesToCopy
 } from '../Utilities';
 import { addQuantMEInputParameters } from './InputOutputHandler';
+import { createModelerFromXml } from './ModelerGenerator';
 
 /**
  * Initiate the replacement process for the QuantME tasks that are contained in the current process model
+ *
+ * @param xml the BPMN diagram in XML format
+ * @param currentQRMs the set of currently in the framework available QRMs
  */
-export async function startReplacementProcess(bpmnjs, props, modeling, elementRegistry, quantME, bpmnFactory) {
+export async function startReplacementProcess(xml, currentQRMs) {
   console.log('Starting replacement process for the current process model...');
+  let modeler = await createModelerFromXml(xml);
+  let bpmnReplace = modeler.get('bpmnReplace');
+  let modeling = modeler.get('modeling');
+  let factory = modeler.get('bpmnFactory');
+  let elementRegistry = modeler.get('elementRegistry');
 
   // get root element of the current diagram
-  const rootElement = getRootProcess(bpmnjs.getDefinitions());
+  const rootElement = getRootProcess(modeler.getDefinitions());
   if (typeof rootElement === 'undefined') {
     console.log('Unable to retrieve root process element from definitions!');
-    return;
+    return { status: 'failed', cause: 'Unable to retrieve root process element from definitions!' };
   }
 
   // get all QuantME tasks from the process
   const replacementTasks = getQuantMETasks(rootElement, elementRegistry);
   console.log('Process contains ' + replacementTasks.length + ' QuantME tasks to replace...');
   if (!replacementTasks || !replacementTasks.length) {
-    return;
+    return { status: 'success', xml: xml };
   }
 
   // check for available replacement models for all QuantME tasks
   for (let replacementTask of replacementTasks) {
 
     // abort transformation if at least one task can not be replaced
-    replacementTask.qrm = await getMatchingQRM(replacementTask.task, quantME);
+    replacementTask.qrm = await getMatchingQRM(replacementTask.task, currentQRMs);
     if (!replacementTask.qrm) {
       console.log('Unable to replace task with id %s. Aborting transformation!', replacementTask.task.id);
-
-      // inform user via notification in the modeler
-      props.displayNotification({
-        type: 'warning',
-        title: 'Unable to transform workflow',
-        content: 'Unable to replace task with id \'' + replacementTask.task.id + '\' by suited QRM',
-        duration: 10000
-      });
-      return;
+      return {
+        status: 'failed',
+        cause: 'Unable to replace task with id \'' + replacementTask.task.id + '\' by suited QRM!'
+      };
     }
   }
 
   // replace each QuantME tasks to retrieve standard-compliant BPMN
   for (let replacementTask of replacementTasks) {
     console.log('Replacing task with id %s by using QRM: ', replacementTask.task.id, replacementTask.qrm);
-    const replacementSuccess = await replaceByFragment(replacementTask.task, replacementTask.parent, replacementTask.qrm.replacement, bpmnFactory);
+    const replacementSuccess = await replaceByFragment(replacementTask.task, replacementTask.parent, replacementTask.qrm.replacement, factory, bpmnReplace, elementRegistry, modeling);
     if (!replacementSuccess) {
       console.log('Replacement of QuantME task with Id ' + replacementTask.task.id + ' failed. Aborting process!');
-      return;
+      return {
+        status: 'failed',
+        cause: 'Replacement of QuantME task with Id ' + replacementTask.task.id + ' failed. Aborting process!'
+      };
     }
   }
 
   // layout diagram after successful transformation
   layout(modeling, elementRegistry, rootElement);
+
+  // export the xml and return to requester
+  function exportXmlWrapper(definitions) {
+    return new Promise((resolve) => {
+      modeler._moddle.toXML(definitions, (err, successResponse) => {
+        resolve(successResponse);
+      });
+    });
+  }
+  let transformedXml = await exportXmlWrapper(modeler.getDefinitions());
+  return { status: 'success', xml: transformedXml };
 }
 
 /**
@@ -101,8 +119,7 @@ function getQuantMETasks(process, elementRegistry) {
 /**
  * Search for a matching QRM for the given task
  */
-async function getMatchingQRM(task, quantME) {
-  let currentQRMs = await quantME.getQRMs();
+async function getMatchingQRM(task, currentQRMs) {
   console.log('Number of available QRMs: ', currentQRMs.length);
 
   for (let i = 0; i < currentQRMs.length; i++) {
@@ -116,7 +133,7 @@ async function getMatchingQRM(task, quantME) {
 /**
  * Replace the given task by the content of the replacement fragment
  */
-async function replaceByFragment(task, parent, replacement, bpmnFactory) {
+async function replaceByFragment(task, parent, replacement, bpmnFactory, bpmnReplace, elementRegistry, modeling) {
 
   if (!replacement) {
     console.log('Replacement fragment is undefined. Aborting replacement!');
@@ -132,7 +149,7 @@ async function replaceByFragment(task, parent, replacement, bpmnFactory) {
   }
 
   console.log('Replacement element: ', replacementElement);
-  let result = insertShape(parent, replacementElement, {}, true, task);
+  let result = insertShape(parent, replacementElement, {}, true, bpmnReplace, elementRegistry, modeling, task);
 
   // add all attributes of the replaced QuantME task to the input parameters of the replacement fragment
   let inputOutputExtension = getCamundaInputOutput(result['element'].businessObject, bpmnFactory);
@@ -148,10 +165,13 @@ async function replaceByFragment(task, parent, replacement, bpmnFactory) {
  * @param newElement the new element to insert
  * @param idMap the idMap containing a mapping of ids defined in newElement to the new ids in the diagram
  * @param replace true if the element should be inserted instead of an available element, false otherwise
+ * @param bpmnReplace the facility to replace BPMN elements
+ * @param elementRegistry the registry to retrieve elements from the diagram
+ * @param modeling the facility to access shapes in the diagram
  * @param oldElement an old element that is only required if it should be replaced by the new element
  * @return {{success: boolean, idMap: *, element: *}}
  */
-function insertShape(parent, newElement, idMap, replace, oldElement, bpmnReplace, elementRegistry, modeling) {
+function insertShape(parent, newElement, idMap, replace, bpmnReplace, elementRegistry, modeling, oldElement) {
   console.log('Inserting shape for element: ', newElement);
 
   // create new id map if not provided
@@ -229,6 +249,9 @@ function insertShape(parent, newElement, idMap, replace, oldElement, bpmnReplace
  * @param parent the element that is the new parent of the inserted elements
  * @param newElement the new element to insert the children for
  * @param idMap the idMap containing a mapping of ids defined in newElement to the new ids in the diagram
+ * @param bpmnReplace the facility to replace BPMN elements
+ * @param elementRegistry the registry to retrieve elements from the diagram
+ * @param modeling the facility to access shapes in the diagram
  * @return {{success: boolean, idMap: *, element: *}}
  */
 function insertChildElements(parent, newElement, idMap, bpmnReplace, elementRegistry, modeling) {

@@ -33,11 +33,7 @@ export default class QuantMEController extends PureComponent {
 
       // load components required to access, adapt, and transform the current QuantME workflow
       this.bpmnjs = modeler.get('bpmnjs');
-      this.bpmnFactory = modeler.get('bpmnFactory');
-      this.elementRegistry = modeler.get('elementRegistry');
       this.editorActions = modeler.get('editorActions');
-      this.bpmnReplace = modeler.get('bpmnReplace');
-      this.modeling = modeler.get('modeling');
 
       // register actions to enable invocation over the menu and the API
       const self = this;
@@ -60,8 +56,27 @@ export default class QuantMEController extends PureComponent {
 
       // transform the current workflow from the modeler to a native workflow
       this.editorActions.register({
-        startReplacementProcess: function() {
-          startReplacementProcess(self.bpmnjs, self.props, self.modeling, self.elementRegistry, self.quantME, self.bpmnFactory).then(() => console.log('Transformation finished!'));
+        startReplacementProcess: async function() {
+          self.props.displayNotification({
+            type: 'info',
+            title: 'Workflow Transformation Started!',
+            content: 'Successfully started transformation process for the current workflow!' ,
+            duration: 7000
+          });
+          let xml = await self.bpmnjs.saveXML();
+          let currentQRMs = await self.quantME.getQRMs();
+          let result = await startReplacementProcess(xml.xml, currentQRMs);
+
+          if (result.status === 'success') {
+            await self.bpmnjs.importXML(result.xml);
+          } else {
+            self.props.displayNotification({
+              type: 'warning',
+              title: 'Unable to transform workflow',
+              content: result.cause,
+              duration: 10000
+            });
+          }
         }
       });
 
