@@ -140,7 +140,7 @@ module.exports.addResultOfLongRunningTask = function(id, args) {
 
   // add updated workflow
   workflow.status = args.status;
-  if (!workflow.status === 'failed') {
+  if (!(workflow.status === 'failed')) {
     workflow.xml = args.xml;
   }
   workflows.push(workflow);
