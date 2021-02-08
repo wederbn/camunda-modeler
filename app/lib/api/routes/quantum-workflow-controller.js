@@ -11,9 +11,13 @@
 
 const { app } = require('electron');
 const { Router } = require('express');
+const fileUpload = require('express-fileupload');
 const router = Router();
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
+
+// use default oprions
+router.use(fileUpload({}));
 
 const log = require('../../log')('app:api:quantum-workflow-controller');
 
@@ -47,11 +51,20 @@ router.get('/', (req, res) => {
 
 // transform the given QuantME workflow model into a native workflow model
 router.post('/', jsonParser, function(req, res) {
+  let workflowXml = undefined;
   if (req.body === undefined || req.body.xml === undefined) {
-    res.status(400).send('Xml has to be set!');
-    return;
+    if (!req.files || Object.keys(req.files).length !== 1) {
+
+      // either xml in json or file with the diagram must be defined
+      res.status(400).send('Xml has to be set or file must be uploaded!');
+      return;
+    } else {
+      log.info('Loading input from file...');
+      workflowXml = req.files[(Object.keys(req.files)[0])].data.toString('utf8');
+    }
+  } else {
+    workflowXml = req.body.xml;
   }
-  let workflowXml = req.body.xml;
 
   // add workflow to list and increase id for the next request
   workflows.push({ id: id, status: 'transforming', xml: workflowXml });
