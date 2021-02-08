@@ -15,6 +15,7 @@ const fileUpload = require('express-fileupload');
 const router = Router();
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
+const deploymentHandler = require('../../deployment/workflow');
 
 // use default oprions
 router.use(fileUpload({}));
@@ -71,17 +72,10 @@ router.post('/', jsonParser, function(req, res) {
 });
 
 router.get('/:id', (req, res) => {
-  let id = req.params.id;
 
   // search the workflow with the given id
-  let workflow = undefined;
-  for (let i = 0; i < workflows.length; i++) {
-    let searchedWorkflow = workflows[i];
-    if (parseInt(searchedWorkflow.id) === parseInt(id)) {
-      workflow = searchedWorkflow;
-      break;
-    }
-  }
+  let id = req.params.id;
+  let workflow = findWorkflowById(id);
 
   if (workflow === undefined) {
     res.status(404).send();
@@ -104,17 +98,10 @@ router.get('/:id', (req, res) => {
 });
 
 router.get('/:id/download', (req, res) => {
-  let id = req.params.id;
 
   // search the workflow with the given id
-  let workflow = undefined;
-  for (let i = 0; i < workflows.length; i++) {
-    let searchedWorkflow = workflows[i];
-    if (parseInt(searchedWorkflow.id) === parseInt(id)) {
-      workflow = searchedWorkflow;
-      break;
-    }
-  }
+  let id = req.params.id;
+  let workflow = findWorkflowById(id);
 
   if (workflow === undefined) {
     res.status(404).send();
@@ -125,6 +112,75 @@ router.get('/:id/download', (req, res) => {
   res.type('bpmn');
   res.send(workflow.xml);
 });
+
+router.post('/:id/deploy', (req, res) => {
+
+  // search the workflow with the given id
+  let id = req.params.id;
+  let workflow = findWorkflowById(id);
+
+  if (workflow === undefined) {
+    res.status(404).send();
+    return;
+  }
+
+  if (workflow.status !== 'transformed') {
+    res.status(400).send('Only workflows in status \'transformed\' can be deployed. Current status: ' + workflow.status);
+    return;
+  }
+
+  // start deployment
+  workflow.status = 'deploying';
+  let deploymentResult = deploymentHandler.deployWorkflow(workflow.xml);
+
+  // update stored workflow
+  workflow.status = deploymentResult.status;
+  if (!(workflow.status === 'failed')) {
+    workflow.workflowEndpoint = deploymentResult.workflowEndpoint;
+  }
+  updateWorkflow(workflow);
+
+  res.json({
+    workflow: workflow,
+    '_links': {
+      'self': { method: 'GET', href: req.header('host') + '/quantme/workflows/' + id },
+      'download': { method: 'GET', href: req.header('host') + '/quantme/workflows/' + id + '/download' }
+    }
+  });
+});
+
+/**
+ * Find the workflow with the given id
+ *
+ * @return {*} the workflow object with the given id if available or 'undefined' otherwise
+ */
+function findWorkflowById(id) {
+  let workflow = undefined;
+  for (let i = 0; i < workflows.length; i++) {
+    let searchedWorkflow = workflows[i];
+    if (parseInt(searchedWorkflow.id) === parseInt(id)) {
+      workflow = searchedWorkflow;
+      break;
+    }
+  }
+  return workflow;
+}
+
+/**
+ * Update the given workflow object with new data
+ *
+ * @param workflow the workflow to update
+ */
+function updateWorkflow(workflow) {
+
+  // remove object from list
+  workflows = workflows.filter(function(obj) {
+    return obj.id !== id;
+  });
+
+  // add new version
+  workflows.push(workflow);
+}
 
 module.exports.addResultOfLongRunningTask = function(id, args) {
   log.info('Updating workflow object with id: ' + id);
@@ -137,17 +193,12 @@ module.exports.addResultOfLongRunningTask = function(id, args) {
     return;
   }
 
-  // filter object from list
-  workflows = workflows.filter(function(obj) {
-    return obj.id !== id;
-  });
-
-  // add updated workflow
+  // update stored workflow
   workflow.status = args.status;
   if (!(workflow.status === 'failed')) {
     workflow.xml = args.xml;
   }
-  workflows.push(workflow);
+  updateWorkflow(workflow);
 };
 
 module.exports.default = router;

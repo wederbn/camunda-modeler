@@ -43,5 +43,5 @@ module.exports.deployWorkflow = function(workflowXml) {
   log.info('Deploying workflow to Camunda Engine at endpoint: %s', this.tomcatUrl);
 
   // TODO
-  return 'TODO';
+  return { status: 'failed' };
 };
