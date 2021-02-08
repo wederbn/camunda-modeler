@@ -37,13 +37,10 @@ router.get('/', (req, res) => {
     }
   };
 
-  // add links to all transformed workflows
+  // add links to all workflows
   for (let i = 0; i < workflows.length; i++) {
     let workflow = workflows[i];
-
-    if (workflow.status === 'finished') {
-      body._links[workflow.id] = { method: 'GET', href: req.header('host') + '/quantme/workflows/' + workflow.id };
-    }
+    body._links[workflow.id] = { method: 'GET', href: req.header('host') + '/quantme/workflows/' + workflow.id };
   }
 
   res.json(body);
@@ -91,11 +88,18 @@ router.get('/:id', (req, res) => {
     return;
   }
 
+  // assemble links for the workflow object
+  let links = {
+    'self': { method: 'GET', href: req.header('host') + '/quantme/workflows/' + id },
+    'download': { method: 'GET', href: req.header('host') + '/quantme/workflows/' + id + '/download' }
+  };
+  if (workflow.status === 'transformed') {
+    links['deploy'] = { method: 'POST', href: req.header('host') + '/quantme/workflows/' + id + '/deploy' };
+  }
+
   res.json({
     workflow: workflow,
-    '_links': {
-      'self': { method: 'GET', href: req.header('host') + '/quantme/workflows/' + id }
-    }
+    '_links': links
   });
 });
 
