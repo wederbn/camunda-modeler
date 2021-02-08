@@ -20,6 +20,9 @@ export default class QuantMEController extends PureComponent {
 
     // get QuantME component from the backend, e.g., to retrieve current QRMs
     this.quantME = props._getGlobal('quantME');
+
+    // get API component from the backend, e.g., to send back results of long-running tasks
+    this.api = props._getGlobal('api');
   }
 
   componentDidMount() {
@@ -60,7 +63,7 @@ export default class QuantMEController extends PureComponent {
           self.props.displayNotification({
             type: 'info',
             title: 'Workflow Transformation Started!',
-            content: 'Successfully started transformation process for the current workflow!' ,
+            content: 'Successfully started transformation process for the current workflow!',
             duration: 7000
           });
           let xml = await self.bpmnjs.saveXML();
@@ -87,9 +90,8 @@ export default class QuantMEController extends PureComponent {
           let currentQRMs = await self.quantME.getQRMs();
           let result = await startReplacementProcess(params.xml, currentQRMs);
 
-          // TODO
-          console.log('Result of transformation:');
-          console.log(result);
+          // return result to API
+          self.api.sendResult(params.returnPath, params.id, { status: result.status, xml: result.xml });
         }
       });
 

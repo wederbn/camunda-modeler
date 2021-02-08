@@ -122,4 +122,4 @@ module.exports.addResultOfLongRunningTask = function(id, args) {
   workflows.push(workflow);
 };
 
-module.exports = router;
+module.exports.default = router;
