@@ -68,10 +68,9 @@ router.post('/', jsonParser, function(req, res) {
 
   // add workflow to list and increase id for the next request
   workflows.push({ id: id, status: 'transforming', xml: workflowXml });
+  app.emit('menu:action', 'transformWorkflow', { id: id, xml: workflowXml, returnPath: '/quantme/workflows' });
   res.status(201).json({ id: id });
   id++;
-
-  app.emit('menu:action', 'transformWorkflow', { id: id, xml: workflowXml, returnPath: '/quantme/workflows' });
 });
 
 router.get('/:id', (req, res) => {
@@ -100,6 +99,29 @@ router.get('/:id', (req, res) => {
   });
 });
 
+router.get('/:id/download', (req, res) => {
+  let id = req.params.id;
+
+  // search the workflow with the given id
+  let workflow = undefined;
+  for (let i = 0; i < workflows.length; i++) {
+    let searchedWorkflow = workflows[i];
+    if (parseInt(searchedWorkflow.id) === parseInt(id)) {
+      workflow = searchedWorkflow;
+      break;
+    }
+  }
+
+  if (workflow === undefined) {
+    res.status(404).send();
+    return;
+  }
+
+  res.attachment('workflow' + id + '.bpmn');
+  res.type('bpmn');
+  res.send(workflow.xml);
+});
+
 module.exports.addResultOfLongRunningTask = function(id, args) {
   log.info('Updating workflow object with id: ' + id);
 
@@ -118,7 +140,9 @@ module.exports.addResultOfLongRunningTask = function(id, args) {
 
   // add updated workflow
   workflow.status = args.status;
-  workflow.xml = args.xml;
+  if (!workflow.status === 'failed') {
+    workflow.xml = args.xml;
+  }
   workflows.push(workflow);
 };
 
