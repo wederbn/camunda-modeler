@@ -13,6 +13,8 @@ This can for example be used if only the API is required and not the graphical m
 
 * ```QRM_REPONAME``` (default: ' '): Defines the Github repository name to access the [QRM-Repository](../QRM-Repository)
 
+* ```CAMUNDA_ENDPOINT``` (default: 'http://localhost:8080/engine-rest'): Defines the endpoint of the Camunda engine to deploy workflows to
+
 ### Setting the Environment Variables
 
 When spinning up the framework in development mode, add the environment variables to the npm command:

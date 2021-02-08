@@ -11,7 +11,13 @@
 
 const log = require('../../log')('app:deployment');
 
-this.tomcatUrl = 'http://localhost:8080/engine-rest';
+// retrieve the Camunda Engine endpoint from the environment variables or use localhost as default
+let endpointEnv = process.env.CAMUNDA_ENDPOINT;
+if (endpointEnv !== undefined) {
+  this.tomcatUrl = endpointEnv;
+} else {
+  this.tomcatUrl = 'http://localhost:8080/engine-rest';
+}
 
 /**
  * Get the endpoint of the configured Camunda engine to deploy to
@@ -31,4 +37,11 @@ module.exports.setCamundaEndpoint = function(camundaEndpoint) {
   if (camundaEndpoint !== null && camundaEndpoint !== undefined) {
     this.tomcatUrl = camundaEndpoint;
   }
+};
+
+module.exports.deployWorkflow = function(workflowXml) {
+  log.info('Deploying workflow to Camunda Engine at endpoint: %s', this.tomcatUrl);
+
+  // TODO
+  return 'TODO';
 };
