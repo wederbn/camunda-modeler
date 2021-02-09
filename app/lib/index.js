@@ -35,12 +35,16 @@ const Workspace = require('./workspace');
 const {
   getQRMs,
   updateQRMs,
+  getQRMRepositoryName,
   setQRMRepositoryName,
+  getQRMRepositoryUserName,
   setQRMUserName
 } = require('./quantme');
 
 const {
+  getCamundaEndpoint,
   setCamundaEndpoint,
+  getOpenTOSCAEndpoint,
   setOpenTOSCAEndpoint
 } = require('./deployment');
 
@@ -251,6 +255,18 @@ renderer.on('config:set', function(key, value, ...args) {
   } catch (error) {
     done(error);
   }
+});
+
+// send configuration to the frontend
+renderer.on('config:get-form-modal', function(done) {
+  log.info('Updating config in the frontend...');
+  let configurationJson = {
+    camundaEndpoint: getCamundaEndpoint(),
+    opentoscaEndpoint: getOpenTOSCAEndpoint(),
+    qrmRepoName: getQRMRepositoryUserName(),
+    qrmUserName: getQRMRepositoryName()
+  };
+  done(null, configurationJson);
 });
 
 // update configuration set over the frontend

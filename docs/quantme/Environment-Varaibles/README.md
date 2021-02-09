@@ -15,6 +15,8 @@ This can for example be used if only the API is required and not the graphical m
 
 * ```CAMUNDA_ENDPOINT``` (default: 'http://localhost:8080/engine-rest'): Defines the endpoint of the Camunda engine to deploy workflows to
 
+* ```OPENTOSCA_ENDPOINT``` (default: 'http://localhost:1337/csars'): Defines the endpoint of the OpenTOSCA container to deploy services with
+
 ### Setting the Environment Variables
 
 When spinning up the framework in development mode, add the environment variables to the npm command:

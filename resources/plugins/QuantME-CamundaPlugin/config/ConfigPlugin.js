@@ -20,10 +20,10 @@ const defaultState = {
 };
 
 const defaultConfig = {
-  camundaEndpoint: 'TODO',
-  opentoscaEndpoint: 'TODO',
-  qrmRepoName: 'TODO',
-  qrmUserName: 'TODO'
+  camundaEndpoint: '',
+  opentoscaEndpoint: '',
+  qrmRepoName: '',
+  qrmUserName: ''
 };
 
 export default class ConfigPlugin extends PureComponent {
@@ -38,11 +38,12 @@ export default class ConfigPlugin extends PureComponent {
 
     // get config to update details in the backend
     this.backendConfig = props._getGlobal('config');
-
-    // TODO: get initial configuration
   }
 
   componentDidMount() {
+
+    // initialize config in the frontend
+    this.backendConfig.getConfigFromBackend().then(config => this.config = config);
 
     // subscribe to updates for all configuration parameters
     this.props.subscribe('config.camundaEndpointChanged', ({ camundaEndpoint }) => {

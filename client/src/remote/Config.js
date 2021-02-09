@@ -15,6 +15,7 @@ import {
 
 const GET_CONFIG = 'config:get',
       SET_CONFIG = 'config:set',
+      GET_CONFIG_FOR_MODAL = 'config:get-form-modal',
       SET_CONFIG_FROM_MODAL = 'config:set-from-modal';
 
 /**
@@ -38,6 +39,15 @@ export default class Config {
    */
   setConfigFromModal(config) {
     return this.backend.send(SET_CONFIG_FROM_MODAL, config);
+  }
+
+  /**
+   * Get the current configuration from the backend
+   *
+   * @returns {Promise<*>}
+   */
+  getConfigFromBackend() {
+    return this.backend.send(GET_CONFIG_FOR_MODAL);
   }
 
   /**
