@@ -84,13 +84,15 @@ module.exports.deployWorkflow = async function(workflowName, workflowXml) {
         id,
         deployedProcessDefinitions
       } = await response.json();
+      log.info('Deployment successful with deployment id: %s', id);
 
-      log.info('Response is ok...');
-      log.info(id);
-      log.info(deployedProcessDefinitions);
+      // abort if there is not exactly one deployed process deifnition
+      if (Object.values(deployedProcessDefinitions || {}).length !== 1) {
+        log.error('Invalid size of deployed process definitions list: ' + Object.values(deployedProcessDefinitions || {}).length);
+        return { status: 'failed' };
+      }
 
-      // TODO: extract information
-      return { status: 'failed' };
+      return { status: 'deployed', deployedProcessDefinition: Object.values(deployedProcessDefinitions || {})[0] };
     } else {
       log.error('Deployment of workflow returned invalid status code: %s', response.status);
       return { status: 'failed' };

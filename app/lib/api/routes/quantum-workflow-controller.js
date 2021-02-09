@@ -136,7 +136,7 @@ router.post('/:id/deploy', (req, res) => {
     // update stored workflow
     workflow.status = result.status;
     if (!(workflow.status === 'failed')) {
-      workflow.workflowEndpoint = result.workflowEndpoint;
+      workflow.deployedProcessDefinition = result.deployedProcessDefinition;
     }
     updateWorkflow(workflow);
   });
