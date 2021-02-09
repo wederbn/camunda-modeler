@@ -17,7 +17,7 @@ const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
 const deploymentHandler = require('../../deployment/workflow');
 
-// use default oprions
+// use default options
 router.use(fileUpload({}));
 
 const log = require('../../log')('app:api:quantum-workflow-controller');

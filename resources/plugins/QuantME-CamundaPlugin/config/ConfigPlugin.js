@@ -46,17 +46,35 @@ export default class ConfigPlugin extends PureComponent {
     this.backendConfig.getConfigFromBackend().then(config => this.config = config);
 
     // subscribe to updates for all configuration parameters
-    this.props.subscribe('config.camundaEndpointChanged', ({ camundaEndpoint }) => {
-      this.config.camundaEndpoint = camundaEndpoint;
-    });
-    this.props.subscribe('config.opentoscaEndpointChanged', ({ opentoscaEndpoint }) => {
-      this.config.opentoscaEndpoint = opentoscaEndpoint;
-    });
-    this.props.subscribe('config.qrmRepoNameChanged', ({ qrmRepoName }) => {
-      this.config.qrmRepoName = qrmRepoName;
-    });
-    this.props.subscribe('config.qrmUserNameChanged', ({ qrmUserName }) => {
-      this.config.qrmUserName = qrmUserName;
+    this.props.subscribe('bpmn.modeler.created', (event) => {
+
+      const {
+        modeler
+      } = event;
+
+      this.editorActions = modeler.get('editorActions');
+      const self = this;
+
+      this.editorActions.register({
+        camundaEndpointChanged: function(camundaEndpoint) {
+          self.config.camundaEndpoint = camundaEndpoint;
+        }
+      });
+      this.editorActions.register({
+        opentoscaEndpointChanged: function(opentoscaEndpoint) {
+          self.config.opentoscaEndpoint = opentoscaEndpoint;
+        }
+      });
+      this.editorActions.register({
+        qrmRepoNameChanged: function(qrmRepoName) {
+          self.config.qrmRepoName = qrmRepoName;
+        }
+      });
+      this.editorActions.register({
+        qrmUserNameChanged: function(qrmUserName) {
+          self.config.qrmUserName = qrmUserName;
+        }
+      });
     });
   }
 
