@@ -131,14 +131,15 @@ router.post('/:id/deploy', (req, res) => {
 
   // start deployment
   workflow.status = 'deploying';
-  let deploymentResult = deploymentHandler.deployWorkflow(workflow.xml);
+  deploymentHandler.deployWorkflow(id, workflow.xml).then((result) => {
 
-  // update stored workflow
-  workflow.status = deploymentResult.status;
-  if (!(workflow.status === 'failed')) {
-    workflow.workflowEndpoint = deploymentResult.workflowEndpoint;
-  }
-  updateWorkflow(workflow);
+    // update stored workflow
+    workflow.status = result.status;
+    if (!(workflow.status === 'failed')) {
+      workflow.workflowEndpoint = result.workflowEndpoint;
+    }
+    updateWorkflow(workflow);
+  });
 
   res.json({
     workflow: workflow,
