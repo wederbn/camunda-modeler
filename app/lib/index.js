@@ -34,8 +34,15 @@ const Workspace = require('./workspace');
 
 const {
   getQRMs,
-  updateQRMs
+  updateQRMs,
+  setQRMRepositoryName,
+  setQRMUserName
 } = require('./quantme');
+
+const {
+  setCamundaEndpoint,
+  setOpenTOSCAEndpoint
+} = require('./deployment');
 
 const {
   readFile,
@@ -244,6 +251,15 @@ renderer.on('config:set', function(key, value, ...args) {
   } catch (error) {
     done(error);
   }
+});
+
+// update configuration set over the frontend
+renderer.on('config:set-from-modal', function(config) {
+  log.info('Updating config in the backend...');
+  setCamundaEndpoint(config.camundaEndpoint);
+  setOpenTOSCAEndpoint(config.opentoscaEndpoint);
+  setQRMUserName(config.qrmUserName);
+  setQRMRepositoryName(config.qrmRepoName);
 });
 
 // plugin toggling //////////

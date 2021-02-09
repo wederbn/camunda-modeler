@@ -10,6 +10,6 @@
  */
 
 module.exports = {
-  ...require('./workflow'),
-  ...require('./services'),
+  camundaEndpoint: process.env.CAMUNDA_ENDPOINT || 'http://localhost:8080/engine-rest',
+  opentoscaEndpoint: process.env.OPENTOSCA_ENDPOINT || 'http://localhost:1337/csars'
 };

@@ -19,24 +19,53 @@ const defaultState = {
   configOpen: false
 };
 
+const defaultConfig = {
+  camundaEndpoint: 'TODO',
+  opentoscaEndpoint: 'TODO',
+  qrmRepoName: 'TODO',
+  qrmUserName: 'TODO'
+};
+
 export default class ConfigPlugin extends PureComponent {
 
   constructor(props) {
     super(props);
 
     this.state = defaultState;
+    this.config = defaultConfig;
 
     this.handleConfigClosed = this.handleConfigClosed.bind(this);
+
+    // get config to update details in the backend
+    this.backendConfig = props._getGlobal('config');
+
+    // TODO: get initial configuration
+  }
+
+  componentDidMount() {
+
+    // subscribe to updates for all configuration parameters
+    this.props.subscribe('config.camundaEndpointChanged', ({ camundaEndpoint }) => {
+      this.config.camundaEndpoint = camundaEndpoint;
+    });
+    this.props.subscribe('config.opentoscaEndpointChanged', ({ opentoscaEndpoint }) => {
+      this.config.opentoscaEndpoint = opentoscaEndpoint;
+    });
+    this.props.subscribe('config.qrmRepoNameChanged', ({ qrmRepoName }) => {
+      this.config.qrmRepoName = qrmRepoName;
+    });
+    this.props.subscribe('config.qrmUserNameChanged', ({ qrmUserName }) => {
+      this.config.qrmUserName = qrmUserName;
+    });
   }
 
   handleConfigClosed(newConfig) {
     this.setState({ configOpen: false });
 
+    // update configuration in frontend and backend if passed through the modal
     if (newConfig) {
-
-      // TODO
-      console.log('Received new config...');
-      console.log(newConfig);
+      this.config = newConfig;
+      this.backendConfig.setConfigFromModal(newConfig);
     }
   }
 
@@ -53,12 +82,7 @@ export default class ConfigPlugin extends PureComponent {
       {this.state.configOpen && (
         <ConfigModal
           onClose={this.handleConfigClosed}
-          initValues={{
-            camundaEndpoint: 'TODO',
-            opentoscaEndpoint: 'TODO',
-            qrmRepoName: 'TODO',
-            qrmUserName: 'TODO'
-          }}
+          initValues={this.config}
         />
       )}
     </Fragment>);
