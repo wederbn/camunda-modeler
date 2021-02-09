@@ -9,6 +9,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+const { app } = require('electron');
 let FormData = require('form-data');
 const fetch = require('node-fetch');
 
@@ -36,6 +37,7 @@ module.exports.getCamundaEndpoint = function() {
 module.exports.setCamundaEndpoint = function(camundaEndpoint) {
   if (camundaEndpoint !== null && camundaEndpoint !== undefined) {
     deploymentConfig.camundaEndpoint = camundaEndpoint.replace(/\/$/, '');
+    app.emit('menu:action', 'camundaEndpointChanged', deploymentConfig.camundaEndpoint);
   }
 };
 

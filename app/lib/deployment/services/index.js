@@ -9,6 +9,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+const { app } = require('electron');
 const deploymentConfig = require('../DeploymentConfig');
 
 /**
@@ -31,6 +32,7 @@ module.exports.getOpenTOSCAEndpoint = function() {
 module.exports.setOpenTOSCAEndpoint = function(opentoscaEndpoint) {
   if (opentoscaEndpoint !== null && opentoscaEndpoint !== undefined) {
     deploymentConfig.opentoscaEndpoint = opentoscaEndpoint.replace(/\/$/, '');
+    app.emit('menu:action', 'opentoscaEndpointChanged', deploymentConfig.opentoscaEndpoint);
   }
 };
 
