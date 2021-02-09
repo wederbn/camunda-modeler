@@ -23,8 +23,9 @@ export default class ConfigPlugin extends PureComponent {
     // render config button and pop-up menu
     return (<Fragment>
       <Fill slot="toolbar" group="9_autoSave">
-        <button type="button" onClick={ () => this.setState({ configOpen: true }) }>
-          TODO
+        <button type="button" className="src-app-primitives-Button__Button--3Ffn0" title="Open configuration menu"
+          onClick={ () => this.setState({ configOpen: true }) } >
+          <span className="app-icon-properties"><span className="indent">Configuration</span></span>
         </button>
       </Fill>
     </Fragment>);
