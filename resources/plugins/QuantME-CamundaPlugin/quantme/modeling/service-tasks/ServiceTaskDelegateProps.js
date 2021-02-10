@@ -12,8 +12,8 @@
 // adapted from 'bpmn-js-properties-panel/lib/provider/camunda/parts/ServiceTaskDelegateProps' to support the Service Task extension
 
 import { addImplementationDetails } from './ServiceTaskImplementationExtension';
-
 import { getImplementationType } from './ImplementationTypeHelperExtension';
+import { deployment } from './Deployment';
 
 const ImplementationTypeHelper = require('bpmn-js-properties-panel/lib/helper/ImplementationTypeHelper'),
       InputOutputHelper = require('bpmn-js-properties-panel/lib/helper/InputOutputHelper');
@@ -84,6 +84,13 @@ export function serviceTaskDelegateProps(group, element, bpmnFactory, translate)
     hideResultVariable: function(element, node) {
       return getImplementationType(element) !== 'expression';
     }
+  }, translate));
+
+  // deployment //////////////////////////////////////////////////
+
+  group.entries = group.entries.concat(deployment(element, bpmnFactory, {
+    getBusinessObject: getBusinessObject,
+    getImplementationType: getImplementationType
   }, translate));
 
   // external //////////////////////////////////////////////////
