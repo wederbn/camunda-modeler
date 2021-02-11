@@ -5,6 +5,8 @@
   padding: 0;
 }
 
+.app-icon-service-deployment:before { content: '\e805'; }
+
 .indent {
   margin-left: 5px;
 }
