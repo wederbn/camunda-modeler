@@ -17,13 +17,10 @@ const jquery = require('jquery');
 const QUANTME_NAMESPACE_PULL = 'http://quantil.org/quantme/pull';
 const QUANTME_NAMESPACE_PUSH = 'http://quantil.org/quantme/push';
 
-export function deployment(element, bpmnFactory, options, translate) {
+export function deployment(element, bpmnFactory, options, translate, wineryEndpoint) {
 
   const getImplementationType = options.getImplementationType,
         getBusinessObject = options.getBusinessObject;
-
-  //TODO: retrieve endpoint
-  const wineryEndpoint = 'http://localhost:8081/winery';
 
   const deploymentEntry = entryFactory.selectBox({
     id: 'deployment',
@@ -51,13 +48,12 @@ export function deployment(element, bpmnFactory, options, translate) {
               break;
             }
           }
-          if (arrValues.length === 0) {
-            arrValues.push({ name: 'No CSARs available', value:'' });
-          }
         },
         async: false
       });
-
+      if (arrValues.length === 0) {
+        arrValues.push({ name: 'No CSARs available', value:'' });
+      }
       return arrValues;
     },
     setControlValue: true,

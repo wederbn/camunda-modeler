@@ -49,7 +49,7 @@ function isServiceTaskLike(element) {
   return ImplementationTypeHelper.isServiceTaskLike(element);
 }
 
-export function serviceTaskDelegateProps(group, element, bpmnFactory, translate) {
+export function serviceTaskDelegateProps(group, element, bpmnFactory, translate, wineryEndpoint) {
 
   if (!isServiceTaskLike(getBusinessObject(element))) {
     return;
@@ -91,7 +91,7 @@ export function serviceTaskDelegateProps(group, element, bpmnFactory, translate)
   group.entries = group.entries.concat(deployment(element, bpmnFactory, {
     getBusinessObject: getBusinessObject,
     getImplementationType: getImplementationType
-  }, translate));
+  }, translate, wineryEndpoint));
 
   // external //////////////////////////////////////////////////
 

@@ -46,7 +46,7 @@ export default class ConfigPlugin extends PureComponent {
     // initialize config in the frontend
     this.backendConfig.getConfigFromBackend().then(config => this.config = config);
 
-    // subscribe to updates for all configuration parameters
+    // subscribe to updates for all configuration parameters in the backend
     this.props.subscribe('bpmn.modeler.created', (event) => {
 
       const {
@@ -56,29 +56,38 @@ export default class ConfigPlugin extends PureComponent {
       this.editorActions = modeler.get('editorActions');
       const self = this;
 
+      // broadcast the initial configuration in the client using the event bus
+      this.eventBus = modeler.get('eventBus');
+      this.eventBus.fire('config.updated', this.config);
+
       this.editorActions.register({
         camundaEndpointChanged: function(camundaEndpoint) {
           self.config.camundaEndpoint = camundaEndpoint;
+          self.eventBus.fire('config.updated', self.config);
         }
       });
       this.editorActions.register({
         opentoscaEndpointChanged: function(opentoscaEndpoint) {
           self.config.opentoscaEndpoint = opentoscaEndpoint;
+          self.eventBus.fire('config.updated', self.config);
         }
       });
       this.editorActions.register({
         wineryEndpointChanged: function(wineryEndpoint) {
           self.config.wineryEndpoint = wineryEndpoint;
+          self.eventBus.fire('config.updated', self.config);
         }
       });
       this.editorActions.register({
         qrmRepoNameChanged: function(qrmRepoName) {
           self.config.qrmRepoName = qrmRepoName;
+          self.eventBus.fire('config.updated', self.config);
         }
       });
       this.editorActions.register({
         qrmUserNameChanged: function(qrmUserName) {
           self.config.qrmUserName = qrmUserName;
+          self.eventBus.fire('config.updated', self.config);
         }
       });
     });
