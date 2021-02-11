@@ -44,6 +44,8 @@ const {
 const {
   getCamundaEndpoint,
   setCamundaEndpoint,
+  getWineryEndpoint,
+  setWineryEndpoint,
   getOpenTOSCAEndpoint,
   setOpenTOSCAEndpoint
 } = require('./deployment');
@@ -263,6 +265,7 @@ renderer.on('config:get-form-modal', function(done) {
   let configurationJson = {
     camundaEndpoint: getCamundaEndpoint(),
     opentoscaEndpoint: getOpenTOSCAEndpoint(),
+    wineryEndpoint: getWineryEndpoint(),
     qrmRepoName: getQRMRepositoryUserName(),
     qrmUserName: getQRMRepositoryName()
   };
@@ -274,6 +277,7 @@ renderer.on('config:set-from-modal', function(config) {
   log.info('Updating config in the backend...');
   setCamundaEndpoint(config.camundaEndpoint);
   setOpenTOSCAEndpoint(config.opentoscaEndpoint);
+  setWineryEndpoint(config.wineryEndpoint);
   setQRMUserName(config.qrmUserName);
   setQRMRepositoryName(config.qrmRepoName);
 });

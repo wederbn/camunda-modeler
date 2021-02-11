@@ -22,6 +22,7 @@ const defaultState = {
 const defaultConfig = {
   camundaEndpoint: '',
   opentoscaEndpoint: '',
+  wineryEndpoint: '',
   qrmRepoName: '',
   qrmUserName: ''
 };
@@ -63,6 +64,11 @@ export default class ConfigPlugin extends PureComponent {
       this.editorActions.register({
         opentoscaEndpointChanged: function(opentoscaEndpoint) {
           self.config.opentoscaEndpoint = opentoscaEndpoint;
+        }
+      });
+      this.editorActions.register({
+        wineryEndpointChanged: function(wineryEndpoint) {
+          self.config.wineryEndpoint = wineryEndpoint;
         }
       });
       this.editorActions.register({
