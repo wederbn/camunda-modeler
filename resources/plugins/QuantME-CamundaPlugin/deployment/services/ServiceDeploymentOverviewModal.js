@@ -19,9 +19,16 @@ const Body = Modal.Body || (({ children }) => <div>{children}</div>);
 const Footer = Modal.Footer || (({ children }) => <div>{children}</div>);
 
 export default function ServiceDeploymentOverviewModal({ onClose, initValues }) {
-  console.log(initValues);
 
-  const onNext = () => onClose({ next: true });
+  const onNext = () => onClose({ next: true, initValues: initValues });
+
+  const listItems = initValues.map((CSAR) =>
+    <tr key={CSAR.id}>
+      <td>{CSAR.csarName}</td>
+      <td>{CSAR.id}</td>
+      <td>{CSAR.type}</td>
+    </tr>
+  );
 
   return <Modal onClose={onClose}>
 
@@ -30,8 +37,18 @@ export default function ServiceDeploymentOverviewModal({ onClose, initValues }) 
     </Title>
 
     <Body>
-      <h2>TEST</h2>
-      // TODO: display CSARs that have to be deployed
+      <h3 className="spaceUnder">CSARs that have to be uploaded to the OpenTOSCA Container:</h3>
+
+      <table>
+        <tbody>
+          <tr>
+            <th>CSAR Name</th>
+            <th>Related Task ID</th>
+            <th>Type (Push/Pull)</th>
+          </tr>
+          {listItems}
+        </tbody>
+      </table>
     </Body>
 
     <Footer>

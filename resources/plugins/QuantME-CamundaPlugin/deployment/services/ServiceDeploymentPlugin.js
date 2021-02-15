@@ -61,6 +61,9 @@ export default class ConfigPlugin extends PureComponent {
 
     // handle click on 'Next' button
     if (result && result.hasOwnProperty('next') && result.next === true) {
+
+      // TODO: perform CSAR upload
+
       this.setState({
         windowOpenDeploymentOverview: false,
         windowOpenDeploymentInput: true,
@@ -154,6 +157,18 @@ export default class ConfigPlugin extends PureComponent {
   }
 
   /**
+   * Get the CSAR name from the deployment model URL
+   *
+   * @param serviceTask the service task the CSAR belongs to
+   * @return {*} the CSAR name
+   */
+  getCSARName(serviceTask) {
+    let url = serviceTask.deploymentModelUrl.split('/?csar')[0];
+    let urlSplit = url.split('/');
+    return urlSplit[urlSplit.length - 1];
+  }
+
+  /**
    * Get the ServiceTasks of the current workflow that have an attached deployment model to deploy the corresponding service
    */
   getServiceTasksToDeploy() {
@@ -178,7 +193,11 @@ export default class ConfigPlugin extends PureComponent {
       let flowElement = flowElements[i];
 
       if (this.isDeployableServiceTask(flowElement)) {
-        serviceTasksToDeploy.push({ id: flowElement.id, url: flowElement.deploymentModelUrl , type: this.getBindingType(flowElement) });
+        serviceTasksToDeploy.push(
+          { id: flowElement.id,
+            url: flowElement.deploymentModelUrl ,
+            type: this.getBindingType(flowElement),
+            csarName: this.getCSARName(flowElement) });
       }
     }
 
