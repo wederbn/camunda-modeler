@@ -29,7 +29,7 @@ export default function ServiceDeploymentInputModal({ onClose, initValues }) {
     </Title>
 
     <Body>
-      <h2>TEST</h2>
+      <h3 className="spaceUnder">CSARs successfully uploaded to the OpenTOSCA Container. Required input parameters:</h3>
     </Body>
 
     <Footer>

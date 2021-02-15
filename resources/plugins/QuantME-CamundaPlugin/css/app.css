@@ -27,8 +27,23 @@ tr:nth-child(even) {
   background-color: #dddddd;
 }
 
+#progress {
+  width: 100%;
+  background-color: #ddd;
+}
+
+#bar {
+  width: 1%;
+  height: 30px;
+  background-color: #4CAF50;
+}
+
 .spaceUnder {
   padding-bottom: 1em;
+}
+
+.spaceAbove {
+  padding-top: 1em;
 }
 
 tr.spaceUnder>td {

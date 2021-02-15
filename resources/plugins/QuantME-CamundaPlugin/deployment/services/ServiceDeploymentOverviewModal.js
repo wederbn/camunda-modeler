@@ -20,7 +20,15 @@ const Footer = Modal.Footer || (({ children }) => <div>{children}</div>);
 
 export default function ServiceDeploymentOverviewModal({ onClose, initValues }) {
 
-  const onNext = () => onClose({ next: true, initValues: initValues });
+  let progressBarRef = React.createRef();
+  let progressBarDivRef = React.createRef();
+  let footerRef = React.createRef();
+
+  const onNext = () => onClose({
+    next: true,
+    csarList: initValues,
+    refs: { progressBarRef: progressBarRef, progressBarDivRef: progressBarDivRef, footerRef: footerRef }
+  });
 
   const listItems = initValues.map((CSAR) =>
     <tr key={CSAR.id}>
@@ -49,10 +57,17 @@ export default function ServiceDeploymentOverviewModal({ onClose, initValues }) 
           {listItems}
         </tbody>
       </table>
+
+      <div hidden={true} ref={progressBarDivRef}>
+        <div className="spaceUnder spaceAbove">Upload progress:</div>
+        <div id="progress">
+          <div id="bar" ref={progressBarRef}/>
+        </div>
+      </div>
     </Body>
 
     <Footer>
-      <div id="deploymentButtons">
+      <div id="deploymentButtons" ref={footerRef}>
         <button type="button" className="btn btn-primary" onClick={() => onNext()}>Upload CSARs</button>
         <button type="button" className="btn btn-secondary" onClick={() => onClose()}>Cancel</button>
       </div>
