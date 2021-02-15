@@ -34,7 +34,7 @@ export default function ServiceDeploymentBindingModal({ onClose, initValues }) {
 
     <Footer>
       <div id="deploymentButtons">
-        <button type="button" className="btn btn-primary" onClick={() => onFinished()}>Finish</button>
+        <button type="button" className="btn btn-primary" onClick={() => onFinished()}>Perform Binding</button>
         <button type="button" className="btn btn-secondary" onClick={() => onClose()}>Cancel</button>
       </div>
     </Footer>

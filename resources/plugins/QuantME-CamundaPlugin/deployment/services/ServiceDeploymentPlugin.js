@@ -16,12 +16,16 @@ import { Fill } from 'camunda-modeler-plugin-helpers/components';
 import ServiceDeploymentOverviewModal from './ServiceDeploymentOverviewModal';
 import ServiceDeploymentInputModal from './ServiceDeploymentInputModal';
 import ServiceDeploymentBindingModal from './ServiceDeploymentBindingModal';
+import { getRootProcess } from '../../quantme/Utilities';
 
 const defaultState = {
   windowOpenDeploymentOverview: false,
   windowOpenDeploymentInput: false,
   windowOpenDeploymentBinding: false
 };
+
+const QUANTME_NAMESPACE_PULL_ENCODED = encodeURIComponent(encodeURIComponent('http://quantil.org/quantme/pull'));
+const QUANTME_NAMESPACE_PUSH_ENCODED = encodeURIComponent(encodeURIComponent('http://quantil.org/quantme/push'));
 
 export default class ConfigPlugin extends PureComponent {
 
@@ -36,6 +40,16 @@ export default class ConfigPlugin extends PureComponent {
   }
 
   componentDidMount() {
+
+    // get modeler to access current workflow
+    this.props.subscribe('bpmn.modeler.created', (event) => {
+
+      const {
+        modeler
+      } = event;
+
+      this.modeler = modeler;
+    });
   }
 
   /**
@@ -102,6 +116,75 @@ export default class ConfigPlugin extends PureComponent {
     });
   }
 
+  /**
+   * Check whether the given element in a workflow is a deployable ServiceTask
+   *
+   * @param element the element to check
+   * @return {*|boolean} true if the element is a ServiceTask and has an assigned deployment model, false otherwise
+   */
+  isDeployableServiceTask(element) {
+    return element.$type && element.$type === 'bpmn:ServiceTask' && element.deploymentModelUrl && this.getBindingType(element) !== undefined;
+  }
+
+  /**
+   * Check whether the given ServiceTask has an attached deployment model that should be bound using pull or push mode
+   *
+   * @param serviceTask the service task to check
+   * @return {string|undefined} 'push' if the corresponding service should be bound by pushing requests,
+   * 'pull' if the corresponding service should be bound by pulling requests from a topic,
+   * or undefined if unable to determine pull or push
+   */
+  getBindingType(serviceTask) {
+    let urlSplit = serviceTask.deploymentModelUrl.split('servicetemplates/');
+    if (urlSplit.length !== 2) {
+      console.warn('Deployment model url is invalid: %s', serviceTask.deploymentModelUrl);
+      return undefined;
+    }
+    let namespace = urlSplit[1];
+
+    if (namespace.startsWith(QUANTME_NAMESPACE_PUSH_ENCODED)) {
+      return 'push';
+    }
+
+    if (namespace.startsWith(QUANTME_NAMESPACE_PULL_ENCODED)) {
+      return 'pull';
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Get the ServiceTasks of the current workflow that have an attached deployment model to deploy the corresponding service
+   */
+  getServiceTasksToDeploy() {
+
+    let serviceTasksToDeploy = [];
+    if (!this.modeler) {
+      console.warn('Modeler not available, unable to retrieve ServiceTasks!');
+      return serviceTasksToDeploy;
+    }
+
+    // get root element of the workflow
+    const rootElement = getRootProcess(this.modeler.getDefinitions());
+
+    if (rootElement === undefined) {
+      console.warn('Unable to retrieve root element within the workflow!');
+      return serviceTasksToDeploy;
+    }
+
+    // search for service tasks with assigned deployment model
+    let flowElements = rootElement.flowElements;
+    for (let i = 0; i < flowElements.length; i++) {
+      let flowElement = flowElements[i];
+
+      if (this.isDeployableServiceTask(flowElement)) {
+        serviceTasksToDeploy.push({ id: flowElement.id, url: flowElement.deploymentModelUrl , type: this.getBindingType(flowElement) });
+      }
+    }
+
+    return serviceTasksToDeploy;
+  }
+
   render() {
 
     // render deployment button and pop-up menu
@@ -115,7 +198,7 @@ export default class ConfigPlugin extends PureComponent {
       {this.state.windowOpenDeploymentOverview && (
         <ServiceDeploymentOverviewModal
           onClose={this.handleDeploymentOverviewClosed}
-          initValues={this.state}
+          initValues={this.getServiceTasksToDeploy()}
         />
       )}
       {this.state.windowOpenDeploymentInput && (

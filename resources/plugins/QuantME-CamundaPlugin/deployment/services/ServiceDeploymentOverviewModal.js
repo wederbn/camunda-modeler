@@ -19,6 +19,7 @@ const Body = Modal.Body || (({ children }) => <div>{children}</div>);
 const Footer = Modal.Footer || (({ children }) => <div>{children}</div>);
 
 export default function ServiceDeploymentOverviewModal({ onClose, initValues }) {
+  console.log(initValues);
 
   const onNext = () => onClose({ next: true });
 
@@ -30,11 +31,12 @@ export default function ServiceDeploymentOverviewModal({ onClose, initValues }) 
 
     <Body>
       <h2>TEST</h2>
+      // TODO: display CSARs that have to be deployed
     </Body>
 
     <Footer>
       <div id="deploymentButtons">
-        <button type="button" className="btn btn-primary" onClick={() => onNext()}>Next</button>
+        <button type="button" className="btn btn-primary" onClick={() => onNext()}>Upload CSARs</button>
         <button type="button" className="btn btn-secondary" onClick={() => onClose()}>Cancel</button>
       </div>
     </Footer>

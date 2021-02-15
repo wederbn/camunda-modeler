@@ -34,7 +34,7 @@ export default function ServiceDeploymentInputModal({ onClose, initValues }) {
 
     <Footer>
       <div id="deploymentButtons">
-        <button type="button" className="btn btn-primary" onClick={() => onNext()}>Next</button>
+        <button type="button" className="btn btn-primary" onClick={() => onNext()}>Deploy Services</button>
         <button type="button" className="btn btn-secondary" onClick={() => onClose()}>Cancel</button>
       </div>
     </Footer>
