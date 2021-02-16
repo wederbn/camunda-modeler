@@ -20,6 +20,8 @@ const Footer = Modal.Footer || (({ children }) => <div>{children}</div>);
 
 export default function ServiceDeploymentInputModal({ onClose, initValues }) {
 
+  console.log(initValues);
+
   const onNext = () => onClose({ next: true });
 
   return <Modal onClose={onClose}>
@@ -29,7 +31,9 @@ export default function ServiceDeploymentInputModal({ onClose, initValues }) {
     </Title>
 
     <Body>
-      <h3 className="spaceUnder">CSARs successfully uploaded to the OpenTOSCA Container. Required input parameters:</h3>
+      <h3 className="spaceUnder">CSARs successfully uploaded to the OpenTOSCA Container.</h3>
+
+      <h3 className="spaceUnder">The following CSARs require input parameters:</h3>
     </Body>
 
     <Footer>

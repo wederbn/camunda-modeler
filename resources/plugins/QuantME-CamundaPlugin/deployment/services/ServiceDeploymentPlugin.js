@@ -18,6 +18,8 @@ import ServiceDeploymentInputModal from './ServiceDeploymentInputModal';
 import ServiceDeploymentBindingModal from './ServiceDeploymentBindingModal';
 import { getRootProcess } from '../../quantme/Utilities';
 
+import { uploadCSARToContainer } from './OpenTOSCAUtils';
+
 const defaultState = {
   windowOpenDeploymentOverview: false,
   windowOpenDeploymentInput: false,
@@ -27,7 +29,7 @@ const defaultState = {
 const QUANTME_NAMESPACE_PULL_ENCODED = encodeURIComponent(encodeURIComponent('http://quantil.org/quantme/pull'));
 const QUANTME_NAMESPACE_PUSH_ENCODED = encodeURIComponent(encodeURIComponent('http://quantil.org/quantme/push'));
 
-export default class ConfigPlugin extends PureComponent {
+export default class ServiceDeploymentPlugin extends PureComponent {
 
   constructor(props) {
     super(props);
@@ -49,6 +51,13 @@ export default class ConfigPlugin extends PureComponent {
       } = event;
 
       this.modeler = modeler;
+
+      // subscribe to event bus to receive updates in the OpenTOSCA Container endpoint
+      const self = this;
+      this.eventBus = modeler.get('eventBus');
+      this.eventBus.on('config.updated', function(config) {
+        self.opentoscaEndpoint = config.opentoscaEndpoint;
+      });
     });
   }
 
@@ -96,14 +105,14 @@ export default class ConfigPlugin extends PureComponent {
         let csar = csarList[i];
         console.log('Uploading CSAR to OpenTOSCA container: ', csar);
 
-        let uploadResult = await this.uploadCSARToContainer(csar.url);
+        let uploadResult = await uploadCSARToContainer(this.opentoscaEndpoint, csar.csarName, csar.url);
         if (uploadResult.success === false) {
 
           // notify user about failed CSAR upload
           this.props.displayNotification({
             type: 'error',
             title: 'Unable to upload CSAR to the OpenTOSCA Container',
-            content: 'CSAR defined for ServiceTask with Id \'' + csar.id + '\' could not be uploaded to the connected OpenTOSCA Container!',
+            content: 'CSAR defined for ServiceTasks with Id \'' + csar.serviceTaskIds + '\' could not be uploaded to the connected OpenTOSCA Container!',
             duration: 20000
           });
 
@@ -117,11 +126,14 @@ export default class ConfigPlugin extends PureComponent {
         }
 
         // set URL of the CSAR in the OpenTOSCA Container which is required to create instances
-        csar.containerUrl = uploadResult.url;
+        csar.buildPlanUrl = uploadResult.url;
+        csar.inputParameters = uploadResult.inputParameters;
 
         // increase progress in the UI
         this.handleProgress(progressBar, progressStep);
       }
+
+      this.csarList = csarList;
 
       this.setState({
         windowOpenDeploymentOverview: false,
@@ -138,18 +150,6 @@ export default class ConfigPlugin extends PureComponent {
       windowOpenDeploymentInput: false,
       windowOpenDeploymentBinding: false
     });
-  }
-
-  /**
-   * Upload the CSAR located at the given URL to the connected OpenTOSCA Container
-   *
-   * @param url the URL pointing to the CSAR
-   */
-  async uploadCSARToContainer(url) {
-    await new Promise(r => setTimeout(r, 2000));
-
-    // TODO
-    return { success: true, url: 'TODO' };
   }
 
   /**
@@ -237,7 +237,7 @@ export default class ConfigPlugin extends PureComponent {
   getCSARName(serviceTask) {
     let url = serviceTask.deploymentModelUrl.split('/?csar')[0];
     let urlSplit = url.split('/');
-    return urlSplit[urlSplit.length - 1];
+    return urlSplit[urlSplit.length - 1] + '.csar';
   }
 
   /**
@@ -245,10 +245,10 @@ export default class ConfigPlugin extends PureComponent {
    */
   getServiceTasksToDeploy() {
 
-    let serviceTasksToDeploy = [];
+    let csarsToDeploy = [];
     if (!this.modeler) {
       console.warn('Modeler not available, unable to retrieve ServiceTasks!');
-      return serviceTasksToDeploy;
+      return csarsToDeploy;
     }
 
     // get root element of the workflow
@@ -256,7 +256,7 @@ export default class ConfigPlugin extends PureComponent {
 
     if (rootElement === undefined) {
       console.warn('Unable to retrieve root element within the workflow!');
-      return serviceTasksToDeploy;
+      return csarsToDeploy;
     }
 
     // search for service tasks with assigned deployment model
@@ -265,15 +265,24 @@ export default class ConfigPlugin extends PureComponent {
       let flowElement = flowElements[i];
 
       if (this.isDeployableServiceTask(flowElement)) {
-        serviceTasksToDeploy.push(
-          { id: flowElement.id,
-            url: flowElement.deploymentModelUrl ,
-            type: this.getBindingType(flowElement),
-            csarName: this.getCSARName(flowElement) });
+
+        // check if CSAR was already added for another service task
+        let csarEntry = csarsToDeploy.find(serviceTask => flowElement.deploymentModelUrl === serviceTask.url);
+        if (csarEntry !== undefined) {
+          csarEntry.serviceTaskIds.push(flowElement.id);
+        } else {
+          csarsToDeploy.push(
+            {
+              serviceTaskIds: [flowElement.id],
+              url: flowElement.deploymentModelUrl,
+              type: this.getBindingType(flowElement),
+              csarName: this.getCSARName(flowElement)
+            });
+        }
       }
     }
 
-    return serviceTasksToDeploy;
+    return csarsToDeploy;
   }
 
   render() {
@@ -295,7 +304,7 @@ export default class ConfigPlugin extends PureComponent {
       {this.state.windowOpenDeploymentInput && (
         <ServiceDeploymentInputModal
           onClose={this.handleDeploymentInputClosed}
-          initValues={this.state}
+          initValues={this.csarList}
         />
       )}
       {this.state.windowOpenDeploymentBinding && (

@@ -31,9 +31,9 @@ export default function ServiceDeploymentOverviewModal({ onClose, initValues }) 
   });
 
   const listItems = initValues.map((CSAR) =>
-    <tr key={CSAR.id}>
+    <tr key={CSAR.csarName}>
       <td>{CSAR.csarName}</td>
-      <td>{CSAR.id}</td>
+      <td>{CSAR.serviceTaskIds.join(',')}</td>
       <td>{CSAR.type}</td>
     </tr>
   );
@@ -51,7 +51,7 @@ export default function ServiceDeploymentOverviewModal({ onClose, initValues }) 
         <tbody>
           <tr>
             <th>CSAR Name</th>
-            <th>Related Task ID</th>
+            <th>Related ServiceTask IDs</th>
             <th>Type (Push/Pull)</th>
           </tr>
           {listItems}
