@@ -18,7 +18,7 @@ import ServiceDeploymentInputModal from './ServiceDeploymentInputModal';
 import ServiceDeploymentBindingModal from './ServiceDeploymentBindingModal';
 import { getRootProcess } from '../../quantme/Utilities';
 
-import { uploadCSARToContainer } from './OpenTOSCAUtils';
+import { createServiceInstance, uploadCSARToContainer } from './OpenTOSCAUtils';
 
 const defaultState = {
   windowOpenDeploymentOverview: false,
@@ -157,13 +157,36 @@ export default class ServiceDeploymentPlugin extends PureComponent {
    *
    * @param result the result from the close operation
    */
-  handleDeploymentInputClosed(result) {
+  async handleDeploymentInputClosed(result) {
 
     // handle click on 'Next' button
     if (result && result.hasOwnProperty('next') && result.next === true) {
 
-      // TODO
-      console.log(result.csarList);
+      // make progress bar visible and hide buttons
+      result.refs.progressBarDivRef.current.hidden = false;
+      result.refs.footerRef.current.hidden = true;
+      let progressBar = result.refs.progressBarRef.current;
+      this.handleProgress(progressBar, 10);
+
+      // calculate progress step size for the number of CSARs to create an service instance for
+      let csarList = result.csarList;
+      let progressStep = Math.round(90 / csarList.length);
+
+      // create service instances for all CSARs
+      for (let i = 0; i < csarList.length; i++) {
+        let csar = csarList[i];
+        console.log('Creating service instance for CSAR: ', csar);
+
+        let instanceCreationResponse = await createServiceInstance(csar);
+
+        // TODO: handle results
+        console.log(instanceCreationResponse);
+
+        // increase progress in the UI
+        this.handleProgress(progressBar, progressStep);
+      }
+
+      this.csarList = csarList;
 
       this.setState({
         windowOpenDeploymentOverview: false,

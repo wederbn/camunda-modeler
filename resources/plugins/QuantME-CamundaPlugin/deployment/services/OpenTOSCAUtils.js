@@ -122,3 +122,16 @@ export async function getBuildPlanUrl(csarUrl) {
 
   return { success: true, url: responseJson.plans[0]._links.self.href };
 }
+
+/**
+ * Create an instance of the ServiceTemplate contained in the given CSAR
+ *
+ * @param csar the details about the CSAR to create an instance from the contained ServiceTemplate
+ * @return the result of the instance creation (success, endpoint, topic on which the service listens, ...)
+ */
+export async function createServiceInstance(csar) {
+  await new Promise(r => setTimeout(r, 2000));
+
+  // TODO
+  return { success: true };
+}

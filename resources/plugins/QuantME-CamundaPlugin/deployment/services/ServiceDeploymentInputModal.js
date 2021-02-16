@@ -20,6 +20,11 @@ const Footer = Modal.Footer || (({ children }) => <div>{children}</div>);
 
 export default function ServiceDeploymentInputModal({ onClose, initValues }) {
 
+  // refs to enable changing the state through the plugin
+  let progressBarRef = React.createRef();
+  let progressBarDivRef = React.createRef();
+  let footerRef = React.createRef();
+
   // propagte updates on dynamically created input fields to corresponding parameter fields
   const handleInputChange = (event, csarIndex, paramIndex) => {
     initValues[csarIndex].inputParameters[paramIndex].value = event.target.value;
@@ -83,7 +88,11 @@ export default function ServiceDeploymentInputModal({ onClose, initValues }) {
     }
   }
 
-  const onNext = () => onClose({ next: true, csarList: initValues });
+  const onNext = () => onClose({
+    next: true,
+    csarList: initValues,
+    refs: { progressBarRef: progressBarRef, progressBarDivRef: progressBarDivRef, footerRef: footerRef }
+  });
 
   return <Modal onClose={onClose}>
 
@@ -99,10 +108,17 @@ export default function ServiceDeploymentInputModal({ onClose, initValues }) {
       <h3 className="spaceUnder" hidden={inputRequired}>No input parameters required.</h3>
 
       {csarInputParts}
+
+      <div hidden={true} ref={progressBarDivRef}>
+        <div className="spaceUnder spaceAbove">Upload progress:</div>
+        <div id="progress">
+          <div id="bar" ref={progressBarRef}/>
+        </div>
+      </div>
     </Body>
 
     <Footer>
-      <div id="deploymentButtons">
+      <div id="deploymentButtons" ref={footerRef}>
         <button type="button" className="btn btn-primary" onClick={() => onNext()}>Deploy Services</button>
         <button type="button" className="btn btn-secondary" onClick={() => onClose()}>Cancel</button>
       </div>
