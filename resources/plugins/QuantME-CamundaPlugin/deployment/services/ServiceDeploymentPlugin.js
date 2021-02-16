@@ -207,9 +207,7 @@ export default class ServiceDeploymentPlugin extends PureComponent {
         this.handleProgress(progressBar, progressStep);
       }
 
-      // TODO: remove logging
-      console.log(csarList);
-
+      // update CSAR list for the binding
       this.csarList = csarList;
 
       this.setState({
@@ -370,7 +368,7 @@ export default class ServiceDeploymentPlugin extends PureComponent {
       {this.state.windowOpenDeploymentBinding && (
         <ServiceDeploymentBindingModal
           onClose={this.handleDeploymentBindingClosed}
-          initValues={this.state}
+          initValues={this.csarList}
         />
       )}
     </Fragment>);

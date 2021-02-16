@@ -152,7 +152,7 @@ export async function createServiceInstance(csar, camundaEngineEndpoint) {
 
     camundaTopicParam.value = topicName;
     camundaEndpointParam.value = camundaEngineEndpoint;
-    result.topicName = result;
+    result.topicName = topicName;
   }
 
   // trigger instance creation
@@ -163,10 +163,17 @@ export async function createServiceInstance(csar, camundaEngineEndpoint) {
   });
   let instanceCreationResponseJson = await instanceCreationResponse.json();
 
-  let pollingUrl = csar.buildPlanUrl + '/instances/' + instanceCreationResponseJson;
-  let state = 'RUNNING';
+  // wait for the service instance to be created
+  await new Promise(r => setTimeout(r, 5000));
+
+  // get service template instance to poll for completness
+  let buildPlanResponse = await fetch(csar.buildPlanUrl + '/instances/' + instanceCreationResponseJson);
+  let buildPlanResponseJson = await buildPlanResponse.json();
+
+  let pollingUrl = buildPlanResponseJson._links.service_template_instance.href;
+  let state = 'CREATING';
   console.log('Polling for finished service instance at URL: %s', pollingUrl);
-  while (!(state === 'FINISHED' || state === 'FAILED')) {
+  while (!(state === 'CREATED' || state === 'FAILED')) {
 
     // wait 5 seconds for next poll
     await new Promise(r => setTimeout(r, 5000));

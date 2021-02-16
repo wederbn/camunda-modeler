@@ -20,6 +20,8 @@ const Footer = Modal.Footer || (({ children }) => <div>{children}</div>);
 
 export default function ServiceDeploymentBindingModal({ onClose, initValues }) {
 
+  console.log(initValues);
+
   const onFinished = () => onClose({ finished: true });
 
   return <Modal onClose={onClose}>
