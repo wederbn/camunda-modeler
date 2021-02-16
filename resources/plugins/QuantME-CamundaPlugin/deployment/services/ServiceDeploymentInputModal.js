@@ -44,24 +44,26 @@ export default function ServiceDeploymentInputModal({ onClose, initValues }) {
 
       // skip parameters that are automatically set by the OpenTOSCA Container
       if (inputParam.name === 'instanceDataAPIUrl' || inputParam.name === 'CorrelationID' || inputParam.name === 'csarEntrypoint') {
+        paramsToRetrieve.push({ hidden: true, inputParam: inputParam });
         continue;
       }
 
       // skip parameters that are automatically set during service binding
       if (inputParam.name === 'camundaTopic' || inputParam.name === 'camundaEndpoint') {
+        paramsToRetrieve.push({ hidden: true, inputParam: inputParam });
         continue;
       }
 
-      paramsToRetrieve.push(inputParam);
+      paramsToRetrieve.push({ hidden: false, inputParam: inputParam });
     }
 
-    if (paramsToRetrieve.length > 0) {
+    if (paramsToRetrieve.filter((param) => param.hidden === false).length > 0) {
       inputRequired = true;
 
       // add entries for the parameters
       const listItems = paramsToRetrieve.map((param, j) =>
-        <tr key={csar.csarName + '-' + param.name}>
-          <td>{param.name}</td>
+        <tr key={csar.csarName + '-' + param.inputParam.name} hidden={param.hidden}>
+          <td>{param.inputParam.name}</td>
           <td>
             <input
               type="string"
