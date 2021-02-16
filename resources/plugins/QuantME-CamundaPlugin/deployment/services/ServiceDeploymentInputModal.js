@@ -20,9 +20,70 @@ const Footer = Modal.Footer || (({ children }) => <div>{children}</div>);
 
 export default function ServiceDeploymentInputModal({ onClose, initValues }) {
 
-  console.log(initValues);
+  // propagte updates on dynamically created input fields to corresponding parameter fields
+  const handleInputChange = (event, csarIndex, paramIndex) => {
+    initValues[csarIndex].inputParameters[paramIndex].value = event.target.value;
+  };
 
-  const onNext = () => onClose({ next: true });
+  // determine input parameters that have to be passed by the user
+  let csarInputParts = [];
+  let inputRequired = false;
+  for (let i = 0; i < initValues.length; i++) {
+    let csar = initValues[i];
+    let inputParams = csar.inputParameters;
+
+    let paramsToRetrieve = [];
+    for (let j = 0; j < inputParams.length; j++) {
+      let inputParam = inputParams[j];
+
+
+      // skip parameters that are automatically set by the OpenTOSCA Container
+      if (inputParam.name === 'instanceDataAPIUrl' || inputParam.name === 'CorrelationID' || inputParam.name === 'csarEntrypoint') {
+        continue;
+      }
+
+      // skip parameters that are automatically set during service binding
+      if (inputParam.name === 'camundaTopic') {
+        continue;
+      }
+
+      paramsToRetrieve.push(inputParam);
+    }
+
+    if (paramsToRetrieve.length > 0) {
+      inputRequired = true;
+
+      // add entries for the parameters
+      const listItems = paramsToRetrieve.map((param, j) =>
+        <tr key={csar.csarName + '-' + param.name}>
+          <td>{param.name}</td>
+          <td>
+            <input
+              type="string"
+              value={initValues[i][j]}
+              onChange={event => handleInputChange(event, i, j)}/>
+          </td>
+        </tr>
+      );
+
+      // assemble the table
+      csarInputParts.push(
+        <div key={csar.csarName}>
+          <h3 className="spaceUnder spaceAbove">{csar.csarName}:</h3>
+          <table>
+            <tbody>
+              <tr>
+                <th>Parameter Name</th>
+                <th>Value</th>
+              </tr>
+              {listItems}
+            </tbody>
+          </table>
+        </div>);
+    }
+  }
+
+  const onNext = () => onClose({ next: true, csarList: initValues });
 
   return <Modal onClose={onClose}>
 
@@ -33,7 +94,11 @@ export default function ServiceDeploymentInputModal({ onClose, initValues }) {
     <Body>
       <h3 className="spaceUnder">CSARs successfully uploaded to the OpenTOSCA Container.</h3>
 
-      <h3 className="spaceUnder">The following CSARs require input parameters:</h3>
+      <h3 className="spaceUnder" hidden={!inputRequired}>The following CSARs require input parameters:</h3>
+
+      <h3 className="spaceUnder" hidden={inputRequired}>No input parameters required.</h3>
+
+      {csarInputParts}
     </Body>
 
     <Footer>

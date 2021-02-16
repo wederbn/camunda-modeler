@@ -161,6 +161,10 @@ export default class ServiceDeploymentPlugin extends PureComponent {
 
     // handle click on 'Next' button
     if (result && result.hasOwnProperty('next') && result.next === true) {
+
+      // TODO
+      console.log(result.csarList);
+
       this.setState({
         windowOpenDeploymentOverview: false,
         windowOpenDeploymentInput: false,
