@@ -48,7 +48,7 @@ export default function ServiceDeploymentInputModal({ onClose, initValues }) {
       }
 
       // skip parameters that are automatically set during service binding
-      if (inputParam.name === 'camundaTopic') {
+      if (inputParam.name === 'camundaTopic' || inputParam.name === 'camundaEndpoint') {
         continue;
       }
 

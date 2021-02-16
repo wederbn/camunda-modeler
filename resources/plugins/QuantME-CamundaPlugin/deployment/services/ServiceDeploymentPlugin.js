@@ -57,6 +57,7 @@ export default class ServiceDeploymentPlugin extends PureComponent {
       this.eventBus = modeler.get('eventBus');
       this.eventBus.on('config.updated', function(config) {
         self.opentoscaEndpoint = config.opentoscaEndpoint;
+        self.camundaEndpoint = config.camundaEndpoint;
       });
     });
   }
@@ -177,14 +178,37 @@ export default class ServiceDeploymentPlugin extends PureComponent {
         let csar = csarList[i];
         console.log('Creating service instance for CSAR: ', csar);
 
-        let instanceCreationResponse = await createServiceInstance(csar);
+        let instanceCreationResponse = await createServiceInstance(csar, this.camundaEndpoint);
+        if (instanceCreationResponse.success === false) {
 
-        // TODO: handle results
-        console.log(instanceCreationResponse);
+          // notify user about failed instance creation
+          this.props.displayNotification({
+            type: 'error',
+            title: 'Unable to create service instace',
+            content: 'Unable to create service instance for CSAR \'' + csar.csarName + '\'. Aborting process!',
+            duration: 20000
+          });
+
+          // abort process
+          this.setState({
+            windowOpenDeploymentOverview: false,
+            windowOpenDeploymentInput: false,
+            windowOpenDeploymentBinding: false
+          });
+          return;
+        }
+
+        // store topic name for pulling services
+        if (instanceCreationResponse.topicName !== undefined) {
+          csar.topicName = instanceCreationResponse.topicName;
+        }
 
         // increase progress in the UI
         this.handleProgress(progressBar, progressStep);
       }
+
+      // TODO: remove logging
+      console.log(csarList);
 
       this.csarList = csarList;
 
@@ -309,6 +333,15 @@ export default class ServiceDeploymentPlugin extends PureComponent {
       }
     }
 
+    if (csarsToDeploy.length === 0) {
+      this.props.displayNotification({
+        type: 'info',
+        title: 'No ServiceTasks with associated deployment models',
+        content: 'The workflow does not contain ServiceTasks with associated deployment models. No service deployment required!',
+        duration: 20000
+      });
+    }
+
     return csarsToDeploy;
   }
 
@@ -322,7 +355,7 @@ export default class ServiceDeploymentPlugin extends PureComponent {
           <span className="app-icon-service-deployment"><span className="indent">Service Deployment</span></span>
         </button>
       </Fill>
-      {this.state.windowOpenDeploymentOverview && (
+      {this.state.windowOpenDeploymentOverview && this.getServiceTasksToDeploy().length !== 0 && (
         <ServiceDeploymentOverviewModal
           onClose={this.handleDeploymentOverviewClosed}
           initValues={this.getServiceTasksToDeploy()}

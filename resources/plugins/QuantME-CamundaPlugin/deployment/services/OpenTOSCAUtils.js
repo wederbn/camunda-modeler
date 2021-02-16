@@ -127,11 +127,68 @@ export async function getBuildPlanUrl(csarUrl) {
  * Create an instance of the ServiceTemplate contained in the given CSAR
  *
  * @param csar the details about the CSAR to create an instance from the contained ServiceTemplate
+ * @param camundaEngineEndpoint the endpoint of the Camunda engine to bind services using the pulling pattern
  * @return the result of the instance creation (success, endpoint, topic on which the service listens, ...)
  */
-export async function createServiceInstance(csar) {
-  await new Promise(r => setTimeout(r, 2000));
+export async function createServiceInstance(csar, camundaEngineEndpoint) {
 
-  // TODO
-  return { success: true };
+  let result = { success: false };
+
+  let inputParameters = csar.inputParameters;
+  if (csar.type === 'pull') {
+
+    // get special parameters that are required to bind services using external tasks / the pulling pattern
+    let camundaTopicParam = inputParameters.find((param) => param.name === 'camundaTopic');
+    let camundaEndpointParam = inputParameters.find((param) => param.name === 'camundaEndpoint');
+
+    // abort if parameters are not available
+    if (camundaTopicParam === undefined || camundaEndpointParam === undefined) {
+      console.error('Unable to pass topic to poll to service instance creation. Service binding will fail!');
+      return result;
+    }
+
+    // generate topic for the binding
+    let topicName = makeId(12);
+
+    camundaTopicParam.value = topicName;
+    camundaEndpointParam.value = camundaEngineEndpoint;
+    result.topicName = result;
+  }
+
+  // trigger instance creation
+  let instanceCreationResponse = await fetch(csar.buildPlanUrl + '/instances', {
+    method: 'POST',
+    body: JSON.stringify(inputParameters),
+    headers: { 'Content-Type': 'application/json' }
+  });
+  let instanceCreationResponseJson = await instanceCreationResponse.json();
+
+  let pollingUrl = csar.buildPlanUrl + '/instances/' + instanceCreationResponseJson;
+  let state = 'RUNNING';
+  console.log('Polling for finished service instance at URL: %s', pollingUrl);
+  while (!(state === 'FINISHED' || state === 'FAILED')) {
+
+    // wait 5 seconds for next poll
+    await new Promise(r => setTimeout(r, 5000));
+
+    // poll for current state
+    let pollingResponse = await fetch(pollingUrl);
+    let pollingResponseJson = await pollingResponse.json();
+    console.log('Polling response: ', pollingResponseJson);
+
+    state = pollingResponseJson.state;
+  }
+
+  result.success = true;
+  return result;
+}
+
+function makeId(length) {
+  let result = '';
+  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
 }
