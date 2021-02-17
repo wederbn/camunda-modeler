@@ -76,7 +76,7 @@ export default function ServiceDeploymentInputModal({ onClose, initValues }) {
       // assemble the table
       csarInputParts.push(
         <div key={csar.csarName}>
-          <h3 className="spaceUnder spaceAbove">{csar.csarName}:</h3>
+          <h3 className="spaceUnderSmall">{csar.csarName}:</h3>
           <table>
             <tbody>
               <tr>

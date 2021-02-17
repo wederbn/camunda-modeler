@@ -11,6 +11,10 @@
   margin-left: 5px;
 }
 
+ul {
+  padding-left: 20px;
+}
+
 table {
   table-layout: fixed;
   font-family: arial, sans-serif;
@@ -43,6 +47,10 @@ tr:nth-child(even) {
 
 .spaceUnder {
   padding-bottom: 1em;
+}
+
+.spaceUnderSmall {
+  padding-bottom: 0.3em;
 }
 
 .spaceAbove {

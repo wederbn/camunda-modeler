@@ -45,10 +45,10 @@ export async function uploadCSARToContainer(opentoscaEndpoint, csarName, url) {
         body: JSON.stringify(body),
         headers: { 'Content-Type': 'application/json' }
       });
-    }
 
-    // check successful upload and retrieve corresponding url
-    getCSARResult = await getBuildPlanForCSAR(opentoscaEndpoint, csarName);
+      // check successful upload and retrieve corresponding url
+      getCSARResult = await getBuildPlanForCSAR(opentoscaEndpoint, csarName);
+    }
 
     if (!getCSARResult.success) {
       console.error('Uploading CSAR failed!');
