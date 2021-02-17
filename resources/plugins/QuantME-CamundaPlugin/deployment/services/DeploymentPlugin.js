@@ -27,12 +27,15 @@ const defaultState = {
   windowOpenDeploymentBinding: false
 };
 
-export default class ServiceDeploymentPlugin extends PureComponent {
+export default class DeploymentPlugin extends PureComponent {
 
   constructor(props) {
     super(props);
 
     this.state = defaultState;
+
+    // get backend to trigger workflow deployment
+    this.backend = props._getGlobal('backend');
 
     this.handleDeploymentOverviewClosed = this.handleDeploymentOverviewClosed.bind(this);
     this.handleDeploymentInputClosed = this.handleDeploymentInputClosed.bind(this);
@@ -366,6 +369,31 @@ export default class ServiceDeploymentPlugin extends PureComponent {
     return csarsToDeploy;
   }
 
+  /**
+   * Deploy the current workflow to the Camunda engine
+   */
+  async deployWorkflow() {
+    const rootElement = getRootProcess(this.modeler.getDefinitions());
+    const xml = (await this.modeler.saveXML()).xml;
+    let result = await this.backend.send('deployment:deploy-workflow', rootElement.id, xml);
+
+    if (result.status === 'failed') {
+      this.props.displayNotification({
+        type: 'error',
+        title: 'Unable to deploy workflow',
+        content: 'Workflow deployment failed. Please check the configured Camunda engine endpoint!',
+        duration: 20000
+      });
+    } else {
+      this.props.displayNotification({
+        type: 'info',
+        title: 'Workflow successfully deployed',
+        content: 'Workflow successfully deployed under deployment Id: ' + result.deployedProcessDefinition.deploymentId,
+        duration: 20000
+      });
+    }
+  }
+
   render() {
 
     // render deployment button and pop-up menu
@@ -374,6 +402,10 @@ export default class ServiceDeploymentPlugin extends PureComponent {
         <button type="button" className="src-app-primitives-Button__Button--3Ffn0" title="Open service deployment menu"
           onClick={() => this.setState({ windowOpenDeploymentOverview: true })}>
           <span className="app-icon-service-deployment"><span className="indent">Service Deployment</span></span>
+        </button>
+        <button type="button" className="src-app-primitives-Button__Button--3Ffn0" title="Deploy the current workflow"
+          onClick={() => this.deployWorkflow()}>
+          <span className="app-icon-workflow"><span className="indent">Workflow Deployment</span></span>
         </button>
       </Fill>
       {this.state.windowOpenDeploymentOverview && this.getServiceTasksToDeploy().length !== 0 && (

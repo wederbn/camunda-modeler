@@ -47,7 +47,8 @@ const {
   getWineryEndpoint,
   setWineryEndpoint,
   getOpenTOSCAEndpoint,
-  setOpenTOSCAEndpoint
+  setOpenTOSCAEndpoint,
+  deployWorkflow
 } = require('./deployment');
 
 const {
@@ -229,6 +230,13 @@ renderer.on('quantme:update-qrms', async function(done) {
   } catch (error) {
     done(error);
   }
+});
+
+// deployment //////////
+
+renderer.on('deployment:deploy-workflow', async function(workflowName, workflowXml, done) {
+  let deploymentResult = await deployWorkflow(workflowName, workflowXml);
+  done(null, deploymentResult);
 });
 
 // config //////////
