@@ -5,6 +5,26 @@
   padding: 0;
 }
 
+.workflow-deployment:before {
+  content: "";
+  display: block;
+  width: 15px;
+  height: 15px;
+  background-size: contain;
+  background: url("../resources/workflow-deployment-icon.png") no-repeat center center;
+  float: left;
+}
+
+.config:before {
+  content: "";
+  display: block;
+  width: 15px;
+  height: 15px;
+  background-size: contain;
+  background: url("../resources/config-icon.png") no-repeat center center;
+  float: left;
+}
+
 .app-icon-service-deployment:before { content: '\e805'; }
 
 .indent {

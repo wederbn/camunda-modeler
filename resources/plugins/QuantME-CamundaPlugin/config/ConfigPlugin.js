@@ -110,7 +110,7 @@ export default class ConfigPlugin extends PureComponent {
       <Fill slot="toolbar">
         <button type="button" className="src-app-primitives-Button__Button--3Ffn0" title="Open configuration menu"
           onClick={() => this.setState({ configOpen: true })}>
-          <span className="app-icon-properties"><span className="indent">Configuration</span></span>
+          <span className="config"><span className="indent">Configuration</span></span>
         </button>
       </Fill>
       {this.state.configOpen && (

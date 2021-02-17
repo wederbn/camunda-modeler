@@ -405,7 +405,7 @@ export default class DeploymentPlugin extends PureComponent {
         </button>
         <button type="button" className="src-app-primitives-Button__Button--3Ffn0" title="Deploy the current workflow"
           onClick={() => this.deployWorkflow()}>
-          <span className="app-icon-workflow"><span className="indent">Workflow Deployment</span></span>
+          <span className="workflow-deployment"><span className="indent">Workflow Deployment</span></span>
         </button>
       </Fill>
       {this.state.windowOpenDeploymentOverview && this.getServiceTasksToDeploy().length !== 0 && (
