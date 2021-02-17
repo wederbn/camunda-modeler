@@ -25,24 +25,27 @@ export async function uploadCSARToContainer(opentoscaEndpoint, csarName, url) {
     return { success: false };
   }
 
-  // check if CSAR us already uploaded
-  let getCSARResult = await getBuildPlanForCSAR(opentoscaEndpoint, csarName);
+  try {
 
-  if (!getCSARResult.success) {
-    console.log('CSAR is not yet uploaded. Uploading...');
+    // check if CSAR us already uploaded
+    let getCSARResult = await getBuildPlanForCSAR(opentoscaEndpoint, csarName);
 
-    let body = {
-      enrich: 'false',
-      name: csarName,
-      url: url
-    };
+    if (!getCSARResult.success) {
+      console.log('CSAR is not yet uploaded. Uploading...');
 
-    // upload the CSAR
-    await fetch(opentoscaEndpoint, {
-      method: 'POST',
-      body: JSON.stringify(body),
-      headers: { 'Content-Type': 'application/json' }
-    });
+      let body = {
+        enrich: 'false',
+        name: csarName,
+        url: url
+      };
+
+      // upload the CSAR
+      await fetch(opentoscaEndpoint, {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
 
     // check successful upload and retrieve corresponding url
     getCSARResult = await getBuildPlanForCSAR(opentoscaEndpoint, csarName);
@@ -51,13 +54,16 @@ export async function uploadCSARToContainer(opentoscaEndpoint, csarName, url) {
       console.error('Uploading CSAR failed!');
       return { success: false };
     }
+
+    // retrieve input parameters for the build plan
+    let buildPlanResult = await fetch(getCSARResult.url);
+    let buildPlanResultJson = await buildPlanResult.json();
+
+    return { success: true, url: getCSARResult.url, inputParameters: buildPlanResultJson.input_parameters };
+  } catch (e) {
+    console.error('Error while uploading CSAR: ' + e);
+    return { success: false };
   }
-
-  // retrieve input parameters for the build plan
-  let buildPlanResult = await fetch(getCSARResult.url);
-  let buildPlanResultJson = await buildPlanResult.json();
-
-  return { success: true, url: getCSARResult.url, inputParameters: buildPlanResultJson.input_parameters };
 }
 
 /**
@@ -67,7 +73,7 @@ export async function uploadCSARToContainer(opentoscaEndpoint, csarName, url) {
  * @param csarName the name of the csar
  * @return the status whether the given CSAR is uploaded and the corresponding build plan link if available
  */
-export async function getBuildPlanForCSAR(opentoscaEndpoint, csarName) {
+async function getBuildPlanForCSAR(opentoscaEndpoint, csarName) {
 
   // get all currently deployed CSARs
   let response = await fetch(opentoscaEndpoint);
@@ -101,7 +107,7 @@ export async function getBuildPlanForCSAR(opentoscaEndpoint, csarName) {
  * @param csarUrl the URL to a CSAR
  * @return the URL to the build plan for the given CSAR
  */
-export async function getBuildPlanUrl(csarUrl) {
+async function getBuildPlanUrl(csarUrl) {
 
   let response = await fetch(csarUrl + '/servicetemplates');
   let responseJson = await response.json();
