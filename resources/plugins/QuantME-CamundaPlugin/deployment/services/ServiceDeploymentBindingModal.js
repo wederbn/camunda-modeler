@@ -45,7 +45,7 @@ export default function ServiceDeploymentBindingModal({ onClose, initValues }) {
   let bindByPull = bindByPullTasks.length > 0;
   let bindByPush = bindByPushTasks.length > 0;
 
-  const onFinished = () => onClose({ finished: true, csarList: initValues });
+  const onFinished = () => onClose({ next: true, csarList: initValues });
 
   return <Modal onClose={onClose}>
 

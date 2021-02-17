@@ -19,15 +19,13 @@ import ServiceDeploymentBindingModal from './ServiceDeploymentBindingModal';
 import { getRootProcess } from '../../quantme/Utilities';
 
 import { createServiceInstance, uploadCSARToContainer } from './OpenTOSCAUtils';
+import { bindUsingPull, bindUsingPush, getBindingType } from './BindingUtils';
 
 const defaultState = {
   windowOpenDeploymentOverview: false,
   windowOpenDeploymentInput: false,
   windowOpenDeploymentBinding: false
 };
-
-const QUANTME_NAMESPACE_PULL_ENCODED = encodeURIComponent(encodeURIComponent('http://quantil.org/quantme/pull'));
-const QUANTME_NAMESPACE_PUSH_ENCODED = encodeURIComponent(encodeURIComponent('http://quantil.org/quantme/push'));
 
 export default class ServiceDeploymentPlugin extends PureComponent {
 
@@ -51,6 +49,8 @@ export default class ServiceDeploymentPlugin extends PureComponent {
       } = event;
 
       this.modeler = modeler;
+      this.elementRegistry = modeler.get('elementRegistry');
+      this.modeling = modeler.get('modeling');
 
       // subscribe to event bus to receive updates in the OpenTOSCA Container endpoint
       const self = this;
@@ -233,6 +233,56 @@ export default class ServiceDeploymentPlugin extends PureComponent {
    */
   handleDeploymentBindingClosed(result) {
 
+    // handle click on 'Next' button
+    if (result && result.hasOwnProperty('next') && result.next === true) {
+
+      // iterate through each CSAR and related ServiceTask and perform the binding with the created service instance
+      let csarList = result.csarList;
+      for (let i = 0; i < csarList.length; i++) {
+        let csar = csarList[i];
+
+        let serviceTaskIds = csar.serviceTaskIds;
+        for (let j = 0; j < serviceTaskIds.length; j++) {
+
+          // bind the service instance using the specified binding pattern
+          let bindingResponse = undefined;
+          if (csar.type === 'pull') {
+            bindingResponse = bindUsingPull(csar.topicName, serviceTaskIds[j], this.elementRegistry, this.modeling);
+          } else if (csar.type === 'push') {
+            bindingResponse = bindUsingPush(csar, serviceTaskIds[j], this.elementRegistry);
+          }
+
+          // abort if binding pattern is invalid or binding fails
+          if (bindingResponse === undefined || bindingResponse.success === false) {
+
+            // notify user about failed binding
+            this.props.displayNotification({
+              type: 'error',
+              title: 'Unable to perform binding',
+              content: 'Unable to bind ServiceTask with Id \'' + serviceTaskIds[j] + '\' using binding pattern \'' + csar.type + '\'. Aborting process!',
+              duration: 20000
+            });
+
+            // abort process
+            this.setState({
+              windowOpenDeploymentOverview: false,
+              windowOpenDeploymentInput: false,
+              windowOpenDeploymentBinding: false
+            });
+            return;
+          }
+        }
+      }
+
+      // notify user about successful binding
+      this.props.displayNotification({
+        type: 'info',
+        title: 'Binding completed',
+        content: 'Binding of the deployed service instances completed. The resulting workflow can now be deployed to the Camunda engine!',
+        duration: 20000
+      });
+    }
+
     this.setState({
       windowOpenDeploymentOverview: false,
       windowOpenDeploymentInput: false,
@@ -247,34 +297,7 @@ export default class ServiceDeploymentPlugin extends PureComponent {
    * @return {*|boolean} true if the element is a ServiceTask and has an assigned deployment model, false otherwise
    */
   isDeployableServiceTask(element) {
-    return element.$type && element.$type === 'bpmn:ServiceTask' && element.deploymentModelUrl && this.getBindingType(element) !== undefined;
-  }
-
-  /**
-   * Check whether the given ServiceTask has an attached deployment model that should be bound using pull or push mode
-   *
-   * @param serviceTask the service task to check
-   * @return {string|undefined} 'push' if the corresponding service should be bound by pushing requests,
-   * 'pull' if the corresponding service should be bound by pulling requests from a topic,
-   * or undefined if unable to determine pull or push
-   */
-  getBindingType(serviceTask) {
-    let urlSplit = serviceTask.deploymentModelUrl.split('servicetemplates/');
-    if (urlSplit.length !== 2) {
-      console.warn('Deployment model url is invalid: %s', serviceTask.deploymentModelUrl);
-      return undefined;
-    }
-    let namespace = urlSplit[1];
-
-    if (namespace.startsWith(QUANTME_NAMESPACE_PUSH_ENCODED)) {
-      return 'push';
-    }
-
-    if (namespace.startsWith(QUANTME_NAMESPACE_PULL_ENCODED)) {
-      return 'pull';
-    }
-
-    return undefined;
+    return element.$type && element.$type === 'bpmn:ServiceTask' && element.deploymentModelUrl && getBindingType(element) !== undefined;
   }
 
   /**
@@ -324,7 +347,7 @@ export default class ServiceDeploymentPlugin extends PureComponent {
             {
               serviceTaskIds: [flowElement.id],
               url: flowElement.deploymentModelUrl,
-              type: this.getBindingType(flowElement),
+              type: getBindingType(flowElement),
               csarName: this.getCSARName(flowElement)
             });
         }
