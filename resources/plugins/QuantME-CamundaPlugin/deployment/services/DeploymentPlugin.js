@@ -409,7 +409,7 @@ export default class DeploymentPlugin extends PureComponent {
           <span className="workflow-deployment"><span className="indent">Workflow Deployment</span></span>
         </button>
       </Fill>
-      {this.state.windowOpenDeploymentOverview && this.getServiceTasksToDeploy().length !== 0 && (
+      {this.state.windowOpenDeploymentOverview && (
         <ServiceDeploymentOverviewModal
           onClose={this.handleDeploymentOverviewClosed}
           initValues={this.getServiceTasksToDeploy()}
