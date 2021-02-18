@@ -32,6 +32,9 @@ export default class DeploymentPlugin extends PureComponent {
   constructor(props) {
     super(props);
 
+    // modelers for all tabs to enable switching between them
+    this.modelers = {};
+
     this.state = defaultState;
 
     // get backend to trigger workflow deployment
@@ -48,12 +51,12 @@ export default class DeploymentPlugin extends PureComponent {
     this.props.subscribe('bpmn.modeler.created', (event) => {
 
       const {
-        modeler
+        modeler, tab
       } = event;
 
+      // save modeler and activate as current modeler
+      this.modelers[tab.id] = modeler;
       this.modeler = modeler;
-      this.elementRegistry = modeler.get('elementRegistry');
-      this.modeling = modeler.get('modeling');
 
       // subscribe to event bus to receive updates in the OpenTOSCA Container endpoint
       const self = this;
@@ -63,6 +66,11 @@ export default class DeploymentPlugin extends PureComponent {
         self.camundaEndpoint = config.camundaEndpoint;
         self.wineryEndpoint = config.wineryEndpoint;
       });
+    });
+
+    // change to modeler corresponding to the active tab
+    this.props.subscribe('app.activeTabChanged', ({ activeTab }) => {
+      this.modeler = this.modelers[activeTab.id];
     });
   }
 
@@ -251,9 +259,9 @@ export default class DeploymentPlugin extends PureComponent {
           // bind the service instance using the specified binding pattern
           let bindingResponse = undefined;
           if (csar.type === 'pull') {
-            bindingResponse = bindUsingPull(csar.topicName, serviceTaskIds[j], this.elementRegistry, this.modeling);
+            bindingResponse = bindUsingPull(csar.topicName, serviceTaskIds[j], this.modeler.get('elementRegistry'), this.modeler.get('modeling'));
           } else if (csar.type === 'push') {
-            bindingResponse = bindUsingPush(csar, serviceTaskIds[j], this.elementRegistry);
+            bindingResponse = bindUsingPush(csar, serviceTaskIds[j], this.modeler.get('elementRegistry'));
           }
 
           // abort if binding pattern is invalid or binding fails
