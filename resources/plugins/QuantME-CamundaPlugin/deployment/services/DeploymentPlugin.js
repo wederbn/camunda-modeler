@@ -71,6 +71,12 @@ export default class DeploymentPlugin extends PureComponent {
     // change to modeler corresponding to the active tab
     this.props.subscribe('app.activeTabChanged', ({ activeTab }) => {
       this.modeler = this.modelers[activeTab.id];
+      this.state = defaultState;
+    });
+
+    // remove corresponding modeler if tab is closed
+    this.props.subscribe('app.closedTab', ({ tab }) => {
+      delete this.modelers[tab.id];
     });
   }
 

@@ -5,6 +5,26 @@
   padding: 0;
 }
 
+.qrm-reload:before {
+  content: "";
+  display: block;
+  width: 15px;
+  height: 15px;
+  background-size: contain;
+  background: url("../resources/qrm-reload-icon.png") no-repeat center center;
+  float: left;
+}
+
+.workflow-transformation:before {
+  content: "";
+  display: block;
+  width: 15px;
+  height: 15px;
+  background-size: contain;
+  background: url("../resources/worklow-transformation-icon.png") no-repeat center center;
+  float: left;
+}
+
 .workflow-deployment:before {
   content: "";
   display: block;
