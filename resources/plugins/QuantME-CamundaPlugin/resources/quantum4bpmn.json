@@ -19,6 +19,27 @@
         ]
       },
       {
+        "name": "QuantumHardwareSelectionSubprocess",
+        "superClass": [ "bpmn:SubProcess" ],
+        "properties": [
+          {
+            "name": "Providers",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "SimulatorsAllowed",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
+            "name": "SelectionStrategy",
+            "isAttr": true,
+            "type": "String"
+          }
+        ]
+      },
+      {
         "name": "QuantumComputationTask",
         "superClass": [ "bpmn:Task" ],
         "properties": [
