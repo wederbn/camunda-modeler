@@ -44,6 +44,14 @@ export default class QuantMERenderer extends BpmnRenderer {
     }
 
     this.quantMeHandlers = {
+      [consts.QUANTUM_HARDWARE_SELECTION_SUBPROCESS]: function(self, parentGfx, element) {
+        console.log(self);
+        var subprocess = self.renderer('bpmn:SubProcess')(parentGfx, element);
+
+        // TODO: add icon
+
+        return subprocess;
+      },
       [consts.QUANTUM_COMPUTATION_TASK]: function(self, parentGfx, element) {
         var task = self.renderer('bpmn:Task')(parentGfx, element);
 

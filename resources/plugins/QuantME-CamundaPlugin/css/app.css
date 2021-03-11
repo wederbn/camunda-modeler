@@ -112,6 +112,16 @@ html, body, #container {
   font-family: 'Arial', sans-serif;
 }
 
+.bpmn-icon-hardware-selection-subprocess:before {
+  content: "";
+  display: block;
+  background: url("../resources/menu-icon-hardware-selection-subprocess.png") no-repeat;
+  width: 20px;
+  height: 20px;
+  float: left;
+  margin: 0 6px 0 0;
+}
+
 .bpmn-icon-task-quantum-computation:before {
   content: "";
   display: block;
