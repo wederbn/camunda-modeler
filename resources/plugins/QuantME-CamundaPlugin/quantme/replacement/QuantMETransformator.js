@@ -21,6 +21,7 @@ import {
 } from '../Utilities';
 import { addQuantMEInputParameters } from './InputOutputHandler';
 import { createModelerFromXml } from './ModelerGenerator';
+import * as Constants from '../Constants';
 
 /**
  * Initiate the replacement process for the QuantME tasks that are contained in the current process model
@@ -42,36 +43,48 @@ export async function startReplacementProcess(xml, currentQRMs) {
     return { status: 'failed', cause: 'Unable to retrieve root process element from definitions!' };
   }
 
-  // get all QuantME tasks from the process
-  const replacementTasks = getQuantMETasks(rootElement, elementRegistry);
-  console.log('Process contains ' + replacementTasks.length + ' QuantME tasks to replace...');
-  if (!replacementTasks || !replacementTasks.length) {
+  // get all QuantME modeling constructs from the process
+  const replacementConstructs = getQuantMETasks(rootElement, elementRegistry);
+  console.log('Process contains ' + replacementConstructs.length + ' QuantME modeling constructs to replace...');
+  if (!replacementConstructs || !replacementConstructs.length) {
     return { status: 'transformed', xml: xml };
   }
 
-  // check for available replacement models for all QuantME tasks
-  for (let replacementTask of replacementTasks) {
+  // check for available replacement models for all QuantME modeling constructs
+  for (let replacementConstruct of replacementConstructs) {
+    if (replacementConstruct.task.$type === Constants.QUANTUM_HARDWARE_SELECTION_SUBPROCESS) {
+      console.log('QuantumHardwareSelectionSubprocess needs no QRM. Skipping search...');
+      continue;
+    }
 
     // abort transformation if at least one task can not be replaced
-    replacementTask.qrm = await getMatchingQRM(replacementTask.task, currentQRMs);
-    if (!replacementTask.qrm) {
-      console.log('Unable to replace task with id %s. Aborting transformation!', replacementTask.task.id);
+    replacementConstruct.qrm = await getMatchingQRM(replacementConstruct.task, currentQRMs);
+    if (!replacementConstruct.qrm) {
+      console.log('Unable to replace task with id %s. Aborting transformation!', replacementConstruct.task.id);
       return {
         status: 'failed',
-        cause: 'Unable to replace task with id \'' + replacementTask.task.id + '\' by suited QRM!'
+        cause: 'Unable to replace task with id \'' + replacementConstruct.task.id + '\' by suited QRM!'
       };
     }
   }
 
-  // replace each QuantME tasks to retrieve standard-compliant BPMN
-  for (let replacementTask of replacementTasks) {
-    console.log('Replacing task with id %s by using QRM: ', replacementTask.task.id, replacementTask.qrm);
-    const replacementSuccess = await replaceByFragment(replacementTask.task, replacementTask.parent, replacementTask.qrm.replacement, factory, bpmnReplace, elementRegistry, modeling);
+  // replace each QuantME modeling construct to retrieve standard-compliant BPMN
+  for (let replacementConstruct of replacementConstructs) {
+
+    let replacementSuccess = false;
+    if (replacementConstruct.task.$type === Constants.QUANTUM_HARDWARE_SELECTION_SUBPROCESS) {
+      console.log('Transforming QuantumHardwareSelectionSubprocess...');
+      replacementSuccess = await replaceHardwareSelectionSubprocess(replacementConstruct.task, replacementConstruct.parent, factory, bpmnReplace, elementRegistry, modeling);
+    } else {
+      console.log('Replacing task with id %s by using QRM: ', replacementConstruct.task.id, replacementConstruct.qrm);
+      replacementSuccess = await replaceByFragment(replacementConstruct.task, replacementConstruct.parent, replacementConstruct.qrm.replacement, factory, bpmnReplace, elementRegistry, modeling);
+    }
+
     if (!replacementSuccess) {
-      console.log('Replacement of QuantME task with Id ' + replacementTask.task.id + ' failed. Aborting process!');
+      console.log('Replacement of QuantME modeling construct with Id ' + replacementConstruct.task.id + ' failed. Aborting process!');
       return {
         status: 'failed',
-        cause: 'Replacement of QuantME task with Id ' + replacementTask.task.id + ' failed. Aborting process!'
+        cause: 'Replacement of QuantME modeling construct with Id ' + replacementConstruct.task.id + ' failed. Aborting process!'
       };
     }
   }
@@ -127,6 +140,14 @@ async function getMatchingQRM(task, currentQRMs) {
     }
   }
   return undefined;
+}
+
+/**
+ * Replace the given QuantumHardwareSelectionSubprocess by a native subprocess orchestrating the hardware selection
+ */
+async function replaceHardwareSelectionSubprocess(subprocess, parent, bpmnFactory, bpmnReplace, elementRegistry, modeling) {
+  console.log(subprocess);
+  // TODO
 }
 
 /**
