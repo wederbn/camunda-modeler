@@ -22,6 +22,7 @@ import {
 import { addQuantMEInputParameters } from './InputOutputHandler';
 import { createModelerFromXml } from './ModelerGenerator';
 import * as Constants from '../Constants';
+import { replaceHardwareSelectionSubprocess } from './hardware-selection/QuantMEHardwareSelectionHandler';
 
 /**
  * Initiate the replacement process for the QuantME tasks that are contained in the current process model
@@ -140,14 +141,6 @@ async function getMatchingQRM(task, currentQRMs) {
     }
   }
   return undefined;
-}
-
-/**
- * Replace the given QuantumHardwareSelectionSubprocess by a native subprocess orchestrating the hardware selection
- */
-async function replaceHardwareSelectionSubprocess(subprocess, parent, bpmnFactory, bpmnReplace, elementRegistry, modeling) {
-  console.log(subprocess);
-  // TODO
 }
 
 /**
