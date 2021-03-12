@@ -161,6 +161,9 @@ function addQuantMEEntries(group, element, translate) {
   case consts.READOUT_ERROR_MITIGATION_TASK:
     addReadoutErrorMitigationTaskEntries(group, translate);
     break;
+  case consts.QUANTUM_HARDWARE_SELECTION_SUBPROCESS:
+    addHardwareSelectionSubprocessEntries(group, translate);
+    break;
   default:
     console.log('Unsupported QuantME element of type: ', element.type);
   }
@@ -211,6 +214,14 @@ function addReadoutErrorMitigationTaskEntries(group, translate) {
   QuantMEPropertyEntryHandler.addUnfoldingTechniqueEntry(group, translate);
   QuantMEPropertyEntryHandler.addQpuEntry(group, translate);
   QuantMEPropertyEntryHandler.addMaxAgeEntry(group, translate);
+}
+
+function addHardwareSelectionSubprocessEntries(group, translate) {
+
+  // add providers, simulatorsAllowed, and selectionStrategy attributes
+  QuantMEPropertyEntryHandler.addProvidersEntry(group, translate);
+  QuantMEPropertyEntryHandler.addSimulatorsAllowedEntry(group, translate);
+  QuantMEPropertyEntryHandler.addSelectionStrategyEntry(group, translate);
 }
 
 QuantMEPropertiesProvider.$inject = [

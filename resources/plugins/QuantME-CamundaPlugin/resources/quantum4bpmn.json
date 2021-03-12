@@ -23,17 +23,17 @@
         "superClass": [ "bpmn:SubProcess" ],
         "properties": [
           {
-            "name": "Providers",
+            "name": "providers",
             "isAttr": true,
             "type": "String"
           },
           {
-            "name": "SimulatorsAllowed",
+            "name": "simulatorsAllowed",
             "isAttr": true,
             "type": "String"
           },
           {
-            "name": "SelectionStrategy",
+            "name": "selectionStrategy",
             "isAttr": true,
             "type": "String"
           }
