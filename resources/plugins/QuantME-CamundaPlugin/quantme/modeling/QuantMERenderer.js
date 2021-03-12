@@ -65,17 +65,6 @@ export default class QuantMERenderer extends BpmnRenderer {
           stroke: getStrokeColor(element, defaultStrokeColor)
         });
 
-        // create top question mark
-        pathData = quantMEPathMap.getPath('SUBPROCESS_QUANTUM_HARDWARE_SELECTION_FILL_QUESTION_MARK');
-        drawPath(parentGfx, pathData, {
-          transform:'scale(0.5)',
-          strokeWidth: 1.5,
-          fill: getFillColor(element, '#000000'),
-          stroke: getStrokeColor(element, defaultStrokeColor)
-        });
-
-        // TODO: add icon
-
         return subprocess;
       },
       [consts.QUANTUM_COMPUTATION_TASK]: function(self, parentGfx, element) {
