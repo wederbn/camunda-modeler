@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getPropertiesToCopy } from '../../Utilities';
+import { getPropertiesToCopy, getCamundaInputOutput } from '../../Utilities';
 import {
   INVOKE_NISQ_ANALYZER_SCRIPT,
   INVOKE_TRANSFORMATION_SCRIPT,
@@ -55,17 +55,23 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   invokeHardwareSelectionBo.name = 'Invoke NISQ Analyzer';
   invokeHardwareSelectionBo.scriptFormat = 'groovy';
   invokeHardwareSelectionBo.script = INVOKE_NISQ_ANALYZER_SCRIPT;
-  console.log('NISQ Analyzer endpoint: %s', nisqAnalyzerEndpoint);
 
-  // TODO: add NISQ Analyzer endpoint as input parameter
+  // add NISQ Analyzer endpoint as input parameter
+  let invokeHardwareSelectionInOut = getCamundaInputOutput(invokeHardwareSelectionBo, bpmnFactory);
+  invokeHardwareSelectionInOut.inputParameters.push(
+    bpmnFactory.create('camunda:InputParameter', {
+      name: 'nisqAnalyzerEndpoint',
+      value: nisqAnalyzerEndpoint
+    })
+  );
 
   // connect gateway with selection path and add condition
   let selectionFlow = modeling.connect(splittingGateway, invokeHardwareSelection, { type: 'bpmn:SequenceFlow' });
   let selectionFlowBo = elementRegistry.get(selectionFlow.id).businessObject;
   selectionFlowBo.name = 'no';
-  console.log(selectionFlowBo);
-
-  // TODO: add condition
+  let selectionFlowCondition = bpmnFactory.create('bpmn:FormalExpression');
+  selectionFlowCondition.body = '${empty alreadySelected || alreadySelected == \'false\'}';
+  selectionFlowBo.conditionExpression = selectionFlowCondition;
 
   // add task implementing the defined selection strategy and connect it
   let selectionTask = addSelectionStrategyTask(subprocess.selectionStrategy, element, elementRegistry, modeling);
@@ -81,9 +87,16 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   invokeTransformationBo.scriptFormat = 'groovy';
   invokeTransformationBo.script = INVOKE_TRANSFORMATION_SCRIPT;
   modeling.connect(selectionTask, invokeTransformation, { type: 'bpmn:SequenceFlow' });
-  console.log('Transformation endpoint: %s', transformationFrameworkEndpoint);
 
-  // TODO: add Transformation Framework endpoint as input parameter
+  // add Transformation Framework endpoint as input parameter
+  let invokeTransformationInOut = getCamundaInputOutput(invokeTransformationBo, bpmnFactory);
+  invokeTransformationInOut.inputParameters.push(
+    bpmnFactory.create('camunda:InputParameter', {
+      name: 'transformationFrameworkEndpoint',
+      value: transformationFrameworkEndpoint
+    })
+  );
+
   // TODO: add workflow fragment as input
 
   // join control flow
@@ -94,10 +107,9 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   let alreadySelectedFlow = modeling.connect(splittingGateway, joiningGateway, { type: 'bpmn:SequenceFlow' });
   let alreadySelectedFlowBo = elementRegistry.get(alreadySelectedFlow.id).businessObject;
   alreadySelectedFlowBo.name = 'yes';
-  let alreadySelectedFlowCondition = bpmnFactory.create('bpmn:ConditionExpression');
-  console.log(alreadySelectedFlowCondition);
-
-  // TODO: add condition (bpmn:conditionExpression)
+  let alreadySelectedFlowCondition = bpmnFactory.create('bpmn:FormalExpression');
+  alreadySelectedFlowCondition.body = '${alreadySelected == \'true\'}';
+  alreadySelectedFlowBo.conditionExpression = alreadySelectedFlowCondition;
 
   // add call activity invoking the dynamically transformed and deployed workflow fragment
   let invokeTransformedFragment = modeling.createShape({ type: 'bpmn:CallActivity' }, { x: 50, y: 50 }, element, {});
