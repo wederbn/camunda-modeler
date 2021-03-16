@@ -29,8 +29,10 @@ import { replaceHardwareSelectionSubprocess } from './hardware-selection/QuantME
  *
  * @param xml the BPMN diagram in XML format
  * @param currentQRMs the set of currently in the framework available QRMs
+ * @param nisqAnalyzerEndpoint endpoint of the NISQ Analyzer for the dynamic hardware selection
+ * @param transformationFrameworkEndpoint endpoint of the QuantME Transformation Framework for the dynamic hardware selection
  */
-export async function startReplacementProcess(xml, currentQRMs) {
+export async function startReplacementProcess(xml, currentQRMs, nisqAnalyzerEndpoint, transformationFrameworkEndpoint) {
   let modeler = await createModelerFromXml(xml);
   let bpmnReplace = modeler.get('bpmnReplace');
   let modeling = modeler.get('modeling');
@@ -75,7 +77,7 @@ export async function startReplacementProcess(xml, currentQRMs) {
     let replacementSuccess = false;
     if (replacementConstruct.task.$type === Constants.QUANTUM_HARDWARE_SELECTION_SUBPROCESS) {
       console.log('Transforming QuantumHardwareSelectionSubprocess...');
-      replacementSuccess = await replaceHardwareSelectionSubprocess(replacementConstruct.task, replacementConstruct.parent, factory, bpmnReplace, elementRegistry, modeling);
+      replacementSuccess = await replaceHardwareSelectionSubprocess(replacementConstruct.task, replacementConstruct.parent, factory, bpmnReplace, elementRegistry, modeling, nisqAnalyzerEndpoint, transformationFrameworkEndpoint);
     } else {
       console.log('Replacing task with id %s by using QRM: ', replacementConstruct.task.id, replacementConstruct.qrm);
       replacementSuccess = await replaceByFragment(replacementConstruct.task, replacementConstruct.parent, replacementConstruct.qrm.replacement, factory, bpmnReplace, elementRegistry, modeling);

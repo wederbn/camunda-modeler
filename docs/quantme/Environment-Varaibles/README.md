@@ -22,6 +22,11 @@ This can for example be used if only the API is required and not the graphical m
 
 * ```WINERY_ENDPOINT``` (default: 'http://localhost:8081/winery'): Defines the endpoint of the Winery to retrieve deployment models for services from
 
+* ```NISQ_ANALYZER_ENDPOINT``` (default: 'http://localhost:8098/nisq-analyzer'): Defines the endpoint of the [NISQ Analyzer](https://github.com/UST-QuAntiL/nisq-analyzer) to enable an automated hardware selection
+
+* ```TRANSFORMATION_FRAMEWORK_ENDPOINT``` (default: 'http://localhost:8099'): Defines the endpoint of the QuantME Transformation Framework to use for the automated hardware selection.
+  Can be set to localhost and the Port defined using the ```PORT``` environment variable if the local framework should be used
+
 ### Setting the Environment Variables
 
 When spinning up the framework in development mode, add the environment variables to the npm command:

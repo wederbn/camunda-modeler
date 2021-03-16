@@ -22,7 +22,7 @@ import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/Extensi
 /**
  * Replace the given QuantumHardwareSelectionSubprocess by a native subprocess orchestrating the hardware selection
  */
-export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpmnFactory, bpmnReplace, elementRegistry, modeling) {
+export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpmnFactory, bpmnReplace, elementRegistry, modeling, nisqAnalyzerEndpoint, transformationFrameworkEndpoint) {
 
   // replace QuantumHardwareSelectionSubprocess with traditional subprocess
   let element = bpmnReplace.replaceElement(elementRegistry.get(subprocess.id), { type: 'bpmn:SubProcess' });
@@ -55,12 +55,16 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   invokeHardwareSelectionBo.name = 'Invoke NISQ Analyzer';
   invokeHardwareSelectionBo.scriptFormat = 'groovy';
   invokeHardwareSelectionBo.script = INVOKE_NISQ_ANALYZER_SCRIPT;
+  console.log('NISQ Analyzer endpoint: %s', nisqAnalyzerEndpoint);
+
+  // TODO: add NISQ Analyzer endpoint as input parameter
 
   // connect gateway with selection path and add condition
   let selectionFlow = modeling.connect(splittingGateway, invokeHardwareSelection, { type: 'bpmn:SequenceFlow' });
   let selectionFlowBo = elementRegistry.get(selectionFlow.id).businessObject;
   selectionFlowBo.name = 'no';
   console.log(selectionFlowBo);
+
   // TODO: add condition
 
   // add task implementing the defined selection strategy and connect it
@@ -77,6 +81,10 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   invokeTransformationBo.scriptFormat = 'groovy';
   invokeTransformationBo.script = INVOKE_TRANSFORMATION_SCRIPT;
   modeling.connect(selectionTask, invokeTransformation, { type: 'bpmn:SequenceFlow' });
+  console.log('Transformation endpoint: %s', transformationFrameworkEndpoint);
+
+  // TODO: add Transformation Framework endpoint as input parameter
+  // TODO: add workflow fragment as input
 
   // join control flow
   let joiningGateway = modeling.createShape({ type: 'bpmn:ExclusiveGateway' }, { x: 50, y: 50 }, element, {});
@@ -86,7 +94,9 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   let alreadySelectedFlow = modeling.connect(splittingGateway, joiningGateway, { type: 'bpmn:SequenceFlow' });
   let alreadySelectedFlowBo = elementRegistry.get(alreadySelectedFlow.id).businessObject;
   alreadySelectedFlowBo.name = 'yes';
-  console.log(alreadySelectedFlowBo);
+  let alreadySelectedFlowCondition = bpmnFactory.create('bpmn:ConditionExpression');
+  console.log(alreadySelectedFlowCondition);
+
   // TODO: add condition (bpmn:conditionExpression)
 
   // add call activity invoking the dynamically transformed and deployed workflow fragment
