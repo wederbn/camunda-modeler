@@ -51,6 +51,7 @@ export default class QuantMEController extends PureComponent {
         console.log(config);
         self.nisqAnalyzerEndpoint = config.nisqAnalyzerEndpoint;
         self.transformationFrameworkEndpoint = config.transformationFrameworkEndpoint;
+        self.camundaEndpoint = config.camundaEndpoint;
       });
 
       // register actions to enable invocation over the menu and the API
@@ -61,7 +62,12 @@ export default class QuantMEController extends PureComponent {
         transformWorkflow: async function(params) {
           console.log('Transforming workflow posted through API!');
           let currentQRMs = await self.quantME.getQRMs();
-          let result = await startReplacementProcess(params.xml, currentQRMs, self.nisqAnalyzerEndpoint, self.transformationFrameworkEndpoint);
+          let result = await startReplacementProcess(params.xml, currentQRMs,
+            {
+              nisqAnalyzerEndpoint: self.nisqAnalyzerEndpoint,
+              transformationFrameworkEndpoint: self.transformationFrameworkEndpoint,
+              camundaEndpoint: self.camundaEndpoint
+            });
 
           // return result to API
           self.api.sendResult(params.returnPath, params.id, { status: result.status, xml: result.xml });
@@ -114,7 +120,12 @@ export default class QuantMEController extends PureComponent {
     });
     let xml = await this.modeler.get('bpmnjs').saveXML();
     let currentQRMs = await this.quantME.getQRMs();
-    let result = await startReplacementProcess(xml.xml, currentQRMs, this.nisqAnalyzerEndpoint, this.transformationFrameworkEndpoint);
+    let result = await startReplacementProcess(xml.xml, currentQRMs,
+      {
+        nisqAnalyzerEndpoint: this.nisqAnalyzerEndpoint,
+        transformationFrameworkEndpoint: this.transformationFrameworkEndpoint,
+        camundaEndpoint: this.camundaEndpoint
+      });
 
     if (result.status === 'transformed') {
       await this.modeler.get('bpmnjs').importXML(result.xml);

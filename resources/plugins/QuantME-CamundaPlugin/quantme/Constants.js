@@ -36,6 +36,9 @@ export const MAX_AGE = 'maxAge';
 export const SIMULATORS_ALLOWED = 'simulatorsAllowed';
 export const SELECTION_STRATEGY = 'selectionStrategy';
 
+// enpoint paths of connected services
+export const NISQ_ANALYZER_QPU_SELECTION_PATH = 'qpu-selection';
+
 // supported selection strategies
 export const SELECTION_STRATEGY_SHORTEST_QUEUE_SIZE = 'Shortest-Queue';
 export const SELECTION_STRATEGY_LIST = [SELECTION_STRATEGY_SHORTEST_QUEUE_SIZE];

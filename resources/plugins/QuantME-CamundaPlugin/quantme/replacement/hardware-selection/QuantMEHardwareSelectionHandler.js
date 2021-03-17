@@ -18,11 +18,10 @@ import {
 import * as consts from '../../Constants';
 import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
 
-
 /**
  * Replace the given QuantumHardwareSelectionSubprocess by a native subprocess orchestrating the hardware selection
  */
-export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpmnFactory, bpmnReplace, elementRegistry, modeling, nisqAnalyzerEndpoint, transformationFrameworkEndpoint) {
+export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpmnFactory, bpmnReplace, elementRegistry, modeling, nisqAnalyzerEndpoint, transformationFrameworkEndpoint, camundaEndpoint) {
 
   // replace QuantumHardwareSelectionSubprocess with traditional subprocess
   let element = bpmnReplace.replaceElement(elementRegistry.get(subprocess.id), { type: 'bpmn:SubProcess' });
@@ -56,12 +55,31 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   invokeHardwareSelectionBo.scriptFormat = 'groovy';
   invokeHardwareSelectionBo.script = INVOKE_NISQ_ANALYZER_SCRIPT;
 
-  // add NISQ Analyzer endpoint as input parameter
+  // add NISQ Analyzer endpoint, providers attribute, and simulatorAllowed attribute as input parameters
   let invokeHardwareSelectionInOut = getCamundaInputOutput(invokeHardwareSelectionBo, bpmnFactory);
+  nisqAnalyzerEndpoint += nisqAnalyzerEndpoint.endsWith('/') ? '' : '/';
   invokeHardwareSelectionInOut.inputParameters.push(
     bpmnFactory.create('camunda:InputParameter', {
-      name: 'nisqAnalyzerEndpoint',
-      value: nisqAnalyzerEndpoint
+      name: 'camunda_endpoint',
+      value: camundaEndpoint
+    })
+  );
+  invokeHardwareSelectionInOut.inputParameters.push(
+    bpmnFactory.create('camunda:InputParameter', {
+      name: 'nisq_analyzer_endpoint',
+      value: nisqAnalyzerEndpoint + consts.NISQ_ANALYZER_QPU_SELECTION_PATH
+    })
+  );
+  invokeHardwareSelectionInOut.inputParameters.push(
+    bpmnFactory.create('camunda:InputParameter', {
+      name: 'providers',
+      value: subprocess.providers
+    })
+  );
+  invokeHardwareSelectionInOut.inputParameters.push(
+    bpmnFactory.create('camunda:InputParameter', {
+      name: 'simulators_allowed',
+      value: subprocess.simulatorsAllowed
     })
   );
 
@@ -70,7 +88,7 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   let selectionFlowBo = elementRegistry.get(selectionFlow.id).businessObject;
   selectionFlowBo.name = 'no';
   let selectionFlowCondition = bpmnFactory.create('bpmn:FormalExpression');
-  selectionFlowCondition.body = '${empty alreadySelected || alreadySelected == \'false\'}';
+  selectionFlowCondition.body = '${execution.hasVariable("alreadySelected") == false || execution.alreadySelected == \'false\'}';
   selectionFlowBo.conditionExpression = selectionFlowCondition;
 
   // add task implementing the defined selection strategy and connect it
@@ -92,7 +110,7 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   let invokeTransformationInOut = getCamundaInputOutput(invokeTransformationBo, bpmnFactory);
   invokeTransformationInOut.inputParameters.push(
     bpmnFactory.create('camunda:InputParameter', {
-      name: 'transformationFrameworkEndpoint',
+      name: 'transformation_framework_endpoint',
       value: transformationFrameworkEndpoint
     })
   );
@@ -108,7 +126,7 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   let alreadySelectedFlowBo = elementRegistry.get(alreadySelectedFlow.id).businessObject;
   alreadySelectedFlowBo.name = 'yes';
   let alreadySelectedFlowCondition = bpmnFactory.create('bpmn:FormalExpression');
-  alreadySelectedFlowCondition.body = '${alreadySelected == \'true\'}';
+  alreadySelectedFlowCondition.body = '${execution.hasVariable("alreadySelected") == true && execution.alreadySelected == \'true\'}';
   alreadySelectedFlowBo.conditionExpression = alreadySelectedFlowCondition;
 
   // add call activity invoking the dynamically transformed and deployed workflow fragment
