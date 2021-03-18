@@ -72,9 +72,43 @@ export var INVOKE_NISQ_ANALYZER_SCRIPT= 'import groovy.json.*\n' +
   '   throw new org.camunda.bpm.engine.delegate.BpmnError("Unable to connect to given endpoint: " + nisqAnalyzerEndpoint);\n' +
   '}';
 
-// TODO
-export var SELECT_ON_QUEUE_SIZE_SCRIPT= 'def pollingUrl = execution.getVariable("nisq_analyzer_job_url");\n' +
-  'println "Polling for NISQ Analyzer results at URL: " + pollingUrl';
+export var SELECT_ON_QUEUE_SIZE_SCRIPT= 'import groovy.json.*\n' +
+  '\n' +
+  'def pollingUrl = execution.getVariable("nisq_analyzer_job_url");\n' +
+  'println "Polling for NISQ Analyzer results at URL: " + pollingUrl\n' +
+  'def ready = false;\n' +
+  'def resultList = [];\n' +
+  'while(ready == false) {\n' +
+  '   println "Waiting 10 seconds for next polling request to the NISQ Analyzer at URL: " + pollingUrl\n' +
+  '   sleep(10000)\n' +
+  '   def get = new URL(pollingUrl).openConnection();\n' +
+  '   get.setRequestMethod("GET");\n' +
+  '   get.setDoOutput(true);\n' +
+  '\n' +
+  '   def status = get.getResponseCode();\n' +
+  '   if(status != 200){\n' +
+  '       throw new org.camunda.bpm.engine.delegate.BpmnError("Received invalid status code during polling: " + status);\n' +
+  '   }\n' +
+  '   def resultText = get.getInputStream().getText();\n' +
+  '   def slurper = new JsonSlurper();\n' +
+  '   def json = slurper.parseText(resultText);\n' +
+  '   ready = json.get("ready");\n' +
+  '   if(ready == true){\n' +
+  '       resultList = json.get("qpuSelectionResultList");\n' +
+  '   }\n' +
+  '}\n' +
+  '\n' +
+  'println "NISQ Analyzer job changed status to ready!"\n' +
+  'println "Received " + resultList.size + " possible QPUs for the execution...";\n' +
+  '\n' +
+  'if(resultList.size == 0){\n' +
+  '   throw new org.camunda.bpm.engine.delegate.BpmnError("Found no suitable QPU, aborting!");\n' +
+  '}\n' +
+  '\n' +
+  'def sortedList = resultList.sort { it.queueSize };\n' +
+  'println sortedList;\n';
+
+// TODO: select QPU with shortest queue, retrieve provider, QPU, language and circuit
 
 // TODO
 export var INVOKE_TRANSFORMATION_SCRIPT= 'println "Test"';

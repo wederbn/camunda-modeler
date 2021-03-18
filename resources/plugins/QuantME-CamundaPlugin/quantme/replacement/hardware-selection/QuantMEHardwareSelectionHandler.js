@@ -54,6 +54,7 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   invokeHardwareSelectionBo.name = 'Invoke NISQ Analyzer';
   invokeHardwareSelectionBo.scriptFormat = 'groovy';
   invokeHardwareSelectionBo.script = INVOKE_NISQ_ANALYZER_SCRIPT;
+  invokeHardwareSelectionBo.asyncBefore = true;
 
   // add NISQ Analyzer endpoint, providers attribute, and simulatorAllowed attribute as input parameters
   let invokeHardwareSelectionInOut = getCamundaInputOutput(invokeHardwareSelectionBo, bpmnFactory);
@@ -96,6 +97,8 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   if (selectionTask === undefined) {
     return false;
   }
+  let selectionTaskBo = elementRegistry.get(selectionTask.id).businessObject;
+  selectionTaskBo.asyncBefore = true;
   modeling.connect(invokeHardwareSelection, selectionTask, { type: 'bpmn:SequenceFlow' });
 
   // add task implementing the transformation of the QuantME modeling constructs within the QuantumHardwareSelectionSubprocess
@@ -104,6 +107,7 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   invokeTransformationBo.name = 'Invoke Transformation Framework';
   invokeTransformationBo.scriptFormat = 'groovy';
   invokeTransformationBo.script = INVOKE_TRANSFORMATION_SCRIPT;
+  invokeTransformationBo.asyncBefore = true;
   modeling.connect(selectionTask, invokeTransformation, { type: 'bpmn:SequenceFlow' });
 
   // add Transformation Framework endpoint as input parameter
