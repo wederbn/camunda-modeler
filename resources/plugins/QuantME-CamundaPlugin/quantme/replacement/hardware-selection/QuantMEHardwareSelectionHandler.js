@@ -96,7 +96,7 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   let selectionFlowBo = elementRegistry.get(selectionFlow.id).businessObject;
   selectionFlowBo.name = 'no';
   let selectionFlowCondition = bpmnFactory.create('bpmn:FormalExpression');
-  selectionFlowCondition.body = '${execution.hasVariable("alreadySelected") == false || execution.alreadySelected == \'false\'}';
+  selectionFlowCondition.body = '${execution.hasVariable("already_selected") == false || execution.already_selected == \'false\'}';
   selectionFlowBo.conditionExpression = selectionFlowCondition;
 
   // add task implementing the defined selection strategy and connect it
@@ -132,6 +132,12 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
       value: hardwareSelectionFragment
     })
   );
+  invokeTransformationInOut.inputParameters.push(
+    bpmnFactory.create('camunda:InputParameter', {
+      name: 'camunda_endpoint',
+      value: camundaEndpoint
+    })
+  );
 
   // join control flow
   let joiningGateway = modeling.createShape({ type: 'bpmn:ExclusiveGateway' }, { x: 50, y: 50 }, element, {});
@@ -142,7 +148,7 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   let alreadySelectedFlowBo = elementRegistry.get(alreadySelectedFlow.id).businessObject;
   alreadySelectedFlowBo.name = 'yes';
   let alreadySelectedFlowCondition = bpmnFactory.create('bpmn:FormalExpression');
-  alreadySelectedFlowCondition.body = '${execution.hasVariable("alreadySelected") == true && execution.alreadySelected == \'true\'}';
+  alreadySelectedFlowCondition.body = '${execution.hasVariable("already_selected") == true && execution.already_selected == \'true\'}';
   alreadySelectedFlowBo.conditionExpression = alreadySelectedFlowCondition;
 
   // add call activity invoking the dynamically transformed and deployed workflow fragment

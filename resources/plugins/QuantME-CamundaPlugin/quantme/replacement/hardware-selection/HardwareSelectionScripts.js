@@ -73,6 +73,8 @@ export var INVOKE_NISQ_ANALYZER_SCRIPT= 'import groovy.json.*\n' +
   '}';
 
 export var SELECT_ON_QUEUE_SIZE_SCRIPT= 'import groovy.json.*\n' +
+  'import org.camunda.bpm.engine.variable.value.FileValue\n' +
+  'import org.camunda.bpm.engine.variable.Variables\n' +
   '\n' +
   'def pollingUrl = execution.getVariable("nisq_analyzer_job_url");\n' +
   'println "Polling for NISQ Analyzer results at URL: " + pollingUrl\n' +
@@ -106,9 +108,43 @@ export var SELECT_ON_QUEUE_SIZE_SCRIPT= 'import groovy.json.*\n' +
   '}\n' +
   '\n' +
   'def sortedList = resultList.sort { it.queueSize };\n' +
-  'println sortedList;\n';
-
-// TODO: select QPU with shortest queue, retrieve provider, QPU, language and circuit
+  'def selectedQpu = resultList.get(0);\n' +
+  'def providerName = selectedQpu.get("providerName");\n' +
+  'def qpuName = selectedQpu.get("qpu");\n' +
+  'def language = selectedQpu.get("transpiledLanguage");\n' +
+  'println "Selected QPU " + qpuName + " from provider " + providerName + "!";\n' +
+  'execution.setVariable("selected_provider", providerName);\n' +
+  'execution.setVariable("selected_qpu", qpuName);\n' +
+  'execution.setVariable("circuit_language", language);\n' +
+  'execution.setVariable("already_selected", true);\n' +
+  'def circuitFile = new File("circuit.tmp");\n' +
+  'circuitFile.write(selectedQpu.get("transpiledCircuit"));\n' +
+  'FileValue typedFileValue = Variables\n' +
+  '  .fileValue("circuit.tmp")\n' +
+  '  .file(circuitFile)\n' +
+  '  .mimeType("text/plain")\n' +
+  '  .encoding("UTF-8")\n' +
+  '  .create();\n' +
+  'execution.setVariable("quantum_circuit", typedFileValue);\n';
 
 // TODO
-export var INVOKE_TRANSFORMATION_SCRIPT= 'println "Test"';
+export var INVOKE_TRANSFORMATION_SCRIPT= 'import groovy.json.*\n' +
+  '\n' +
+  'def transformationUrl = execution.getVariable("transformation_framework_endpoint");\n' +
+  'transformationUrl = transformationUrl.endsWith("/") ? transformationUrl : transformationUrl + "/";\n' +
+  'transformationUrl += "/quantme/workflows/hardware-selection";\n' +
+  'println "Posting for transformation using the following URL: " + transformationUrl\n' +
+  '\n' +
+  'def circuitUrl = execution.getVariable("camunda_endpoint");\n' +
+  'circuitUrl = circuitUrl.endsWith("/") ? circuitUrl : circuitUrl + "/";\n' +
+  'circuitUrl += "process-instance/" + execution.getProcessInstanceId() + "/variables/quantum_circuit/data";\n' +
+  'println "Circuit accessible through URL: " + circuitUrl\n' +
+  '\n' +
+  'def circuitLanguage = execution.getVariable("circuit_language");\n' +
+  'def providerName = execution.getVariable("selected_provider");\n' +
+  'def qpuName = execution.getVariable("selected_qpu");\n' +
+  'def message = JsonOutput.toJson(["circuitUrl": circuitUrl, "circuitLanguage": circuitLanguage, "provider": providerName, "qpu": qpuName]);\n' +
+  'println "Sending message: " + message;\n' +
+  '\n' +
+  'def workflowFragment = execution.getVariable("hardware_selection_fragment");\n' +
+  'println workflowFragment;\n';
