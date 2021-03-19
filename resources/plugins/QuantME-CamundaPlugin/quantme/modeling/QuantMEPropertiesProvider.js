@@ -212,6 +212,7 @@ function addReadoutErrorMitigationTaskEntries(group, translate) {
 
   // add unfoldingTechnique, qpu, and maxAge attributes
   QuantMEPropertyEntryHandler.addUnfoldingTechniqueEntry(group, translate);
+  QuantMEPropertyEntryHandler.addProviderEntry(group, translate);
   QuantMEPropertyEntryHandler.addQpuEntry(group, translate);
   QuantMEPropertyEntryHandler.addMaxAgeEntry(group, translate);
 }

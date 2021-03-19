@@ -147,6 +147,11 @@
             "type": "String"
           },
           {
+            "name": "provider",
+            "isAttr": true,
+            "type": "String"
+          },
+          {
             "name": "qpu",
             "isAttr": true,
             "type": "String"

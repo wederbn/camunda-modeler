@@ -14,6 +14,7 @@ import React, { Fragment, PureComponent } from 'camunda-modeler-plugin-helpers/r
 import { Fill } from 'camunda-modeler-plugin-helpers/components';
 
 import { startReplacementProcess } from '../replacement/QuantMETransformator';
+import { configureBasedOnHardwareSelection } from '../replacement/hardware-selection/QuantMEHardwareSelectionHandler';
 
 export default class QuantMEController extends PureComponent {
 
@@ -71,6 +72,39 @@ export default class QuantMEController extends PureComponent {
 
           // return result to API
           self.api.sendResult(params.returnPath, params.id, { status: result.status, xml: result.xml });
+        }
+      });
+
+      // transform and deploy the workflow for the dynamic hardware selection
+      this.editorActions.register({
+        transformAndDeployWorkflow: async function(params) {
+          console.log('Transforming and deploying workflow for hardware selection!');
+          let currentQRMs = await self.quantME.getQRMs();
+
+          // configure the workflow fragment with the given parameters
+          console.log('Configuring workflow to transform using provider "%s", QPU "%s", and circuit language "%s"!',
+            params.provider, params.qpu, params.circuitLanguage);
+          let configurationResult = await configureBasedOnHardwareSelection(params.xml, params.provider, params.qpu, params.circuitLanguage);
+
+          // forward error to API if configuration fails
+          if (configurationResult.status === 'failed') {
+            console.log('Configuration of given workflow fragment and parameters failed!');
+            self.api.sendResult(params.returnPath, params.id, { status: configurationResult.status, xml: configurationResult.xml });
+            return;
+          }
+
+          // transform to native BPMN
+          let result = await startReplacementProcess(configurationResult.xml, currentQRMs,
+            {
+              nisqAnalyzerEndpoint: self.nisqAnalyzerEndpoint,
+              transformationFrameworkEndpoint: self.transformationFrameworkEndpoint,
+              camundaEndpoint: self.camundaEndpoint
+            });
+
+          // TODO: throw error if not successful, deploy and return endpoint for call activity
+          console.log(result);
+
+          // return result to API
         }
       });
 

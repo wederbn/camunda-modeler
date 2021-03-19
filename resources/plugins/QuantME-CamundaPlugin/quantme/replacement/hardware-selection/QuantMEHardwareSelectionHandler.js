@@ -10,15 +10,17 @@
  */
 
 import { exportXmlFromModeler, getCamundaInputOutput, getPropertiesToCopy, getRootProcess } from '../../Utilities';
-import { insertShape } from '../QuantMETransformator';
+import { getQuantMETasks, insertShape } from '../QuantMETransformator';
 import {
   INVOKE_NISQ_ANALYZER_SCRIPT,
-  INVOKE_TRANSFORMATION_SCRIPT, RETRIEVE_FRAGMENT_SCRIPT_PREFIX, RETRIEVE_FRAGMENT_SCRIPT_SUFFIX,
+  INVOKE_TRANSFORMATION_SCRIPT,
+  RETRIEVE_FRAGMENT_SCRIPT_PREFIX,
+  RETRIEVE_FRAGMENT_SCRIPT_SUFFIX,
   SELECT_ON_QUEUE_SIZE_SCRIPT
 } from './HardwareSelectionScripts';
 import * as consts from '../../Constants';
 import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
-import { createModeler } from '../ModelerGenerator';
+import { createModeler, createModelerFromXml } from '../ModelerGenerator';
 
 /**
  * Replace the given QuantumHardwareSelectionSubprocess by a native subprocess orchestrating the hardware selection
@@ -188,10 +190,38 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
  * @param circuitLanguage the language of the circuit provided by the NISQ Analyzer
  * @return the configured workflow model
  */
-export function configureBasedOnHardwareSelection(xml, provider, qpu, circuitLanguage) {
+export async function configureBasedOnHardwareSelection(xml, provider, qpu, circuitLanguage) {
+  let modeler = await createModelerFromXml(xml);
+  let elementRegistry = modeler.get('elementRegistry');
+  let modeling = modeler.get('modeling');
 
-  // TODO
-  return xml;
+  // get root element of the current diagram
+  const rootElement = getRootProcess(modeler.getDefinitions());
+  if (typeof rootElement === 'undefined') {
+    console.log('Unable to retrieve root process element from definitions!');
+    return { status: 'failed', cause: 'Unable to retrieve root process element from definitions!' };
+  }
+
+  // get all QuantME modeling constructs from the process
+  const quantmeTasks = getQuantMETasks(rootElement, elementRegistry);
+
+  // update properties of quantum circuit execution and readout error mitigation tasks according to the hardware selection
+  for (let quantmeTask of quantmeTasks) {
+    console.log('Configuring task: ', quantmeTask.task);
+
+    if (quantmeTask.task.$type === consts.QUANTUM_CIRCUIT_EXECUTION_TASK) {
+      quantmeTask.task.provider = provider;
+      quantmeTask.task.qpu = qpu;
+      quantmeTask.task.programmingLanguage = circuitLanguage;
+    }
+
+    if (quantmeTask.task.$type === consts.QUANTUM_CIRCUIT_EXECUTION_TASK) {
+      quantmeTask.task.provider = provider;
+      quantmeTask.task.qpu = qpu;
+    }
+  }
+
+  return { status: 'success', xml: await exportXmlFromModeler(modeler) };
 }
 
 /**

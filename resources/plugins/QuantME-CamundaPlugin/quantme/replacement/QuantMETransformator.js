@@ -102,7 +102,7 @@ export async function startReplacementProcess(xml, currentQRMs, endpointConfig) 
 /**
  * Get QuantME tasks from process
  */
-function getQuantMETasks(process, elementRegistry) {
+export function getQuantMETasks(process, elementRegistry) {
 
   // retrieve parent object for later replacement
   const processBo = elementRegistry.get(process.id);

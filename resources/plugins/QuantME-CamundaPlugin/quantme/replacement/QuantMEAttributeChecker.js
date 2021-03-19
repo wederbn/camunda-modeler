@@ -87,6 +87,6 @@ function checkQuantumCircuitExecutionTask(bo) {
 
 function checkReadoutErrorMitigationTask(bo) {
 
-  // check if unfoldingTechnique and qpu are defined
-  return !(typeof bo.unfoldingTechnique === 'undefined' || typeof bo.qpu === 'undefined');
+  // check if unfoldingTechnique, provider, and qpu are defined
+  return !(typeof bo.unfoldingTechnique === 'undefined'|| typeof bo.provider === 'undefined' || typeof bo.qpu === 'undefined');
 }
