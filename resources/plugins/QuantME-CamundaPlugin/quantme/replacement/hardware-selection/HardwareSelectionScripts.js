@@ -145,6 +145,7 @@ export var RETRIEVE_FRAGMENT_SCRIPT_SUFFIX = '\'\n' +
   '  .create();\n' +
   'execution.setVariable("hardware_selection_fragment", typedFileValue);\n';
 
+// script to invoke the transformation of the workflow fragment within the QuantumHardwareSelectionSubprocess depending on the hardware selection
 export var INVOKE_TRANSFORMATION_SCRIPT = 'import groovy.json.*\n' +
   'import org.camunda.bpm.engine.variable.value.FileValue\n' +
   '\n' +
@@ -193,6 +194,27 @@ export var INVOKE_TRANSFORMATION_SCRIPT = 'import groovy.json.*\n' +
   '   throw new org.camunda.bpm.engine.delegate.BpmnError("Unable to connect to given endpoint: " + transformationUrl);\n' +
   '}\n' +
   '\n' +
-  'println "Polling for successful transformation at: " + pollingUrl;\n';
-
-// TODO: poll for endpoint and set variables for Call activity
+  'println "Polling for successful transformation at: " + pollingUrl;\n' +
+  '\n' +
+  'def transformationStatus = false;\n' +
+  'def result = [];\n' +
+  'while(transformationStatus != "deployed") {\n' +
+  '   println "Waiting 10 seconds for next polling request to the Transformation Framework at URL: " + pollingUrl\n' +
+  '   sleep(10000)\n' +
+  '   def get = new URL(pollingUrl).openConnection();\n' +
+  '   get.setRequestMethod("GET");\n' +
+  '   get.setDoOutput(true);\n' +
+  '\n' +
+  '   if(get.getResponseCode() != 200){\n' +
+  '       throw new org.camunda.bpm.engine.delegate.BpmnError("Received invalid status code during polling: " + get.getResponseCode());\n' +
+  '   }\n' +
+  '   def resultText = get.getInputStream().getText();\n' +
+  '   def slurper = new JsonSlurper();\n' +
+  '   def json = slurper.parseText(resultText);\n' +
+  '   transformationStatus = json.get("status");\n' +
+  '   if(transformationStatus == "deployed"){\n' +
+  '       def fragmentEndpoint = json.get("fragmentEndpoint");\n' +
+  '       println "Resulting fragment endpoint: " + fragmentEndpoint\n' +
+  '       execution.setVariable("fragment_endpoint", fragmentEndpoint);\n' +
+  '   }\n' +
+  '}';
