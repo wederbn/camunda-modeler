@@ -47,6 +47,25 @@ export async function getRootProcessFromXml(xml) {
 }
 
 /**
+ * Export the current diagram in the given modeler as XML
+ *
+ * @param modeler the modeler to export the diagram
+ * @return the XML
+ */
+export async function exportXmlFromModeler(modeler) {
+
+  // export the xml and return to requester
+  function exportXmlWrapper(definitions) {
+    return new Promise((resolve) => {
+      modeler._moddle.toXML(definitions, (err, successResponse) => {
+        resolve(successResponse);
+      });
+    });
+  }
+  return await exportXmlWrapper(modeler.getDefinitions());
+}
+
+/**
  * Check if the given process contains only one flow element and return it
  *
  * @param process the process to retrieve the flow element from
