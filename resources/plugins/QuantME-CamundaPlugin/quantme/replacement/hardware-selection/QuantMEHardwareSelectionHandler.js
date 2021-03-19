@@ -9,7 +9,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getPropertiesToCopy, getCamundaInputOutput } from '../../Utilities';
+import { getCamundaInputOutput, getPropertiesToCopy, getRootProcess } from '../../Utilities';
+import { insertShape } from '../QuantMETransformator';
 import {
   INVOKE_NISQ_ANALYZER_SCRIPT,
   INVOKE_TRANSFORMATION_SCRIPT,
@@ -17,6 +18,7 @@ import {
 } from './HardwareSelectionScripts';
 import * as consts from '../../Constants';
 import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
+import { createModeler } from '../ModelerGenerator';
 
 /**
  * Replace the given QuantumHardwareSelectionSubprocess by a native subprocess orchestrating the hardware selection
@@ -30,9 +32,14 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   modeling.updateProperties(element, getPropertiesToCopy(subprocess));
   modeling.updateProperties(element, { selectionStrategy : undefined, providers: undefined, simulatorsAllowed: undefined });
 
-  // retrieve corresponding business object and update properties
+  // retrieve business object of the new element
   let bo = elementRegistry.get(element.id).businessObject;
   bo.di.isExpanded = true;
+
+  // extract workflow fragment within the QuantumHardwareSelectionSubprocess
+  let hardwareSelectionFragment = await getHardwareSelectionFragment(bo);
+
+  // remove child elements from the subprocess
   bo.flowElements = [];
 
   // add start event for the new subprocess
@@ -118,8 +125,13 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
       value: transformationFrameworkEndpoint
     })
   );
-
-  // TODO: add workflow fragment as input
+  console.log('Adding extracted workflow fragment XML: ', hardwareSelectionFragment);
+  invokeTransformationInOut.inputParameters.push(
+    bpmnFactory.create('camunda:InputParameter', {
+      name: 'hardware_selection_fragment',
+      value: hardwareSelectionFragment
+    })
+  );
 
   // join control flow
   let joiningGateway = modeling.createShape({ type: 'bpmn:ExclusiveGateway' }, { x: 50, y: 50 }, element, {});
@@ -188,4 +200,47 @@ function addShortestQueueSelectionStrategy(parent, elementRegistry, modeling) {
   taskBo.scriptFormat = 'groovy';
   taskBo.script = SELECT_ON_QUEUE_SIZE_SCRIPT;
   return task;
+}
+
+async function getHardwareSelectionFragment(subprocess) {
+  console.log('Extracting workflow fragment from subprocess: ', subprocess);
+
+  // create new modeler to extract the XML of the workflow fragment
+  let modeler = createModeler();
+  let elementRegistry = modeler.get('elementRegistry');
+  let bpmnReplace = modeler.get('bpmnReplace');
+  let modeling = modeler.get('modeling');
+
+  // initialize the modeler
+  function initializeModeler() {
+    return new Promise((resolve) => {
+      modeler.createDiagram((err, successResponse) => {
+        resolve(successResponse);
+      });
+    });
+  }
+  await initializeModeler();
+
+  // retrieve root element to add extracted workflow fragment
+  let rootElement = getRootProcess(modeler.getDefinitions());
+  let rootElementBo = elementRegistry.get(rootElement.id);
+
+  // add start and end event to the new process
+  let startEvent = bpmnReplace.replaceElement(elementRegistry.get(rootElement.flowElements[0].id), { type: 'bpmn:StartEvent' });
+  let endEvent = modeling.createShape({ type: 'bpmn:EndEvent' }, { x: 50, y: 50 }, rootElementBo, {});
+
+  // insert given subprocess and connect to start and end event
+  let insertedSubprocess = insertShape(rootElementBo, subprocess, {}, false, bpmnReplace, elementRegistry, modeling).element;
+  modeling.connect(startEvent, insertedSubprocess, { type: 'bpmn:SequenceFlow' });
+  modeling.connect(insertedSubprocess, endEvent, { type: 'bpmn:SequenceFlow' });
+
+  // export the xml
+  function exportXmlWrapper(definitions) {
+    return new Promise((resolve) => {
+      modeler._moddle.toXML(definitions, (err, successResponse) => {
+        resolve(successResponse);
+      });
+    });
+  }
+  return await exportXmlWrapper(modeler.getDefinitions());
 }

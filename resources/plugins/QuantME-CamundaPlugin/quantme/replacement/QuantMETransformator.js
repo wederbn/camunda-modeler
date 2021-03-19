@@ -186,7 +186,7 @@ async function replaceByFragment(task, parent, replacement, bpmnFactory, bpmnRep
  * @param oldElement an old element that is only required if it should be replaced by the new element
  * @return {{success: boolean, idMap: *, element: *}}
  */
-function insertShape(parent, newElement, idMap, replace, bpmnReplace, elementRegistry, modeling, oldElement) {
+export function insertShape(parent, newElement, idMap, replace, bpmnReplace, elementRegistry, modeling, oldElement) {
   console.log('Inserting shape for element: ', newElement);
 
   // create new id map if not provided
