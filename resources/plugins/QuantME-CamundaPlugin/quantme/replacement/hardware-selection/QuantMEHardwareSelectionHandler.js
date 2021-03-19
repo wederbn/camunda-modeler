@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getCamundaInputOutput, getPropertiesToCopy, getRootProcess } from '../../Utilities';
+import { exportXmlFromModeler, getCamundaInputOutput, getPropertiesToCopy, getRootProcess } from '../../Utilities';
 import { insertShape } from '../QuantMETransformator';
 import {
   INVOKE_NISQ_ANALYZER_SCRIPT,
@@ -180,6 +180,21 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
 }
 
 /**
+ * Configure the given QuantME workflow fragment based on the selected hardware
+ *
+ * @param xml the QuantME workflow fragment in XML format
+ * @param provider the provider of the selected QPU
+ * @param qpu the selected QPU
+ * @param circuitLanguage the language of the circuit provided by the NISQ Analyzer
+ * @return the configured workflow model
+ */
+export function configureBasedOnHardwareSelection(xml, provider, qpu, circuitLanguage) {
+
+  // TODO
+  return xml;
+}
+
+/**
  * Add and return a task implementing the given selection strategy
  */
 function addSelectionStrategyTask(selectionStrategy, parent, elementRegistry, modeling) {
@@ -243,16 +258,7 @@ async function getHardwareSelectionFragment(subprocess) {
   modeling.connect(startEvent, insertedSubprocess, { type: 'bpmn:SequenceFlow' });
   modeling.connect(insertedSubprocess, endEvent, { type: 'bpmn:SequenceFlow' });
 
-  // callback to enable exporting the xml
-  function exportXmlWrapper(definitions) {
-    return new Promise((resolve) => {
-      modeler._moddle.toXML(definitions, (err, successResponse) => {
-        resolve(successResponse);
-      });
-    });
-  }
-
   // export xml and remove line breaks
-  let xml = await exportXmlWrapper(modeler.getDefinitions());
+  let xml = await exportXmlFromModeler(modeler);
   return xml.replace(/(\r\n|\n|\r)/gm, '');
 }

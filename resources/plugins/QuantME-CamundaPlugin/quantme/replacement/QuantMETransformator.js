@@ -17,12 +17,13 @@ import {
   getSingleFlowElement,
   isFlowLikeElement,
   getCamundaInputOutput,
-  getPropertiesToCopy
+  getPropertiesToCopy,
+  exportXmlFromModeler
 } from '../Utilities';
 import { addQuantMEInputParameters } from './InputOutputHandler';
-import { createModelerFromXml } from './ModelerGenerator';
 import * as Constants from '../Constants';
 import { replaceHardwareSelectionSubprocess } from './hardware-selection/QuantMEHardwareSelectionHandler';
+import { createModelerFromXml } from './ModelerGenerator';
 
 /**
  * Initiate the replacement process for the QuantME tasks that are contained in the current process model
@@ -95,16 +96,7 @@ export async function startReplacementProcess(xml, currentQRMs, endpointConfig) 
   // layout diagram after successful transformation
   layout(modeling, elementRegistry, rootElement);
 
-  // export the xml and return to requester
-  function exportXmlWrapper(definitions) {
-    return new Promise((resolve) => {
-      modeler._moddle.toXML(definitions, (err, successResponse) => {
-        resolve(successResponse);
-      });
-    });
-  }
-  let transformedXml = await exportXmlWrapper(modeler.getDefinitions());
-  return { status: 'transformed', xml: transformedXml };
+  return { status: 'transformed', xml: await exportXmlFromModeler(modeler) };
 }
 
 /**
