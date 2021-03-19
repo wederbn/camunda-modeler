@@ -13,7 +13,7 @@ import { getCamundaInputOutput, getPropertiesToCopy, getRootProcess } from '../.
 import { insertShape } from '../QuantMETransformator';
 import {
   INVOKE_NISQ_ANALYZER_SCRIPT,
-  INVOKE_TRANSFORMATION_SCRIPT,
+  INVOKE_TRANSFORMATION_SCRIPT, RETRIEVE_FRAGMENT_SCRIPT_PREFIX, RETRIEVE_FRAGMENT_SCRIPT_SUFFIX,
   SELECT_ON_QUEUE_SIZE_SCRIPT
 } from './HardwareSelectionScripts';
 import * as consts from '../../Constants';
@@ -109,13 +109,23 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   modeling.connect(invokeHardwareSelection, selectionTask, { type: 'bpmn:SequenceFlow' });
 
   // add task implementing the transformation of the QuantME modeling constructs within the QuantumHardwareSelectionSubprocess
+  console.log('Adding extracted workflow fragment XML: ', hardwareSelectionFragment);
+  let retrieveFragment = modeling.createShape({ type: 'bpmn:ScriptTask' }, { x: 50, y: 50 }, element, {});
+  let retrieveFragmentBo = elementRegistry.get(retrieveFragment.id).businessObject;
+  retrieveFragmentBo.name = 'Retrieve Fragment to Transform';
+  retrieveFragmentBo.scriptFormat = 'groovy';
+  retrieveFragmentBo.script = RETRIEVE_FRAGMENT_SCRIPT_PREFIX + hardwareSelectionFragment + RETRIEVE_FRAGMENT_SCRIPT_SUFFIX;
+  retrieveFragmentBo.asyncBefore = true;
+  modeling.connect(selectionTask, retrieveFragment, { type: 'bpmn:SequenceFlow' });
+
+  // add task implementing the transformation of the QuantME modeling constructs within the QuantumHardwareSelectionSubprocess
   let invokeTransformation = modeling.createShape({ type: 'bpmn:ScriptTask' }, { x: 50, y: 50 }, element, {});
   let invokeTransformationBo = elementRegistry.get(invokeTransformation.id).businessObject;
   invokeTransformationBo.name = 'Invoke Transformation Framework';
   invokeTransformationBo.scriptFormat = 'groovy';
   invokeTransformationBo.script = INVOKE_TRANSFORMATION_SCRIPT;
   invokeTransformationBo.asyncBefore = true;
-  modeling.connect(selectionTask, invokeTransformation, { type: 'bpmn:SequenceFlow' });
+  modeling.connect(retrieveFragment, invokeTransformation, { type: 'bpmn:SequenceFlow' });
 
   // add Transformation Framework endpoint as input parameter
   let invokeTransformationInOut = getCamundaInputOutput(invokeTransformationBo, bpmnFactory);
@@ -123,13 +133,6 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
     bpmnFactory.create('camunda:InputParameter', {
       name: 'transformation_framework_endpoint',
       value: transformationFrameworkEndpoint
-    })
-  );
-  console.log('Adding extracted workflow fragment XML: ', hardwareSelectionFragment);
-  invokeTransformationInOut.inputParameters.push(
-    bpmnFactory.create('camunda:InputParameter', {
-      name: 'hardware_selection_fragment',
-      value: hardwareSelectionFragment
     })
   );
   invokeTransformationInOut.inputParameters.push(
@@ -240,7 +243,7 @@ async function getHardwareSelectionFragment(subprocess) {
   modeling.connect(startEvent, insertedSubprocess, { type: 'bpmn:SequenceFlow' });
   modeling.connect(insertedSubprocess, endEvent, { type: 'bpmn:SequenceFlow' });
 
-  // export the xml
+  // callback to enable exporting the xml
   function exportXmlWrapper(definitions) {
     return new Promise((resolve) => {
       modeler._moddle.toXML(definitions, (err, successResponse) => {
@@ -248,5 +251,8 @@ async function getHardwareSelectionFragment(subprocess) {
       });
     });
   }
-  return await exportXmlWrapper(modeler.getDefinitions());
+
+  // export xml and remove line breaks
+  let xml = await exportXmlWrapper(modeler.getDefinitions());
+  return xml.replace(/(\r\n|\n|\r)/gm, '');
 }

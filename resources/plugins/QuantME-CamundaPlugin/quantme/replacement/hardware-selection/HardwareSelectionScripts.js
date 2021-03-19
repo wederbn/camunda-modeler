@@ -10,7 +10,7 @@
  */
 
 // script to invoke the hardware selection by the NISQ Analyzer based on the circuit created in the workflow
-export var INVOKE_NISQ_ANALYZER_SCRIPT= 'import groovy.json.*\n' +
+export var INVOKE_NISQ_ANALYZER_SCRIPT = 'import groovy.json.*\n' +
   '\n' +
   'def nisqAnalyzerEndpoint = execution.getVariable("nisq_analyzer_endpoint");\n' +
   'def circuitLanguage = execution.getVariable("circuit_language");\n' +
@@ -72,7 +72,8 @@ export var INVOKE_NISQ_ANALYZER_SCRIPT= 'import groovy.json.*\n' +
   '   throw new org.camunda.bpm.engine.delegate.BpmnError("Unable to connect to given endpoint: " + nisqAnalyzerEndpoint);\n' +
   '}';
 
-export var SELECT_ON_QUEUE_SIZE_SCRIPT= 'import groovy.json.*\n' +
+// script to select one of the suitable QPUs provided by the NISQ Analyzer based on their current queue size
+export var SELECT_ON_QUEUE_SIZE_SCRIPT = 'import groovy.json.*\n' +
   'import org.camunda.bpm.engine.variable.value.FileValue\n' +
   'import org.camunda.bpm.engine.variable.Variables\n' +
   '\n' +
@@ -109,7 +110,7 @@ export var SELECT_ON_QUEUE_SIZE_SCRIPT= 'import groovy.json.*\n' +
   '\n' +
   'def sortedList = resultList.sort { it.queueSize };\n' +
   'def selectedQpu = resultList.get(0);\n' +
-  'def providerName = selectedQpu.get("providerName");\n' +
+  'def providerName = selectedQpu.get("provider");\n' +
   'def qpuName = selectedQpu.get("qpu");\n' +
   'def language = selectedQpu.get("transpiledLanguage");\n' +
   'println "Selected QPU " + qpuName + " from provider " + providerName + "!";\n' +
@@ -127,24 +128,71 @@ export var SELECT_ON_QUEUE_SIZE_SCRIPT= 'import groovy.json.*\n' +
   '  .create();\n' +
   'execution.setVariable("quantum_circuit", typedFileValue);\n';
 
-// TODO
-export var INVOKE_TRANSFORMATION_SCRIPT= 'import groovy.json.*\n' +
+// Workaround to store the workflow fragment to transform as the Camunda engine only allows variables up to 4000 characters.
+// Thus, a script is used to store it as a file variable during runtime which is allowed to be larger.
+export var RETRIEVE_FRAGMENT_SCRIPT_PREFIX = 'import org.camunda.bpm.engine.variable.value.FileValue\n' +
+  'import org.camunda.bpm.engine.variable.Variables\n' +
+  'def xml = \'';
+
+export var RETRIEVE_FRAGMENT_SCRIPT_SUFFIX = '\'\n' +
+  'def file = new File("fragment.tmp");\n' +
+  'file.write(xml);\n' +
+  'FileValue typedFileValue = Variables\n' +
+  '  .fileValue("fragment.tmp")\n' +
+  '  .file(file)\n' +
+  '  .mimeType("text/plain")\n' +
+  '  .encoding("UTF-8")\n' +
+  '  .create();\n' +
+  'execution.setVariable("hardware_selection_fragment", typedFileValue);\n';
+
+export var INVOKE_TRANSFORMATION_SCRIPT = 'import groovy.json.*\n' +
+  'import org.camunda.bpm.engine.variable.value.FileValue\n' +
   '\n' +
   'def transformationUrl = execution.getVariable("transformation_framework_endpoint");\n' +
   'transformationUrl = transformationUrl.endsWith("/") ? transformationUrl : transformationUrl + "/";\n' +
-  'transformationUrl += "/quantme/workflows/hardware-selection";\n' +
-  'println "Posting for transformation using the following URL: " + transformationUrl\n' +
+  'transformationUrl += "quantme/workflows";\n' +
+  'println "Posting for transformation using the following URL: " + transformationUrl + "/hardware-selection"\n' +
   '\n' +
   'def circuitUrl = execution.getVariable("camunda_endpoint");\n' +
   'circuitUrl = circuitUrl.endsWith("/") ? circuitUrl : circuitUrl + "/";\n' +
   'circuitUrl += "process-instance/" + execution.getProcessInstanceId() + "/variables/quantum_circuit/data";\n' +
   'println "Circuit accessible through URL: " + circuitUrl\n' +
   '\n' +
+  'FileValue fileVariable = execution.getVariableTyped("hardware_selection_fragment");\n' +
+  'def fragment = fileVariable.getValue().getText("UTF-8");\n' +
   'def circuitLanguage = execution.getVariable("circuit_language");\n' +
   'def providerName = execution.getVariable("selected_provider");\n' +
   'def qpuName = execution.getVariable("selected_qpu");\n' +
-  'def message = JsonOutput.toJson(["circuitUrl": circuitUrl, "circuitLanguage": circuitLanguage, "provider": providerName, "qpu": qpuName]);\n' +
+  'def message = JsonOutput.toJson(["xml": fragment, "circuitLanguage": circuitLanguage, "provider": providerName, "qpu": qpuName]);\n' +
   'println "Sending message: " + message;\n' +
   '\n' +
-  'def workflowFragment = execution.getVariable("hardware_selection_fragment");\n' +
-  'println workflowFragment;\n';
+  'def pollingUrl = "";\n' +
+  'try {\n' +
+  '   def post = new URL(transformationUrl + "/hardware-selection").openConnection();\n' +
+  '   post.setRequestMethod("POST");\n' +
+  '   post.setDoOutput(true);\n' +
+  '   post.setRequestProperty("Content-Type", "application/json");\n' +
+  '   post.setRequestProperty("accept", "application/json");\n' +
+  '   post.getOutputStream().write(message.getBytes("UTF-8"));\n' +
+  '\n' +
+  '   def status = post.getResponseCode();\n' +
+  '   if(status == 201){\n' +
+  '       def resultText = post.getInputStream().getText();\n' +
+  '       def slurper = new JsonSlurper();\n' +
+  '       def json = slurper.parseText(resultText);\n' +
+  '       pollingUrl = transformationUrl + "/" + json.get("id");\n' +
+  '       println "Transformation Framework returned job with URL: " + pollingUrl;\n' +
+  '   }else{\n' +
+  '       throw new org.camunda.bpm.engine.delegate.BpmnError("Received status code " + status + " while invoking Transformation Framework!");\n' +
+  '   }\n' +
+  '} catch(org.camunda.bpm.engine.delegate.BpmnError e) {\n' +
+  '   println e.errorCode;\n' +
+  '   throw new org.camunda.bpm.engine.delegate.BpmnError(e.errorCode);\n' +
+  '} catch(Exception e) {\n' +
+  '   println e;\n' +
+  '   throw new org.camunda.bpm.engine.delegate.BpmnError("Unable to connect to given endpoint: " + transformationUrl);\n' +
+  '}\n' +
+  '\n' +
+  'println "Polling for successful transformation at: " + pollingUrl;\n';
+
+// TODO: poll for endpoint and set variables for Call activity
