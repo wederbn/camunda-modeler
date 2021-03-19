@@ -193,7 +193,6 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
 export async function configureBasedOnHardwareSelection(xml, provider, qpu, circuitLanguage) {
   let modeler = await createModelerFromXml(xml);
   let elementRegistry = modeler.get('elementRegistry');
-  let modeling = modeler.get('modeling');
 
   // get root element of the current diagram
   const rootElement = getRootProcess(modeler.getDefinitions());
@@ -215,7 +214,7 @@ export async function configureBasedOnHardwareSelection(xml, provider, qpu, circ
       quantmeTask.task.programmingLanguage = circuitLanguage;
     }
 
-    if (quantmeTask.task.$type === consts.QUANTUM_CIRCUIT_EXECUTION_TASK) {
+    if (quantmeTask.task.$type === consts.READOUT_ERROR_MITIGATION_TASK) {
       quantmeTask.task.provider = provider;
       quantmeTask.task.qpu = qpu;
     }
