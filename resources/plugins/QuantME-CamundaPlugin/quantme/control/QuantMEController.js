@@ -15,6 +15,10 @@ import { Fill } from 'camunda-modeler-plugin-helpers/components';
 
 import { startReplacementProcess } from '../replacement/QuantMETransformator';
 import { configureBasedOnHardwareSelection } from '../replacement/hardware-selection/QuantMEHardwareSelectionHandler';
+import { getServiceTasksToDeploy } from '../../deployment/services/DeploymentUtils';
+import { getRootProcess } from '../Utilities';
+import { createModelerFromXml } from '../replacement/ModelerGenerator';
+import { createServiceInstance, uploadCSARToContainer } from '../../deployment/services/OpenTOSCAUtils';
 
 export default class QuantMEController extends PureComponent {
 
@@ -53,6 +57,8 @@ export default class QuantMEController extends PureComponent {
         self.nisqAnalyzerEndpoint = config.nisqAnalyzerEndpoint;
         self.transformationFrameworkEndpoint = config.transformationFrameworkEndpoint;
         self.camundaEndpoint = config.camundaEndpoint;
+        self.opentoscaEndpoint = config.opentoscaEndpoint;
+        self.wineryEndpoint = config.wineryEndpoint;
       });
 
       // register actions to enable invocation over the menu and the API
@@ -101,10 +107,34 @@ export default class QuantMEController extends PureComponent {
               camundaEndpoint: self.camundaEndpoint
             });
 
-          // TODO: throw error if not successful, deploy and return endpoint for call activity
-          console.log(result);
+          // get all ServiceTasks that require a service deployment
+          let modeler = await createModelerFromXml(result.xml);
+          let csarsToDeploy = getServiceTasksToDeploy(getRootProcess(modeler.getDefinitions()));
+          console.log('Found %i CSARs associated with ServiceTasks: ', csarsToDeploy.length, csarsToDeploy);
 
-          // return result to API
+          // upload the CSARs to the OpenTOSCA Container
+          for (let i = 0; i < csarsToDeploy.length; i++) {
+            let csar = csarsToDeploy[i];
+            let uploadResult = await uploadCSARToContainer(self.opentoscaEndpoint, csar.csarName, csar.url, self.wineryEndpoint);
+            console.log('Uploaded CSAR \'%s\' to OpenTOSCA container with result: ', csar.csarName, uploadResult);
+
+            // abort if upload is not successful
+            if (uploadResult.success === false) {
+              self.api.sendResult(params.returnPath, params.id, { status: 'failed', xml: result.xml });
+              return;
+            }
+            csar.buildPlanUrl = uploadResult.url;
+            csar.inputParameters = uploadResult.inputParameters;
+
+            // create a service instance of the CSAR
+            console.log('Successfully uploaded CSAR to OpenTOSCA Container. Creating service instance...');
+            let instanceCreationResponse = await createServiceInstance(csar, self.camundaEndpoint);
+            console.log('Creation of service instance of CSAR \'%s\' returned result: ', csar.csarName, instanceCreationResponse);
+
+            // TODO: binding
+          }
+
+          // TODO: throw error if not successful and return endpoint for call activity
         }
       });
 
