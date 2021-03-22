@@ -20,6 +20,7 @@ import { getRootProcess } from '../../quantme/Utilities';
 
 import { createServiceInstance, uploadCSARToContainer } from './OpenTOSCAUtils';
 import { bindUsingPull, bindUsingPush, getBindingType } from './BindingUtils';
+import { getServiceTasksToDeploy } from './DeploymentUtils';
 
 const defaultState = {
   windowOpenDeploymentOverview: false,
@@ -309,68 +310,17 @@ export default class DeploymentPlugin extends PureComponent {
   }
 
   /**
-   * Check whether the given element in a workflow is a deployable ServiceTask
-   *
-   * @param element the element to check
-   * @return {*|boolean} true if the element is a ServiceTask and has an assigned deployment model, false otherwise
+   * Get the list of ServiceTasks to deploy a service for to display them in the modal
    */
-  isDeployableServiceTask(element) {
-    return element.$type && element.$type === 'bpmn:ServiceTask' && element.deploymentModelUrl && getBindingType(element) !== undefined;
-  }
+  getServiceTasksToDeployForModal() {
 
-  /**
-   * Get the CSAR name from the deployment model URL
-   *
-   * @param serviceTask the service task the CSAR belongs to
-   * @return {*} the CSAR name
-   */
-  getCSARName(serviceTask) {
-    let url = serviceTask.deploymentModelUrl.split('/?csar')[0];
-    let urlSplit = url.split('/');
-    return urlSplit[urlSplit.length - 1] + '.csar';
-  }
-
-  /**
-   * Get the ServiceTasks of the current workflow that have an attached deployment model to deploy the corresponding service
-   */
-  getServiceTasksToDeploy() {
-
-    let csarsToDeploy = [];
     if (!this.modeler) {
       console.warn('Modeler not available, unable to retrieve ServiceTasks!');
-      return csarsToDeploy;
+      return [];
     }
 
-    // get root element of the workflow
-    const rootElement = getRootProcess(this.modeler.getDefinitions());
-
-    if (rootElement === undefined) {
-      console.warn('Unable to retrieve root element within the workflow!');
-      return csarsToDeploy;
-    }
-
-    // search for service tasks with assigned deployment model
-    let flowElements = rootElement.flowElements;
-    for (let i = 0; i < flowElements.length; i++) {
-      let flowElement = flowElements[i];
-
-      if (this.isDeployableServiceTask(flowElement)) {
-
-        // check if CSAR was already added for another service task
-        let csarEntry = csarsToDeploy.find(serviceTask => flowElement.deploymentModelUrl === serviceTask.url);
-        if (csarEntry !== undefined) {
-          csarEntry.serviceTaskIds.push(flowElement.id);
-        } else {
-          csarsToDeploy.push(
-            {
-              serviceTaskIds: [flowElement.id],
-              url: flowElement.deploymentModelUrl,
-              type: getBindingType(flowElement),
-              csarName: this.getCSARName(flowElement)
-            });
-        }
-      }
-    }
+    // get all ServiceTasks with associated deployment model
+    let csarsToDeploy = getServiceTasksToDeploy(getRootProcess(this.modeler.getDefinitions()));
 
     if (csarsToDeploy.length === 0) {
       this.props.displayNotification({
@@ -426,7 +376,7 @@ export default class DeploymentPlugin extends PureComponent {
       {this.state.windowOpenDeploymentOverview && (
         <ServiceDeploymentOverviewModal
           onClose={this.handleDeploymentOverviewClosed}
-          initValues={this.getServiceTasksToDeploy()}
+          initValues={this.getServiceTasksToDeployForModal()}
         />
       )}
       {this.state.windowOpenDeploymentInput && (
