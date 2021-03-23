@@ -227,6 +227,9 @@ module.exports.addResultOfLongRunningTask = function(id, args) {
   workflow.status = args.status;
   if (!(workflow.status === 'failed')) {
     workflow.xml = args.xml;
+    if (workflow.status === 'deployed') {
+      workflow.deployedProcessDefinition = args.deployedProcessDefinition;
+    }
   }
   updateWorkflow(workflow);
 };

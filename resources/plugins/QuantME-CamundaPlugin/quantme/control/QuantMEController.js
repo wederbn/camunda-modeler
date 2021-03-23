@@ -124,7 +124,7 @@ export default class QuantMEController extends PureComponent {
 
             // abort if upload is not successful
             if (uploadResult.success === false) {
-              self.api.sendResult(params.returnPath, params.id, { status: 'failed', xml: result.xml });
+              self.api.sendResult(params.returnPath, params.id, { status: 'failed' });
               return;
             }
             csar.buildPlanUrl = uploadResult.url;
@@ -147,18 +147,26 @@ export default class QuantMEController extends PureComponent {
 
               if (bindingResponse === undefined || bindingResponse.success === false) {
                 console.error('Failed to bind service instance to ServiceTask with Id: ', serviceTaskIds[j]);
-                self.api.sendResult(params.returnPath, params.id, { status: 'failed', xml: result.xml });
+                self.api.sendResult(params.returnPath, params.id, { status: 'failed' });
                 return;
               }
             }
           }
           console.log('Successfully deployed and bound all required service instances!');
 
+          // deploy the transformed and bound workflow to the Camunda engine
           const rootElement = getRootProcess(modeler.getDefinitions());
-          let workflowDeploymentResult = await self.backend.send('deployment:deploy-workflow', rootElement.id, await exportXmlFromModeler(modeler));
-          console.log('Workflow deployment result: ', workflowDeploymentResult);
+          let boundWorkflowXml = await exportXmlFromModeler(modeler);
+          let workflowDeploymentResult = await self.backend.send('deployment:deploy-workflow', rootElement.id, boundWorkflowXml);
+          if (workflowDeploymentResult === undefined || workflowDeploymentResult.status !== 'deployed') {
+            console.error('Failed to deploy workflow: ', workflowDeploymentResult);
+            self.api.sendResult(params.returnPath, params.id, { status: 'failed' });
+            return;
+          }
 
-          // TODO: throw error if not successful and return endpoint for call activity
+          // return result to the API
+          console.log('Workflow deployment successfully. Returning to API...');
+          self.api.sendResult(params.returnPath, params.id, { status: workflowDeploymentResult.status, deployedProcessDefinition: workflowDeploymentResult.deployedProcessDefinition, xml: boundWorkflowXml });
         }
       });
 
