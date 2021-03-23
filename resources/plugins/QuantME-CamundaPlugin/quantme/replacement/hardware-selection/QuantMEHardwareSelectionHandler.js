@@ -169,7 +169,7 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   let invokeTransformedFragment = modeling.createShape({ type: 'bpmn:CallActivity' }, { x: 50, y: 50 }, element, {});
   let invokeTransformedFragmentBo = elementRegistry.get(invokeTransformedFragment.id).businessObject;
   invokeTransformedFragmentBo.name = 'Invoke Transformed Fragment';
-  invokeTransformedFragmentBo.calledElement = '${ execution.fragment_endpoint }';
+  invokeTransformedFragmentBo.calledElement = '${fragment_endpoint}';
   invokeTransformedFragmentBo.calledElementBinding = 'latest';
   invokeTransformedFragmentBo.asyncBefore = true;
   modeling.connect(joiningGateway, invokeTransformedFragment, { type: 'bpmn:SequenceFlow' });
