@@ -171,6 +171,7 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
   invokeTransformedFragmentBo.name = 'Invoke Transformed Fragment';
   invokeTransformedFragmentBo.calledElement = '${ execution.fragment_endpoint }';
   invokeTransformedFragmentBo.calledElementBinding = 'latest';
+  invokeTransformedFragmentBo.asyncBefore = true;
   modeling.connect(joiningGateway, invokeTransformedFragment, { type: 'bpmn:SequenceFlow' });
 
   // pass all variables between the caller and callee workflow
