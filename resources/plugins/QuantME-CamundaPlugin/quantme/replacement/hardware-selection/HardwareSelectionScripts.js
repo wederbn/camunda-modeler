@@ -183,6 +183,7 @@ export var INVOKE_TRANSFORMATION_SCRIPT = 'import groovy.json.*\n' +
   '       def json = slurper.parseText(resultText);\n' +
   '       pollingUrl = transformationUrl + "/" + json.get("id");\n' +
   '       println "Transformation Framework returned job with URL: " + pollingUrl;\n' +
+  '       execution.setVariable("transformation_framework_job_url", pollingUrl);\n' +
   '   }else{\n' +
   '       throw new org.camunda.bpm.engine.delegate.BpmnError("Received status code " + status + " while invoking Transformation Framework!");\n' +
   '   }\n' +
@@ -192,8 +193,11 @@ export var INVOKE_TRANSFORMATION_SCRIPT = 'import groovy.json.*\n' +
   '} catch(Exception e) {\n' +
   '   println e;\n' +
   '   throw new org.camunda.bpm.engine.delegate.BpmnError("Unable to connect to given endpoint: " + transformationUrl);\n' +
-  '}\n' +
-  '\n' +
+  '}';
+
+// script to poll for the result of the transformation and deployment
+export var POLL_FOR_TRANSFORMATION_SCRIPT = 'import groovy.json.*\n' +
+  'def pollingUrl = execution.getVariable("transformation_framework_job_url");\n' +
   'println "Polling for successful transformation at: " + pollingUrl;\n' +
   '\n' +
   'def transformationStatus = false;\n' +
@@ -211,10 +215,11 @@ export var INVOKE_TRANSFORMATION_SCRIPT = 'import groovy.json.*\n' +
   '   def resultText = get.getInputStream().getText();\n' +
   '   def slurper = new JsonSlurper();\n' +
   '   def json = slurper.parseText(resultText);\n' +
-  '   transformationStatus = json.get("status");\n' +
+  '   def workflow = json.get("workflow");\n' +
+  '   transformationStatus = workflow.get("status");\n' +
   '   if(transformationStatus == "deployed"){\n' +
-  '       def fragmentEndpoint = json.get("fragmentEndpoint");\n' +
-  '       println "Resulting fragment endpoint: " + fragmentEndpoint\n' +
-  '       execution.setVariable("fragment_endpoint", fragmentEndpoint);\n' +
+  '       def deployedProcessDefinition = workflow.get("deployedProcessDefinition");\n' +
+  '       println "Resulting definition of deployed process: " + deployedProcessDefinition\n' +
+  '       execution.setVariable("fragment_endpoint", deployedProcessDefinition.key);\n' +
   '   }\n' +
   '}';

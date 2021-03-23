@@ -13,7 +13,7 @@ import { exportXmlFromModeler, getCamundaInputOutput, getPropertiesToCopy, getRo
 import { getQuantMETasks, insertShape } from '../QuantMETransformator';
 import {
   INVOKE_NISQ_ANALYZER_SCRIPT,
-  INVOKE_TRANSFORMATION_SCRIPT,
+  INVOKE_TRANSFORMATION_SCRIPT, POLL_FOR_TRANSFORMATION_SCRIPT,
   RETRIEVE_FRAGMENT_SCRIPT_PREFIX,
   RETRIEVE_FRAGMENT_SCRIPT_SUFFIX,
   SELECT_ON_QUEUE_SIZE_SCRIPT
@@ -144,9 +144,18 @@ export async function replaceHardwareSelectionSubprocess(subprocess, parent, bpm
     })
   );
 
+  // add task to poll for the results of the transformation and deployment
+  let pollForTransformation = modeling.createShape({ type: 'bpmn:ScriptTask' }, { x: 50, y: 50 }, element, {});
+  let pollForTransformationBo = elementRegistry.get(pollForTransformation.id).businessObject;
+  pollForTransformationBo.name = 'Poll for Transformation and Deployment';
+  pollForTransformationBo.scriptFormat = 'groovy';
+  pollForTransformationBo.script = POLL_FOR_TRANSFORMATION_SCRIPT;
+  pollForTransformationBo.asyncBefore = true;
+  modeling.connect(invokeTransformation, pollForTransformation, { type: 'bpmn:SequenceFlow' });
+
   // join control flow
   let joiningGateway = modeling.createShape({ type: 'bpmn:ExclusiveGateway' }, { x: 50, y: 50 }, element, {});
-  modeling.connect(invokeTransformation, joiningGateway, { type: 'bpmn:SequenceFlow' });
+  modeling.connect(pollForTransformation, joiningGateway, { type: 'bpmn:SequenceFlow' });
 
   // add connection from splitting to joining gateway and add condition
   let alreadySelectedFlow = modeling.connect(splittingGateway, joiningGateway, { type: 'bpmn:SequenceFlow' });
