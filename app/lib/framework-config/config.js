@@ -14,7 +14,7 @@ module.exports = {
   opentoscaEndpoint: process.env.OPENTOSCA_ENDPOINT || 'http://localhost:1337/csars',
   wineryEndpoint: process.env.WINERY_ENDPOINT || 'http://localhost:8081/winery',
   nisqAnalyzerEndpoint: process.env.NISQ_ANALYZER_ENDPOINT || 'http://localhost:8098/nisq-analyzer',
-  transformationFrameworkEndpoint: process.env.TRANSFORMATION_FRAMEWORK_ENDPOINT || 'http://localhost:8099',
+  transformationFrameworkEndpoint: process.env.TRANSFORMATION_FRAMEWORK_ENDPOINT || 'http://localhost:8888',
   githubUsername: process.env.QRM_USERNAME,
   githubRepositoryName: process.env.QRM_REPONAME,
   githubRepositoryPath: process.env.QRM_REPOPATH
