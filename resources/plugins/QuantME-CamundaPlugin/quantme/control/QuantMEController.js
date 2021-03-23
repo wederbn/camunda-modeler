@@ -16,9 +16,10 @@ import { Fill } from 'camunda-modeler-plugin-helpers/components';
 import { startReplacementProcess } from '../replacement/QuantMETransformator';
 import { configureBasedOnHardwareSelection } from '../replacement/hardware-selection/QuantMEHardwareSelectionHandler';
 import { getServiceTasksToDeploy } from '../../deployment/services/DeploymentUtils';
-import { getRootProcess } from '../Utilities';
+import { exportXmlFromModeler, getRootProcess } from '../Utilities';
 import { createModelerFromXml } from '../replacement/ModelerGenerator';
 import { createServiceInstance, uploadCSARToContainer } from '../../deployment/services/OpenTOSCAUtils';
+import { bindUsingPull, bindUsingPush } from '../../deployment/services/BindingUtils';
 
 export default class QuantMEController extends PureComponent {
 
@@ -34,6 +35,9 @@ export default class QuantMEController extends PureComponent {
 
     // get API component from the backend, e.g., to send back results of long-running tasks
     this.api = props._getGlobal('api');
+
+    // get backend to trigger workflow deployment
+    this.backend = props._getGlobal('backend');
   }
 
   componentDidMount() {
@@ -131,8 +135,28 @@ export default class QuantMEController extends PureComponent {
             let instanceCreationResponse = await createServiceInstance(csar, self.camundaEndpoint);
             console.log('Creation of service instance of CSAR \'%s\' returned result: ', csar.csarName, instanceCreationResponse);
 
-            // TODO: binding
+            // bind the service instance using the specified binding pattern
+            let serviceTaskIds = csar.serviceTaskIds;
+            for (let j = 0; j < serviceTaskIds.length; j++) {
+              let bindingResponse = undefined;
+              if (csar.type === 'pull') {
+                bindingResponse = bindUsingPull(instanceCreationResponse.topicName, serviceTaskIds[j], modeler.get('elementRegistry'), modeler.get('modeling'));
+              } else if (csar.type === 'push') {
+                bindingResponse = bindUsingPush(csar, serviceTaskIds[j], modeler.get('elementRegistry'));
+              }
+
+              if (bindingResponse === undefined || bindingResponse.success === false) {
+                console.error('Failed to bind service instance to ServiceTask with Id: ', serviceTaskIds[j]);
+                self.api.sendResult(params.returnPath, params.id, { status: 'failed', xml: result.xml });
+                return;
+              }
+            }
           }
+          console.log('Successfully deployed and bound all required service instances!');
+
+          const rootElement = getRootProcess(modeler.getDefinitions());
+          let workflowDeploymentResult = await self.backend.send('deployment:deploy-workflow', rootElement.id, await exportXmlFromModeler(modeler));
+          console.log('Workflow deployment result: ', workflowDeploymentResult);
 
           // TODO: throw error if not successful and return endpoint for call activity
         }

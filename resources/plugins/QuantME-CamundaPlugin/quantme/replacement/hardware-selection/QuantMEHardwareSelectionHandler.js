@@ -200,6 +200,7 @@ export async function configureBasedOnHardwareSelection(xml, provider, qpu, circ
     console.log('Unable to retrieve root process element from definitions!');
     return { status: 'failed', cause: 'Unable to retrieve root process element from definitions!' };
   }
+  rootElement.isExecutable = true;
 
   // get all QuantME modeling constructs from the process
   const quantmeTasks = getQuantMETasks(rootElement, elementRegistry);
