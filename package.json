@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "QuantME Modeling and Transformation Framework based on the Camunda Modeler",
   "scripts": {
-    "app:dev": "electron ./app/dev.js --force-update-checks resources/diagram/simple.bpmn",
+    "app:dev": "electron ./app/dev.js --force-update-checks",
     "app:test": "nyc --reporter lcov --exclude \"app/test/**\" --exclude \"app/**/__tests__\" mocha --require ./app/test/expect \"app/**/*-spec.js\"",
     "client:build": "(cd client && npm run build)",
     "client:dev": "(cd client && npm run dev)",
