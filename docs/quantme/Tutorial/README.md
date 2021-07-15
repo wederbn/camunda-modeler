@@ -26,7 +26,7 @@ This means you have to reconfigure the QRM repository after restarting the frame
 
 4. Start the QuantME Modeling and Transformation Framework:
 
-- Please make sure you execute the following commands using a Posix environment. 
+- Please make sure to execute the following commands using a Posix environment. 
 On Windows, that is Git Bash or WSL.
 
 - In development mode: Build the plugins contained in this [folder](../../../resources/plugins) and then run ```npm install``` and ```npm run dev``` in the root folder.
@@ -96,7 +96,8 @@ The application is build in ```.\dist``` and can be started depending on your op
   * Update the QRM repository: 
     The QRM repository is loaded into the QuantME Modeling and Transformation Framework at startup.
     Therefore, if there are updates in the repository during the runtime of the framework, the QRM repository has to be reloaded.
-    This can be requested in the menu: 
+    Furthermore, an update is also needed after updating the QRM repository configuration during runtime.
+    This can be requested in the toolbar: 
     
     <kbd><img src="./reload-qrms.gif" width="900"/></kbd>
     
