@@ -26,6 +26,9 @@ This means you have to reconfigure the QRM repository after restarting the frame
 
 4. Start the QuantME Modeling and Transformation Framework:
 
+- Please make sure you execute the following commands using a Posix environment. 
+On Windows, that is Git Bash or WSL.
+
 - In development mode: Build the plugins contained in this [folder](../../../resources/plugins) and then run ```npm install``` and ```npm run dev``` in the root folder.
 Then, the framework will start automatically.
 
