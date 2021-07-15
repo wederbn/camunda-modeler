@@ -4,7 +4,7 @@ In the following, it is described how to set up the QuantME Modeling and Transfo
 
 1. Clone the QuantME Modeling and Transformation Framework: 
 
-  ```git clone https://github.com/UST-QuAntiL/QuantME-TransformationFramework.git```
+    ```git clone https://github.com/UST-QuAntiL/QuantME-TransformationFramework.git```
 
 2. Create a Github repository for your QRMs. 
 In the following we will assume the repository is available under the `UST-QuAntiL` Github organization and has the repository name `qrm-test`.
