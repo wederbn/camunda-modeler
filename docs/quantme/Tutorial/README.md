@@ -99,7 +99,7 @@ The application is build in ```.\dist``` and can be started depending on your op
     Furthermore, an update is also needed after updating the QRM repository configuration during runtime.
     This can be requested in the toolbar: 
     
-    <kbd><img src="./reload-qrms.gif" width="900"/></kbd>
+    <kbd><img src="./reload-qrms.png" /></kbd>
     
     Note: The Github API takes some time to return the updated files.
     Thus, if you experience some issues, wait some time and then update the QRM repository again.
