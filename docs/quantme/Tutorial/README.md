@@ -10,9 +10,9 @@ In the following, it is described how to set up the QuantME Modeling and Transfo
 In the following we will assume the repository is available under the `UST-QuAntiL` Github organization and has the repository name `qrm-test`.
 Please adapt these values to your setup in the following steps.
 
-3. Configure the QuantME Modeling and Transformation Framework to use the created QRM repository:
-- Navigate to the configuration file that is located [here](../../../app/lib/framework-config/config.js)
-- Insert the user/organisation name and repository name:
+3. Configure the QuantME Modeling and Transformation Framework to use the created QRM repository using one of the two options provided bellow:
+- Navigate to the configuration file that is located [here](../../../app/lib/framework-config/config.js).
+Insert the user/organisation name and repository name:
 
   ```JS
   module.exports = {
@@ -26,10 +26,10 @@ This means you have to reconfigure the QRM repository after restarting the frame
 
 4. Start the QuantME Modeling and Transformation Framework:
 
-- In development mode: Build the plugins contained in this [folder](../../../resources/plugins) and then run ```npm run install``` and ```npm run dev``` in the root folder.
+- In development mode: Build the plugins contained in this [folder](../../../resources/plugins) and then run ```npm install``` and ```npm run dev``` in the root folder.
 Then, the framework will start automatically.
 
-- In production mode: Run ```npm run install``` and ```npm run build```.
+- In production mode: Run ```npm install``` and ```npm run build```.
 The application is build in ```.\dist``` and can be started depending on your operating system.
 
 5. Use the framework to create a QRM (detector and replacement fragment):
