@@ -20,6 +20,9 @@ Please adapt these values to your setup in the following steps.
     githubRepositoryName: 'qrm-test'
   };
   ```
+- Alternatively, you can also configure the QRM repository after starting the framework using the `Configuration Button` in the toolbar. 
+However, please note that configuration changes during runtime are currently *not* stored in the configuration file.
+This means you have to reconfigure the QRM repository after restarting the framework.
 
 4. Start the QuantME Modeling and Transformation Framework:
 
