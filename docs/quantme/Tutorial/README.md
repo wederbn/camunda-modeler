@@ -56,7 +56,7 @@ The application is build in ```.\dist``` and can be started depending on your op
     <kbd><img src="./set-attributes.gif" width="900"/></kbd>
   
     In this example, we want to create a replacement fragment that can apply the _correction matrix_ unfolding technique to calculations performed on _ibmq_rome_ or _ibmq_london_. 
-    Therefore, we define ```Correction Matrix``` for the _unfolding technique_ attribute of the task and the list ```ibmq_rome, ibmq_london``` for the _QPU_ attribute.
+    Therefore, we define ```Correction Matrix``` for the _unfolding technique_ attribute of the task, ```IBMQ``` for the _provider_ attribute, and the list ```ibmq_rome, ibmq_london``` for the _QPU_ attribute.
     Our implementation will handle arbitrary values for the _max age_ attribute, thus, we add a wildcard (```*```) for this attribute.
     Note: For workflows only numerical values are allowed for the _max age_ attribute. 
     Therefore, the wildcard is marked as faulty.
