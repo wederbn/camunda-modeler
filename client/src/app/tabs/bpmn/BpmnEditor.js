@@ -66,7 +66,7 @@ const NAMESPACE_CAMUNDA = {
   prefix: 'camunda'
 };
 
-const EXPORT_AS = [ 'png', 'jpeg', 'svg' ];
+const EXPORT_AS = [ 'png', 'jpeg', 'svg', 'zip' ];
 
 const COLORS = [{
   title: 'White',
