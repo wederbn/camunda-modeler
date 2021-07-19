@@ -8,28 +8,19 @@
  * except in compliance with the MIT License.
  */
 
+import JSZip from 'jszip';
+
 import React, { Component } from 'react';
 
 import { isFunction } from 'min-dash';
 
 import { Fill } from '../../slot-fill';
 
-import {
-  Button,
-  DropdownButton,
-  Icon,
-  Loader
-} from '../../primitives';
+import { Button, DropdownButton, Icon, Loader } from '../../primitives';
 
-import {
-  debounce
-} from '../../../util';
+import { debounce } from '../../../util';
 
-import {
-  WithCache,
-  WithCachedState,
-  CachedComponent
-} from '../../cached';
+import { CachedComponent, WithCache, WithCachedState } from '../../cached';
 
 import PropertiesContainer from '../PropertiesContainer';
 
@@ -49,10 +40,7 @@ import generateImage from '../../util/generateImage';
 
 import applyDefaultTemplates from './modeler/features/apply-default-templates/applyDefaultTemplates';
 
-import {
-  findUsages as findNamespaceUsages,
-  replaceUsages as replaceNamespaceUsages
-} from '../util/namespace';
+import { findUsages as findNamespaceUsages, replaceUsages as replaceNamespaceUsages } from '../util/namespace';
 
 import configureModeler from './util/configure';
 
@@ -535,10 +523,20 @@ export class BpmnEditor extends CachedComponent {
   }
 
   async exportQAA() {
-    console.log('QAA export not yet supported. Exporting empty file!');
+    console.log('Starting QAA export!');
 
-    // TODO
-    return '';
+    // get modeler and JS zipper
+    let jszip = new JSZip();
+    const modeler = this.getModeler();
+
+    // write the BPMN diagram to the zip
+    const { xml } = await modeler.saveXML({ format: true });
+    jszip.file('workflow.bpmn', xml);
+
+    // TODO: add dependencies
+
+    // export zip files
+    return await jszip.generateAsync({ type: 'binarystring' });
   }
 
   async exportSVG() {

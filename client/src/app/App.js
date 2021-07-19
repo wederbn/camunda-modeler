@@ -1468,6 +1468,7 @@ export class App extends PureComponent {
     const fileSystem = this.getGlobal('fileSystem');
 
     try {
+
       const contents = await this.tabRef.current.triggerAction('export-as', {
         fileType: exportType
       });
@@ -1542,7 +1543,6 @@ export class App extends PureComponent {
       try {
 
         const exportOptions = await this.askForExportType(tab, options);
-        console.log('Export Options: ', exportOptions);
 
         return exportOptions ? await this.exportAsFile(exportOptions) : false;
       } catch (err) {

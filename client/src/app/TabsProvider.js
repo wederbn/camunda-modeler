@@ -37,7 +37,8 @@ const noopProvider = {
 };
 
 const ENCODING_BASE64 = 'base64',
-      ENCODING_UTF8 = 'utf8';
+      ENCODING_UTF8 = 'utf8',
+      ENCODING_BINARY = 'binary';
 
 const EXPORT_JPEG = {
   name: 'JPEG image',
@@ -59,7 +60,7 @@ const EXPORT_SVG = {
 
 const EXPORT_QAA = {
   name: 'Quantum application archive',
-  encoding: ENCODING_UTF8,
+  encoding: ENCODING_BINARY,
   extensions: [ 'zip' ]
 };
 
