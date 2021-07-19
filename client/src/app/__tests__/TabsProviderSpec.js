@@ -95,7 +95,7 @@ describe('TabsProvider', function() {
       },
       zip: {
         name: 'Quantum application archive',
-        encoding: 'utf8',
+        encoding: 'binary',
         extensions: ['zip']
       }
     };
