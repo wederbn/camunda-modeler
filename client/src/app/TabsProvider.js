@@ -57,6 +57,12 @@ const EXPORT_SVG = {
   extensions: [ 'svg' ]
 };
 
+const EXPORT_QAA = {
+  name: 'Quantum application archive',
+  encoding: ENCODING_UTF8,
+  extensions: [ 'zip' ]
+};
+
 /**
  * A provider that allows us to customize available tabs.
  */
@@ -76,7 +82,8 @@ export default class TabsProvider {
         exports: {
           png: EXPORT_PNG,
           jpeg: EXPORT_JPEG,
-          svg: EXPORT_SVG
+          svg: EXPORT_SVG,
+          zip: EXPORT_QAA
         },
         extensions: [ 'bpmn', 'xml' ],
         getComponent(options) {

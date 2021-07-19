@@ -1487,8 +1487,9 @@ export class App extends PureComponent {
   /**
    * Asks the user for file type to export.
    * @param {Tab} tab
+   * @param [options] options
    */
-  async askForExportType(tab) {
+  async askForExportType(tab, options) {
     const {
       tabsProvider
     } = this.props;
@@ -1501,7 +1502,7 @@ export class App extends PureComponent {
 
     const provider = tabsProvider.getProvider(type);
 
-    const filters = getExportFileDialogFilters(provider);
+    const filters = getExportFileDialogFilters(provider, options);
 
     const exportPath = await this.showSaveFileDialog(tab, {
       filters,
@@ -1531,7 +1532,7 @@ export class App extends PureComponent {
     };
   }
 
-  async exportAs(tab) {
+  async exportAs(tab, options) {
 
     // do as long as it was successful or cancelled
     const infinite = true;
@@ -1540,7 +1541,8 @@ export class App extends PureComponent {
 
       try {
 
-        const exportOptions = await this.askForExportType(tab);
+        const exportOptions = await this.askForExportType(tab, options);
+        console.log('Export Options: ', exportOptions);
 
         return exportOptions ? await this.exportAsFile(exportOptions) : false;
       } catch (err) {
@@ -1654,7 +1656,7 @@ export class App extends PureComponent {
     }
 
     if (action === 'export-as') {
-      return this.exportAs(activeTab);
+      return this.exportAs(activeTab, options);
     }
 
     if (action === 'show-dialog') {
@@ -2209,19 +2211,28 @@ function getSaveFileDialogFilters(provider) {
   }, FILTER_ALL_EXTENSIONS];
 }
 
-function getExportFileDialogFilters(provider) {
+function getExportFileDialogFilters(provider, options) {
   const filters = [];
 
-  forEach(provider.exports, (exports) => {
-    const {
-      extensions,
-      name
-    } = exports;
+  // iterate over each export format defined by the provider (e.g., BPMN, DMN, ...)
+  let keys = Object.keys(provider.exports);
+  keys.forEach(key => {
 
-    filters.push({
-      name,
-      extensions
-    });
+    // check if export format is defined in given options
+    if (options.indexOf(key) > -1) {
+      let exportFormat = provider.exports[key];
+
+      const {
+        extensions,
+        name
+      } = exportFormat;
+
+      // add export format for file dialog
+      filters.push({
+        name,
+        extensions
+      });
+    }
   });
 
   return filters;
