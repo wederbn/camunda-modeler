@@ -525,6 +525,8 @@ export class BpmnEditor extends CachedComponent {
   async exportQAA() {
     console.log('Starting QAA export!');
 
+    // TODO: notify user that QAA is exported in the background
+
     // get modeler and JS zipper
     let jszip = new JSZip();
     const modeler = this.getModeler();
@@ -532,6 +534,12 @@ export class BpmnEditor extends CachedComponent {
     // write the BPMN diagram to the zip
     const { xml } = await modeler.saveXML({ format: true });
     jszip.file('workflow.bpmn', xml);
+
+    // add related deployment models to the QAA
+    const deploymentModelFolder = jszip.folder('deployment-models');
+    deploymentModelFolder.file('test.txt', 'test');
+
+    console.log(modeler);
 
     // TODO: add dependencies
 

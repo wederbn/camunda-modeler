@@ -17,7 +17,7 @@ import { fetch } from 'whatwg-fetch';
  * @param opentoscaEndpoint the endpoint of the OpenTOSCA Container
  * @param csarName the name of the CSAR to upload
  * @param url the URL pointing to the CSAR
- * @param wineryEndpoint the entpoint of the Winery containing the CSAR to upload
+ * @param wineryEndpoint the endpoint of the Winery containing the CSAR to upload
  */
 export async function uploadCSARToContainer(opentoscaEndpoint, csarName, url, wineryEndpoint) {
 

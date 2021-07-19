@@ -12,7 +12,7 @@
 import BpmnModeler from 'bpmn-js/lib/Modeler';
 import elementTemplates from 'bpmn-js-properties-panel/lib/provider/camunda/element-templates';
 import quantMEModule from '../modeling';
-import quantMEModdleExtension from '../../resources/quantum4bpmn.json';
+import quantMEModdleExtension from 'client/src/app/tabs/bpmn/modeler/extension/quantum4bpmn.json';
 import camundaModdlePackage from 'camunda-bpmn-moddle/resources/camunda';
 
 /**
