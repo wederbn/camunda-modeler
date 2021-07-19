@@ -2219,7 +2219,7 @@ function getExportFileDialogFilters(provider, options) {
   keys.forEach(key => {
 
     // check if export format is defined in given options
-    if (options.indexOf(key) > -1) {
+    if (options && options.indexOf(key) > -1) {
       let exportFormat = provider.exports[key];
 
       const {
