@@ -527,7 +527,18 @@ export class BpmnEditor extends CachedComponent {
       return svg;
     }
 
+    if (type === 'zip') {
+      return await this.exportQAA();
+    }
+
     return generateImage(type, svg);
+  }
+
+  async exportQAA() {
+    console.log('QAA export not yet supported. Exporting empty file!');
+
+    // TODO
+    return '';
   }
 
   async exportSVG() {
