@@ -1457,7 +1457,7 @@ export class App extends PureComponent {
    * @param {string} options.exportType
    * @param {File} options.originalFile
    */
-  async exportAsFile(options) {
+  async exportAsFile(options, tab) {
     const {
       encoding,
       exportType,
@@ -1469,16 +1469,23 @@ export class App extends PureComponent {
 
     try {
       const contents = await this.tabRef.current.triggerAction('export-as', {
-        fileType: exportType
+        fileType: exportType,
+        tab: tab
       });
 
-      return fileSystem.writeFile(exportPath, {
-        ...originalFile,
-        contents
-      }, {
-        encoding,
-        fileType: exportType
-      });
+      // QAAs have to be exported directly as their size prevents sending them to the backend
+      console.log(exportType);
+      if (exportType !== 'zip') {
+
+        // export using the file system facility of the backend
+        return fileSystem.writeFile(exportPath, {
+          ...originalFile,
+          contents
+        }, {
+          encoding,
+          fileType: exportType
+        });
+      }
     } catch (err) {
       this.logEntry(err.message, 'ERROR');
     }
@@ -1543,7 +1550,7 @@ export class App extends PureComponent {
 
         const exportOptions = await this.askForExportType(tab, options);
 
-        return exportOptions ? await this.exportAsFile(exportOptions) : false;
+        return exportOptions ? await this.exportAsFile(exportOptions, tab) : false;
       } catch (err) {
         console.error('Tab export failed', err);
 

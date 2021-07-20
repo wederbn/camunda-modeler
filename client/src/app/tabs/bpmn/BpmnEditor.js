@@ -9,6 +9,7 @@
  */
 
 import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 
 import React, { Component } from 'react';
 
@@ -45,6 +46,8 @@ import { findUsages as findNamespaceUsages, replaceUsages as replaceNamespaceUsa
 import configureModeler from './util/configure';
 
 import Metadata from '../../../util/Metadata';
+import { getServiceTasksToDeploy } from '../../quantme/deployment/DeploymentUtils';
+import { getRootProcess } from '../../quantme/utilities/Utilities';
 
 
 const NAMESPACE_URL_ACTIVITI = 'http://activiti.org/bpmn';
@@ -508,7 +511,7 @@ export class BpmnEditor extends CachedComponent {
     }
   }
 
-  async exportAs(type) {
+  async exportAs(type, tab) {
     const svg = await this.exportSVG();
 
     if (type === 'svg') {
@@ -516,13 +519,15 @@ export class BpmnEditor extends CachedComponent {
     }
 
     if (type === 'zip') {
-      return await this.exportQAA();
+      let contents = await this.exportQAA(tab);
+      saveAs(contents, tab.name);
+      return;
     }
 
     return generateImage(type, svg);
   }
 
-  async exportQAA() {
+  async exportQAA(tab) {
     console.log('Starting QAA export!');
 
     // TODO: notify user that QAA is exported in the background
@@ -533,18 +538,36 @@ export class BpmnEditor extends CachedComponent {
 
     // write the BPMN diagram to the zip
     const { xml } = await modeler.saveXML({ format: true });
-    jszip.file('workflow.bpmn', xml);
+    jszip.file(tab.name, xml);
 
-    // add related deployment models to the QAA
-    const deploymentModelFolder = jszip.folder('deployment-models');
-    deploymentModelFolder.file('test.txt', 'test');
+    // get list of deployment models defined at service tasks
+    let csarsToAdd = getServiceTasksToDeploy(getRootProcess(modeler.getDefinitions()));
+    if (csarsToAdd && csarsToAdd.length > 0) {
+      console.log('Adding %i CSARs to QAA!', csarsToAdd.length);
 
-    console.log(modeler);
+      // add folder for related deployment models to the QAA
+      const deploymentModelFolder = jszip.folder('deployment-models');
 
-    // TODO: add dependencies
+      for (let id in csarsToAdd) {
+        const csarToAdd = csarsToAdd[id];
 
-    // export zip files
-    return await jszip.generateAsync({ type: 'binarystring' });
+        // create folder for the CSAR contents
+        const csarFolder = deploymentModelFolder.folder(csarToAdd.csarName);
+
+        // download CSAR from Winery
+        const csarUrl = csarToAdd.url.replace('{{ wineryEndpoint }}', modeler.config.wineryEndpoint);
+        const response = await fetch(csarUrl);
+        const blob = await response.blob();
+
+        // add content of the CSAR to the created folder
+        await csarFolder.loadAsync(blob);
+      }
+    } else {
+      console.log('No CSARs connected with service tasks!');
+    }
+
+    // export zip file
+    return jszip.generateAsync({ type:'blob' });
   }
 
   async exportSVG() {
