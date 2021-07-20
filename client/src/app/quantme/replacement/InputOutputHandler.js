@@ -9,8 +9,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getPropertiesToCopy } from 'client/src/app/quantme/utilities/Utilities';
-import { QUANTME_ATTRIBUTES } from 'client/src/app/quantme/Constants';
+import { getPropertiesToCopy } from '../utilities/Utilities';
+import { QUANTME_ATTRIBUTES } from '../Constants';
 
 /**
  * Add attributes of a replaced QuantME task to the replacing workflow fragment to enable its configuration based of the attribute values.
