@@ -18,7 +18,7 @@ import {
   RETRIEVE_FRAGMENT_SCRIPT_SUFFIX,
   SELECT_ON_QUEUE_SIZE_SCRIPT
 } from './HardwareSelectionScripts';
-import * as consts from '../../Constants';
+import * as consts from 'client/src/app/quantme/Constants';
 import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
 import { createModeler, createModelerFromXml } from '../ModelerGenerator';
 

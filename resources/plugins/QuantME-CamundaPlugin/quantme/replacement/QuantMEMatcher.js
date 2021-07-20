@@ -11,7 +11,7 @@
 
 import { isQuantMETask, getSingleFlowElement } from 'client/src/app/quantme/utilities/Utilities';
 import { getRootProcessFromXml } from '../Utilities';
-import * as consts from '../Constants';
+import * as consts from 'client/src/app/quantme/Constants';
 
 export async function matchesQRM(qrm, task) {
   console.log('Matching QRM %s and task with id %s!', qrm.qrmUrl, task.id);

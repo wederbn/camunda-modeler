@@ -10,7 +10,7 @@
  */
 
 import { getPropertiesToCopy } from 'client/src/app/quantme/utilities/Utilities';
-import { QUANTME_ATTRIBUTES } from '../Constants';
+import { QUANTME_ATTRIBUTES } from 'client/src/app/quantme/Constants';
 
 /**
  * Add attributes of a replaced QuantME task to the replacing workflow fragment to enable its configuration based of the attribute values.

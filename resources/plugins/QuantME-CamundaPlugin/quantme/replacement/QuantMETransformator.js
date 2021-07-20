@@ -21,7 +21,7 @@ import {
 } from 'client/src/app/quantme/utilities/Utilities';
 import { getRootProcessFromXml } from '../Utilities';
 import { addQuantMEInputParameters } from './InputOutputHandler';
-import * as Constants from '../Constants';
+import * as Constants from 'client/src/app/quantme/Constants';
 import { replaceHardwareSelectionSubprocess } from './hardware-selection/QuantMEHardwareSelectionHandler';
 import { createModelerFromXml } from './ModelerGenerator';
 

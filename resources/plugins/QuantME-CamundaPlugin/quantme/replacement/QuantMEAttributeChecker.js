@@ -10,7 +10,7 @@
  */
 
 let ModelUtil = require('bpmn-js/lib/util/ModelUtil');
-import * as consts from '../Constants';
+import * as consts from 'client/src/app/quantme/Constants';
 
 /**
  * Check whether the given QuantME task has all required elements set
