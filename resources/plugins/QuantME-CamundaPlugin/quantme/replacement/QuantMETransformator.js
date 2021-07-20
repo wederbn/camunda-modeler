@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { layout } from './Layouter';
+import { layout } from 'client/src/app/quantme/layouter/Layouter';
 import { matchesQRM } from './QuantMEMatcher';
 import {
   getRootProcess,
