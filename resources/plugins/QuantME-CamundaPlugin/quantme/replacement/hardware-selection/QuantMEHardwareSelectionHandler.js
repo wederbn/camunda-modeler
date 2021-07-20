@@ -20,7 +20,7 @@ import {
 } from './HardwareSelectionScripts';
 import * as consts from 'client/src/app/quantme/Constants';
 import extensionElementsHelper from 'bpmn-js-properties-panel/lib/helper/ExtensionElementsHelper';
-import { createModeler, createModelerFromXml } from '../ModelerGenerator';
+import { createModeler, createModelerFromXml } from '../../Utilities';
 
 /**
  * Replace the given QuantumHardwareSelectionSubprocess by a native subprocess orchestrating the hardware selection

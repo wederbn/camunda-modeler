@@ -17,7 +17,7 @@ import { startReplacementProcess } from '../replacement/QuantMETransformator';
 import { configureBasedOnHardwareSelection } from '../replacement/hardware-selection/QuantMEHardwareSelectionHandler';
 import { getServiceTasksToDeploy } from 'client/src/app/quantme/deployment/DeploymentUtils';
 import { exportXmlFromModeler, getRootProcess } from 'client/src/app/quantme/utilities/Utilities';
-import { createModelerFromXml } from '../replacement/ModelerGenerator';
+import { createModelerFromXml } from '../Utilities';
 import { createServiceInstance, uploadCSARToContainer } from 'client/src/app/quantme/deployment/OpenTOSCAUtils';
 import { bindUsingPull, bindUsingPush } from 'client/src/app/quantme/deployment/BindingUtils';
 

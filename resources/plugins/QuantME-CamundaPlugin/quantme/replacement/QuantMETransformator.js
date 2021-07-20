@@ -19,11 +19,10 @@ import {
   getPropertiesToCopy,
   exportXmlFromModeler
 } from 'client/src/app/quantme/utilities/Utilities';
-import { getRootProcessFromXml } from '../Utilities';
+import { getRootProcessFromXml, createModelerFromXml } from '../Utilities';
 import { addQuantMEInputParameters } from 'client/src/app/quantme/replacement/InputOutputHandler';
 import * as Constants from 'client/src/app/quantme/Constants';
 import { replaceHardwareSelectionSubprocess } from './hardware-selection/QuantMEHardwareSelectionHandler';
-import { createModelerFromXml } from './ModelerGenerator';
 
 /**
  * Initiate the replacement process for the QuantME tasks that are contained in the current process model
