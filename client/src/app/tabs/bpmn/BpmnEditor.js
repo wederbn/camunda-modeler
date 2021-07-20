@@ -520,7 +520,7 @@ export class BpmnEditor extends CachedComponent {
 
     if (type === 'zip') {
       let contents = await this.exportQAA(tab);
-      saveAs(contents, tab.name);
+      saveAs(contents, tab.name.split('.')[0] + '.zip');
       return;
     }
 
@@ -529,8 +529,6 @@ export class BpmnEditor extends CachedComponent {
 
   async exportQAA(tab) {
     console.log('Starting QAA export!');
-
-    // TODO: notify user that QAA is exported in the background
 
     // get modeler and JS zipper
     let jszip = new JSZip();

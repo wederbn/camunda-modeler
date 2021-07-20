@@ -1468,6 +1468,17 @@ export class App extends PureComponent {
     const fileSystem = this.getGlobal('fileSystem');
 
     try {
+
+      // inform the user over pending QAA export
+      if (exportType === 'zip') {
+        this.displayNotification({
+          type: 'info',
+          title: 'QAA export pending!',
+          content: 'QAA export is currently pending. Retrieving required CSARs from connected Winery. Please wait until the file dialog opens to store the QAA locally!',
+          duration: 100000
+        });
+      }
+
       const contents = await this.tabRef.current.triggerAction('export-as', {
         fileType: exportType,
         tab: tab
