@@ -35,6 +35,9 @@ export default class ConfigPlugin extends PureComponent {
   constructor(props) {
     super(props);
 
+    // modelers for all tabs to enable switching between them
+    this.modelers = {};
+
     this.state = defaultState;
     this.config = defaultConfig;
 
@@ -46,71 +49,87 @@ export default class ConfigPlugin extends PureComponent {
 
   componentDidMount() {
 
-    // initialize config in the frontend
-    this.backendConfig.getConfigFromBackend().then(config => this.config = config);
-
     // subscribe to updates for all configuration parameters in the backend
     this.props.subscribe('bpmn.modeler.created', (event) => {
 
       const {
-        modeler
+        modeler, tab
       } = event;
 
-      this.editorActions = modeler.get('editorActions');
+      // save modeler and activate as current modeler
+      this.modelers[tab.id] = modeler;
+      this.modeler = modeler;
       const self = this;
 
-      // broadcast the initial configuration in the client using the event bus
-      this.eventBus = modeler.get('eventBus');
-      this.eventBus.fire('config.updated', this.config);
+      const editorActions = this.modeler.get('editorActions');
+      const eventBus = this.modeler.get('eventBus');
 
-      this.editorActions.register({
+      // initialize config in the frontend
+      this.backendConfig.getConfigFromBackend().then(config => {
+        this.config = config;
+        this.modeler.config = config;
+        eventBus.fire('config.updated', config);
+      });
+
+      editorActions.register({
         camundaEndpointChanged: function(camundaEndpoint) {
           self.config.camundaEndpoint = camundaEndpoint;
-          self.eventBus.fire('config.updated', self.config);
+          modeler.config.camundaEndpoint = camundaEndpoint;
         }
       });
-      this.editorActions.register({
+      editorActions.register({
         nisqAnalyzerEndpointChanged: function(nisqAnalyzerEndpoint) {
           self.config.nisqAnalyzerEndpoint = nisqAnalyzerEndpoint;
-          self.eventBus.fire('config.updated', self.config);
+          modeler.config.nisqAnalyzerEndpoint = nisqAnalyzerEndpoint;
         }
       });
-      this.editorActions.register({
+      editorActions.register({
         opentoscaEndpointChanged: function(opentoscaEndpoint) {
           self.config.opentoscaEndpoint = opentoscaEndpoint;
-          self.eventBus.fire('config.updated', self.config);
+          modeler.config.opentoscaEndpoint = opentoscaEndpoint;
         }
       });
-      this.editorActions.register({
+      editorActions.register({
         qrmRepoNameChanged: function(qrmRepoName) {
           self.config.qrmRepoName = qrmRepoName;
-          self.eventBus.fire('config.updated', self.config);
+          modeler.config.qrmRepoName = qrmRepoName;
         }
       });
-      this.editorActions.register({
+      editorActions.register({
         qrmUserNameChanged: function(qrmUserName) {
           self.config.qrmUserName = qrmUserName;
-          self.eventBus.fire('config.updated', self.config);
+          modeler.config.qrmUserName = qrmUserName;
         }
       });
-      this.editorActions.register({
+      editorActions.register({
         qrmRepoPathChanged: function(qrmRepoPath) {
           self.config.qrmRepoPath = qrmRepoPath;
-          self.eventBus.fire('config.updated', self.config);
+          modeler.config.qrmRepoPath = qrmRepoPath;
         }
       });
-      this.editorActions.register({
+      editorActions.register({
         transformationFrameworkEndpointChanged: function(transformationFrameworkEndpoint) {
           self.config.transformationFrameworkEndpoint = transformationFrameworkEndpoint;
-          self.eventBus.fire('config.updated', self.config);
+          modeler.config.transformationFrameworkEndpoint = transformationFrameworkEndpoint;
         }
       });
-      this.editorActions.register({
+      editorActions.register({
         wineryEndpointChanged: function(wineryEndpoint) {
           self.config.wineryEndpoint = wineryEndpoint;
-          self.eventBus.fire('config.updated', self.config);
+          modeler.config.wineryEndpoint = wineryEndpoint;
+          eventBus.fire('config.updated', self.config);
         }
       });
+    });
+
+    // change to modeler corresponding to the active tab
+    this.props.subscribe('app.activeTabChanged', ({ activeTab }) => {
+      if (this.modeler) {
+        const config = this.modeler.config;
+        this.modeler = this.modelers[activeTab.id];
+        this.modeler.config = config;
+        this.modeler.get('eventBus').fire('config.updated', config);
+      }
     });
   }
 
