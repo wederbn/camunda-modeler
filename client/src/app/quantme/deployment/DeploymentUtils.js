@@ -10,7 +10,7 @@
  */
 
 import { getBindingType } from './BindingUtils';
-import { getFlowElementsRecursively } from 'client/src/app/quantme/utilities/Utilities';
+import { getFlowElementsRecursively } from '../utilities/Utilities';
 
 /**
  * Get the ServiceTasks of the current workflow that have an attached deployment model to deploy the corresponding service starting from the given root element

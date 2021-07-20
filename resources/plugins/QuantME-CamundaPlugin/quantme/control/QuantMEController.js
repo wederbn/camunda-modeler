@@ -15,11 +15,11 @@ import { Fill } from 'camunda-modeler-plugin-helpers/components';
 
 import { startReplacementProcess } from '../replacement/QuantMETransformator';
 import { configureBasedOnHardwareSelection } from '../replacement/hardware-selection/QuantMEHardwareSelectionHandler';
-import { getServiceTasksToDeploy } from '../../deployment/services/DeploymentUtils';
+import { getServiceTasksToDeploy } from 'client/src/app/quantme/deployment/DeploymentUtils';
 import { exportXmlFromModeler, getRootProcess } from 'client/src/app/quantme/utilities/Utilities';
 import { createModelerFromXml } from '../replacement/ModelerGenerator';
 import { createServiceInstance, uploadCSARToContainer } from 'client/src/app/quantme/deployment/OpenTOSCAUtils';
-import { bindUsingPull, bindUsingPush } from '../../deployment/services/BindingUtils';
+import { bindUsingPull, bindUsingPush } from 'client/src/app/quantme/deployment/BindingUtils';
 
 export default class QuantMEController extends PureComponent {
 
