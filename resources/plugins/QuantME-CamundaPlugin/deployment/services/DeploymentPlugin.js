@@ -16,7 +16,7 @@ import { Fill } from 'camunda-modeler-plugin-helpers/components';
 import ServiceDeploymentOverviewModal from './ServiceDeploymentOverviewModal';
 import ServiceDeploymentInputModal from './ServiceDeploymentInputModal';
 import ServiceDeploymentBindingModal from './ServiceDeploymentBindingModal';
-import { getRootProcess } from '../../quantme/Utilities';
+import { getRootProcess } from 'client/src/app/quantme/utilities/Utilities';
 
 import { createServiceInstance, uploadCSARToContainer } from './OpenTOSCAUtils';
 import { bindUsingPull, bindUsingPush, getBindingType } from './BindingUtils';

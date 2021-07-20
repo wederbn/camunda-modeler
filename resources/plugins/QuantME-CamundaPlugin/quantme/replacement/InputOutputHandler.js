@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getPropertiesToCopy } from '../Utilities';
+import { getPropertiesToCopy } from 'client/src/app/quantme/utilities/Utilities';
 import { QUANTME_ATTRIBUTES } from '../Constants';
 
 /**

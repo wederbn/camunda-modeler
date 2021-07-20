@@ -16,7 +16,7 @@ import { Fill } from 'camunda-modeler-plugin-helpers/components';
 import { startReplacementProcess } from '../replacement/QuantMETransformator';
 import { configureBasedOnHardwareSelection } from '../replacement/hardware-selection/QuantMEHardwareSelectionHandler';
 import { getServiceTasksToDeploy } from '../../deployment/services/DeploymentUtils';
-import { exportXmlFromModeler, getRootProcess } from '../Utilities';
+import { exportXmlFromModeler, getRootProcess } from 'client/src/app/quantme/utilities/Utilities';
 import { createModelerFromXml } from '../replacement/ModelerGenerator';
 import { createServiceInstance, uploadCSARToContainer } from '../../deployment/services/OpenTOSCAUtils';
 import { bindUsingPull, bindUsingPush } from '../../deployment/services/BindingUtils';

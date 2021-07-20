@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { exportXmlFromModeler, getCamundaInputOutput, getPropertiesToCopy, getRootProcess } from '../../Utilities';
+import { exportXmlFromModeler, getCamundaInputOutput, getPropertiesToCopy, getRootProcess } from 'client/src/app/quantme/utilities/Utilities';
 import { getQuantMETasks, insertShape } from '../QuantMETransformator';
 import {
   INVOKE_NISQ_ANALYZER_SCRIPT,

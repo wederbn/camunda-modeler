@@ -9,7 +9,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getRootProcessFromXml, isQuantMETask, getSingleFlowElement } from '../Utilities';
+import { isQuantMETask, getSingleFlowElement } from 'client/src/app/quantme/utilities/Utilities';
+import { getRootProcessFromXml } from '../Utilities';
 import * as consts from '../Constants';
 
 export async function matchesQRM(qrm, task) {

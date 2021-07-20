@@ -13,13 +13,13 @@ import { layout } from './Layouter';
 import { matchesQRM } from './QuantMEMatcher';
 import {
   getRootProcess,
-  getRootProcessFromXml,
   getSingleFlowElement,
   isFlowLikeElement,
   getCamundaInputOutput,
   getPropertiesToCopy,
   exportXmlFromModeler
-} from '../Utilities';
+} from 'client/src/app/quantme/utilities/Utilities';
+import { getRootProcessFromXml } from '../Utilities';
 import { addQuantMEInputParameters } from './InputOutputHandler';
 import * as Constants from '../Constants';
 import { replaceHardwareSelectionSubprocess } from './hardware-selection/QuantMEHardwareSelectionHandler';
