@@ -1474,7 +1474,6 @@ export class App extends PureComponent {
       });
 
       // QAAs have to be exported directly as their size prevents sending them to the backend
-      console.log(exportType);
       if (exportType !== 'zip') {
 
         // export using the file system facility of the backend
@@ -1511,16 +1510,25 @@ export class App extends PureComponent {
 
     const filters = getExportFileDialogFilters(provider, options);
 
-    const exportPath = await this.showSaveFileDialog(tab, {
-      filters,
-      title: `Export ${ name } as...`
-    });
+    let exportType;
+    let exportPath;
+    if (options !== 'zip') {
+      exportPath = await this.showSaveFileDialog(tab, {
+        filters,
+        title: `Export ${name} as...`
+      });
 
-    if (!exportPath) {
-      return false;
+      exportType = getFileTypeFromExtension(exportPath);
+
+      if (!exportPath) {
+        return false;
+      }
+    } else {
+
+      // file dialog for QAA is shown on export
+      exportPath = 'QAA.zip';
+      exportType = 'zip';
     }
-
-    const exportType = getFileTypeFromExtension(exportPath);
 
     // handle missing extension / export type as abortion
     // this ensures file export does not fail on Linux,
