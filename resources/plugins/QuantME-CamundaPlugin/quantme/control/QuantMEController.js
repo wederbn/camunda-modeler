@@ -18,7 +18,7 @@ import { configureBasedOnHardwareSelection } from '../replacement/hardware-selec
 import { getServiceTasksToDeploy } from '../../deployment/services/DeploymentUtils';
 import { exportXmlFromModeler, getRootProcess } from 'client/src/app/quantme/utilities/Utilities';
 import { createModelerFromXml } from '../replacement/ModelerGenerator';
-import { createServiceInstance, uploadCSARToContainer } from '../../deployment/services/OpenTOSCAUtils';
+import { createServiceInstance, uploadCSARToContainer } from 'client/src/app/quantme/deployment/OpenTOSCAUtils';
 import { bindUsingPull, bindUsingPush } from '../../deployment/services/BindingUtils';
 
 export default class QuantMEController extends PureComponent {
