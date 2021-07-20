@@ -19,17 +19,6 @@ const defaultState = {
   configOpen: false
 };
 
-const defaultConfig = {
-  camundaEndpoint: '',
-  nisqAnalyzerEndpoint: '',
-  opentoscaEndpoint: '',
-  qrmRepoName: '',
-  qrmUserName: '',
-  qrmRepoPath: '',
-  transformationFrameworkEndpoint: '',
-  wineryEndpoint: ''
-};
-
 export default class ConfigPlugin extends PureComponent {
 
   constructor(props) {
@@ -39,7 +28,6 @@ export default class ConfigPlugin extends PureComponent {
     this.modelers = {};
 
     this.state = defaultState;
-    this.config = defaultConfig;
 
     this.handleConfigClosed = this.handleConfigClosed.bind(this);
 
@@ -66,58 +54,49 @@ export default class ConfigPlugin extends PureComponent {
 
       // initialize config in the frontend
       this.backendConfig.getConfigFromBackend().then(config => {
-        this.config = config;
         this.modeler.config = config;
         eventBus.fire('config.updated', config);
       });
 
       editorActions.register({
         camundaEndpointChanged: function(camundaEndpoint) {
-          self.config.camundaEndpoint = camundaEndpoint;
-          modeler.config.camundaEndpoint = camundaEndpoint;
+          self.modeler.config.camundaEndpoint = camundaEndpoint;
         }
       });
       editorActions.register({
         nisqAnalyzerEndpointChanged: function(nisqAnalyzerEndpoint) {
-          self.config.nisqAnalyzerEndpoint = nisqAnalyzerEndpoint;
-          modeler.config.nisqAnalyzerEndpoint = nisqAnalyzerEndpoint;
+          self.modeler.config.nisqAnalyzerEndpoint = nisqAnalyzerEndpoint;
         }
       });
       editorActions.register({
         opentoscaEndpointChanged: function(opentoscaEndpoint) {
-          self.config.opentoscaEndpoint = opentoscaEndpoint;
-          modeler.config.opentoscaEndpoint = opentoscaEndpoint;
+          self.modeler.config.opentoscaEndpoint = opentoscaEndpoint;
         }
       });
       editorActions.register({
         qrmRepoNameChanged: function(qrmRepoName) {
-          self.config.qrmRepoName = qrmRepoName;
-          modeler.config.qrmRepoName = qrmRepoName;
+          self.modeler.config.qrmRepoName = qrmRepoName;
         }
       });
       editorActions.register({
         qrmUserNameChanged: function(qrmUserName) {
-          self.config.qrmUserName = qrmUserName;
-          modeler.config.qrmUserName = qrmUserName;
+          self.modeler.config.qrmUserName = qrmUserName;
         }
       });
       editorActions.register({
         qrmRepoPathChanged: function(qrmRepoPath) {
-          self.config.qrmRepoPath = qrmRepoPath;
-          modeler.config.qrmRepoPath = qrmRepoPath;
+          self.modeler.config.qrmRepoPath = qrmRepoPath;
         }
       });
       editorActions.register({
         transformationFrameworkEndpointChanged: function(transformationFrameworkEndpoint) {
-          self.config.transformationFrameworkEndpoint = transformationFrameworkEndpoint;
-          modeler.config.transformationFrameworkEndpoint = transformationFrameworkEndpoint;
+          self.modeler.config.transformationFrameworkEndpoint = transformationFrameworkEndpoint;
         }
       });
       editorActions.register({
         wineryEndpointChanged: function(wineryEndpoint) {
-          self.config.wineryEndpoint = wineryEndpoint;
-          modeler.config.wineryEndpoint = wineryEndpoint;
-          eventBus.fire('config.updated', self.config);
+          self.modeler.config.wineryEndpoint = wineryEndpoint;
+          eventBus.fire('config.updated', self.modeler.config);
         }
       });
     });
@@ -125,6 +104,8 @@ export default class ConfigPlugin extends PureComponent {
     // change to modeler corresponding to the active tab
     this.props.subscribe('app.activeTabChanged', ({ activeTab }) => {
       if (this.modeler) {
+
+        // copy config from old active modeler to new active modeler
         const config = this.modeler.config;
         this.modeler = this.modelers[activeTab.id];
         this.modeler.config = config;
@@ -138,7 +119,7 @@ export default class ConfigPlugin extends PureComponent {
 
     // update configuration in frontend and backend if passed through the modal
     if (newConfig) {
-      this.config = newConfig;
+      this.modeler.config = newConfig;
       this.backendConfig.setConfigFromModal(newConfig);
     }
   }
@@ -156,7 +137,7 @@ export default class ConfigPlugin extends PureComponent {
       {this.state.configOpen && (
         <ConfigModal
           onClose={this.handleConfigClosed}
-          initValues={this.config}
+          initValues={this.modeler.config}
         />
       )}
     </Fragment>);
