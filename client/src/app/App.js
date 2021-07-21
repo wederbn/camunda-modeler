@@ -506,11 +506,13 @@ export class App extends PureComponent {
     // filter QAAs as they have to be uploaded differently due to their size
     let qaaPaths = filePaths.filter(path => path.endsWith('zip'));
     filePaths = filePaths.filter(path => !path.endsWith('zip'));
-    if (qaaPaths && qaaPaths.length > 0) {
-      this.openQAAs(qaaPaths);
-    }
 
-    const files = await this.readFileList(filePaths);
+    let files = await this.readFileList(filePaths);
+
+    // unzip QAAs and extract BPMN files
+    if (qaaPaths && qaaPaths.length > 0) {
+      files = files.concat(await this.openQAAs(qaaPaths));
+    }
 
     await this.openFiles(files);
   }
@@ -523,7 +525,7 @@ export class App extends PureComponent {
       duration: 100000
     });
 
-    await this.tabRef.current.triggerAction('import-qaa', {
+    return await this.tabRef.current.triggerAction('import-qaa', {
       qaaPaths: qaaPaths
     });
   }
