@@ -49,7 +49,6 @@ import Metadata from '../../../util/Metadata';
 import { getServiceTasksToDeploy } from '../../quantme/deployment/DeploymentUtils';
 import { getRootProcess } from '../../quantme/utilities/Utilities';
 
-
 const NAMESPACE_URL_ACTIVITI = 'http://activiti.org/bpmn';
 
 const NAMESPACE_CAMUNDA = {
@@ -566,6 +565,36 @@ export class BpmnEditor extends CachedComponent {
 
     // export zip file
     return jszip.generateAsync({ type:'blob' });
+  }
+
+  async importQAAs(qaaPaths) {
+    console.log('Importing QAAs from paths: ', qaaPaths);
+    qaaPaths.forEach(qaaPath => this.importQAA(qaaPath));
+  }
+
+  async importQAA(qaaPath) {
+
+    // request zip file representing QAA
+    const xmlhttp = new XMLHttpRequest();
+    xmlhttp.responseType = 'blob';
+    xmlhttp.onload = function() {
+      if (xmlhttp.status === 200) {
+        console.log('Request finished with status code 200 for QAA at path %s!', qaaPath);
+        const blob = new Blob([xmlhttp.response], { type : 'application/zip' });
+
+        // load zip file using JSZip
+        let jszip = new JSZip();
+        jszip.loadAsync(blob).then(function(zip) {
+          console.log('Successfully loaded zip!', zip);
+
+          // TODO
+        }, function(e) {
+          console.log('Failed loading Zip: %s', e);
+        });
+      }
+    };
+    xmlhttp.open('GET','file:///' + qaaPath,true);
+    xmlhttp.send();
   }
 
   async exportSVG() {
