@@ -9,6 +9,7 @@
  */
 
 import JSZip from 'jszip';
+import $ from 'jquery';
 import { saveAs } from 'file-saver';
 
 import React, { Component } from 'react';
@@ -574,20 +575,64 @@ export class BpmnEditor extends CachedComponent {
 
   async importQAA(qaaPath) {
 
+    // retrieve Winery endpoint to upload CSARs to
+    const wineryEndpoint = this.getModeler().config.wineryEndpoint;
+
     // request zip file representing QAA
     const xmlhttp = new XMLHttpRequest();
     xmlhttp.responseType = 'blob';
-    xmlhttp.onload = function() {
+    xmlhttp.onload = async function() {
       if (xmlhttp.status === 200) {
         console.log('Request finished with status code 200 for QAA at path %s!', qaaPath);
         const blob = new Blob([xmlhttp.response], { type : 'application/zip' });
 
         // load zip file using JSZip
         let jszip = new JSZip();
-        jszip.loadAsync(blob).then(function(zip) {
+        jszip.loadAsync(blob).then(async function(zip) {
           console.log('Successfully loaded zip!', zip);
 
-          // TODO
+          // find BPMN file in QAA
+          let files = zip.filter(function(relativePath, file) {
+            return !relativePath.startsWith('deployment-models') && relativePath.endsWith('.bpmn');
+          });
+
+          // check if exaclty one workflow is contained in the QAA
+          if (files.length !== 1) {
+            console.error('QAA with path %s must contain exactly one BPMN file but contains %i!', qaaPath, files.length);
+            return;
+          }
+
+          // import BPMN file
+          let workflow = await files[0].async('string');
+
+          // TODO: import into modeler
+          console.log(workflow);
+
+          // get folders representing CSARs
+          let deploymentModels = zip.folder('deployment-models');
+          deploymentModels.forEach(function(relativePath, file) {
+
+            // CSARs must be direct subfolders
+            if (file.dir && relativePath.split('/').length === 2) {
+              let csar = zip.folder(file.name);
+              csar.generateAsync({ type:'blob' }).then(function(blob) {
+
+                const fd = new FormData();
+                fd.append('overwrite', 'false');
+                fd.append('file', blob);
+                $.ajax({
+                  type: 'POST',
+                  url: wineryEndpoint,
+                  data: fd,
+                  processData: false,
+                  contentType: false,
+                  success: function() {
+                    console.log('Successfully uploaded CSAR: %s', file.name.split('/')[1]);
+                  }
+                });
+              });
+            }
+          });
         }, function(e) {
           console.log('Failed loading Zip: %s', e);
         });
