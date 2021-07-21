@@ -570,25 +570,32 @@ export class BpmnEditor extends CachedComponent {
 
   async importQAAs(qaaPaths) {
     console.log('Importing QAAs from paths: ', qaaPaths);
-    qaaPaths.forEach(qaaPath => this.importQAA(qaaPath));
+
+    let resultList = [];
+    for (let id in qaaPaths) {
+      resultList.push(await this.importQAA(qaaPaths[id]));
+    }
+    return resultList;
   }
 
-  async importQAA(qaaPath) {
+  importQAA(qaaPath) {
 
     // retrieve Winery endpoint to upload CSARs to
     const wineryEndpoint = this.getModeler().config.wineryEndpoint;
 
-    // request zip file representing QAA
-    const xmlhttp = new XMLHttpRequest();
-    xmlhttp.responseType = 'blob';
-    xmlhttp.onload = async function() {
-      if (xmlhttp.status === 200) {
-        console.log('Request finished with status code 200 for QAA at path %s!', qaaPath);
-        const blob = new Blob([xmlhttp.response], { type : 'application/zip' });
+    return new Promise(function(resolve, reject) {
 
-        // load zip file using JSZip
-        let jszip = new JSZip();
-        jszip.loadAsync(blob).then(async function(zip) {
+      // request zip file representing QAA
+      const xmlhttp = new XMLHttpRequest();
+      xmlhttp.responseType = 'blob';
+      xmlhttp.onload = async function(callback) {
+        if (xmlhttp.status === 200) {
+          console.log('Request finished with status code 200 for QAA at path %s!', qaaPath);
+          const blob = new Blob([xmlhttp.response], { type: 'application/zip' });
+
+          // load zip file using JSZip
+          let jszip = new JSZip();
+          let zip = await jszip.loadAsync(blob);
           console.log('Successfully loaded zip!', zip);
 
           // find BPMN file in QAA
@@ -599,14 +606,8 @@ export class BpmnEditor extends CachedComponent {
           // check if exaclty one workflow is contained in the QAA
           if (files.length !== 1) {
             console.error('QAA with path %s must contain exactly one BPMN file but contains %i!', qaaPath, files.length);
-            return;
+            reject('QAA with path %s must contain exactly one BPMN file but contains %i!', qaaPath, files.length);
           }
-
-          // import BPMN file
-          let workflow = await files[0].async('string');
-
-          // TODO: import into modeler
-          console.log(workflow);
 
           // get folders representing CSARs
           let deploymentModels = zip.folder('deployment-models');
@@ -615,7 +616,7 @@ export class BpmnEditor extends CachedComponent {
             // CSARs must be direct subfolders
             if (file.dir && relativePath.split('/').length === 2) {
               let csar = zip.folder(file.name);
-              csar.generateAsync({ type:'blob' }).then(function(blob) {
+              csar.generateAsync({ type: 'blob' }).then(function(blob) {
 
                 const fd = new FormData();
                 fd.append('overwrite', 'false');
@@ -633,13 +634,17 @@ export class BpmnEditor extends CachedComponent {
               });
             }
           });
-        }, function(e) {
-          console.log('Failed loading Zip: %s', e);
-        });
-      }
-    };
-    xmlhttp.open('GET','file:///' + qaaPath,true);
-    xmlhttp.send();
+
+          // import BPMN file
+          resolve({
+            contents: await files[0].async('string'),
+            name: files[0].name
+          });
+        }
+      };
+      xmlhttp.open('GET', 'file:///' + qaaPath, true);
+      xmlhttp.send();
+    });
   }
 
   async exportSVG() {
